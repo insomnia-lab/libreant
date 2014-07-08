@@ -8,7 +8,8 @@ from . import models
 from . import views
 
 
-def setup(new_db):
+def setup(new_db, viewsetup=True):
     global _db
     _db = new_db
-    views.set_all_views()
+    if viewsetup:
+        views.set_all_views()

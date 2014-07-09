@@ -1,0 +1,26 @@
+LibreAnt
+========
+
+This is libreant: a software to manage both your ebooks and your physical books.
+Its approach is:
+* minimum assumptions about your library structure, catalogation systems or
+  whatsoever
+* ease of deployment
+* ease to build a decentralized network for integration, sharing, and search
+
+Its main UI is a web one
+
+Implementation
+==============
+
+Main building blocks are python, elasticsearch, flask.
+
+Testing
+=======
+
+There is not much, still. However, after having created your virtualenv, start
+elasticsearch, running `./run_es.sh -d`
+
+Now you can run the unit test, using `nosetests -c nose.cfg`
+
+For a more complete testing, wait a bit longer ;)

@@ -1,0 +1,30 @@
+{
+    "variables": {
+        "iso_url": "https://mirrors.kernel.org/archlinux/iso/2014.06.01/archlinux-2014.06.01-dual.iso",
+        "iso_checksum": "61bfd735e62336a800d27a94e3e55d5bbe99d6bf",
+        "iso_checksum_type": "sha1"
+    },
+    "builders": [
+        {
+            "type": "qemu",
+            "iso_url": "{{user `iso_url`}}",
+            "iso_checksum": "{{user `iso_checksum`}}",
+            "iso_checksum_type": "{{user `iso_checksum_type`}}",
+            "http_directory": ".",
+            "qemuargs": [ [ "-boot", "order=cd" ] ],
+            "boot_wait": "5s",
+            "boot_command": [
+                "<enter><wait10><wait10>",
+                "/usr/bin/wget http://{{.HTTPIP}}:{{.HTTPPort}}/{install-qemu.sh,poweroff.timer,libreant.tar.gz} && /usr/bin/bash ./install-qemu.sh<enter>"
+            ],
+            "disk_interface": "scsi",
+            "disk_size": 20480,
+            "ssh_username": "root",
+            "ssh_password": "pass",
+            "shutdown_command": "systemctl start poweroff.timer",
+            "output_directory": "qemu-images",
+            "format": "qcow2",
+            "vm_name": "libreant-qemu"
+        }
+    ]
+}

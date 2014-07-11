@@ -13,6 +13,7 @@ from . import db, api
 def setup_func():
     db.es.delete_by_query(index=db.index_name,
                           body={'query': {'match_all': {}}})
+    db.es.indices.refresh(index=db.index_name)
 
 
 def teardown_func():
@@ -73,3 +74,15 @@ def test_allfields():
     words = ('Ok', 'computer', 'mazinga', 'batman')
     for word in words:
         assert word in body['text_it'], body['text_it']
+
+
+@with_setup(setup_func, teardown_func)
+def test_fts_basic():
+    '''Simple fts, without stemming or anything fancy'''
+    db.add_book(doc_type='book',
+                body=dict(title='La fine', language='it'))
+    db.add_book(doc_type='book',
+                body=dict(title="It's fine", language='en'))
+    db.es.indices.refresh(index=db.index_name)
+    res = db.get_books_simplequery('fine')
+    eq_(res['hits']['total'], 2)

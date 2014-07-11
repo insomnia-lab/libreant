@@ -1,3 +1,23 @@
+def validate_book(body):
+    if 'language' not in body:
+        raise ValueError('language needed')
+    if len(body['language']) > 2:
+        raise ValueError('invalid language: %s' % body['language'])
+    allfields = []
+    for field in body.values():
+        if type(field) in (str, unicode):
+            separate = field.split()
+        elif type(field) is (list):
+            separate = field
+        else:
+            continue
+        for f in separate:
+            allfields.append(f)
+
+    body['text_%s' % body['language']] = allfields
+    return body
+
+
 class DB(object):
     '''
     this class contains every query method and every operation on the index
@@ -6,6 +26,8 @@ class DB(object):
     def __init__(self, es):
         self.es = es
         self.index_name = 'book'
+        # book_validator can adjust the book, and raise if it's not valid
+        self.book_validator = validate_book
 
     def setup_db(self):
         self.es.indices.create(index=self.index_name, ignore=400)
@@ -43,6 +65,7 @@ class DB(object):
             db.add_book(doc_type='book',
                         body={'title': 'foobar'})
         '''
+        book['body'] = validate_book(book['body'])
         return self.es.create(index=self.index_name, **book)
     # End operations }}}
 

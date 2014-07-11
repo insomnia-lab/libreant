@@ -1,0 +1,24 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/fixes.html" as fixes %}
+
+{% block content %}
+<div class="container">
+    <h1>Webant - Search results</h1>
+
+    {% if not books %}
+
+    Sorry, no books matching your query
+
+    {% else %}
+
+    <ul>
+    {% for b in books %}
+    <li><a href="{{url_for('view_book', bookid=b['_id'])}}">{{ b['title'] }}</a></li>
+    {% endfor %}
+    </ul>
+
+    {% endif %}
+
+</form>
+{% endblock content %}
+

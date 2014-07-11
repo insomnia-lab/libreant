@@ -1,0 +1,14 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/fixes.html" as fixes %}
+
+{% block content %}
+<div class="container">
+    <h1>Webant</h1>
+
+    Hello, just search now!
+
+    <form action="/search">
+    <input name="q" />
+    <input type="submit" name="submit" />
+</form>
+{% endblock content %}

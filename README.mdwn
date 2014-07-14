@@ -10,6 +10,20 @@ Its approach is:
 
 Its main UI is a web one
 
+Quick start
+-----------
+
+First of all, make sure you have elasticsearch and python2 and virtualenv2 on your computer.
+On archlinux, this is `pacman -S elasticsearch python2 python2-virtualenv`
+Then, run
+
+```sh
+virtualenv2 --no-site-packages ve
+./ve/bin/pip install -r requirements.txt
+```
+
+Now your environment is ready and you can run `./run_all_dev.sh`
+
 Implementation
 ==============
 

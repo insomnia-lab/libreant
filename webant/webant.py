@@ -15,6 +15,7 @@ def create_app(configfile=None):
         app.config['SECRET_KEY'] = 'asjdkasjdlkasdjlksajsdlsajdlsajd'
 
     app.db = DB(Elasticsearch())
+    app.db.setup_db()
 
     @app.route('/')
     def index():
@@ -31,14 +32,12 @@ def create_app(configfile=None):
             src = b['_source']
             src['_id'] = b['_id']
             books.append(src)
-        print books
         return render_template('search.html', books=books)
 
     @app.route('/view/<bookid>')
     def view_book(bookid):
         b = app.db.get_by_id(bookid)
         return render_template('details.html', book=b)
-
 
     return app
 

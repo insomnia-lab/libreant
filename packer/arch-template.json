@@ -11,10 +11,10 @@
             "iso_checksum": "{{user `iso_checksum`}}",
             "iso_checksum_type": "{{user `iso_checksum_type`}}",
             "http_directory": ".",
-            "qemuargs": [ [ "-boot", "order=cd" ] ],
+            "qemuargs": [ [ "-boot", "order=cd" ], [ "-m", "300m" ] ],
             "boot_wait": "5s",
             "boot_command": [
-                "<enter><wait10><wait10>",
+                "<enter><wait10><wait10><wait10>",
                 "/usr/bin/wget http://{{.HTTPIP}}:{{.HTTPPort}}/{install-qemu.sh,poweroff.timer,libreant.tar.gz} && /usr/bin/bash ./install-qemu.sh<enter>"
             ],
             "disk_interface": "scsi",

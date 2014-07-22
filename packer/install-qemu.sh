@@ -43,6 +43,7 @@ echo '==> generating the filesystem table'
 echo '==> generating the system configuration script'
 /usr/bin/install --mode=0755 /dev/null "${TARGET_DIR}${CONFIG_SCRIPT}"
 
+/usr/bin/mv libreant.tar.gz ${TARGET_DIR}
 cat <<-EOF > "${TARGET_DIR}${CONFIG_SCRIPT}"
 	echo '${FQDN}' > /etc/hostname
 	/usr/bin/ln -s /usr/share/zoneinfo/${TIMEZONE} /etc/localtime
@@ -67,6 +68,8 @@ cat <<-EOF > "${TARGET_DIR}${CONFIG_SCRIPT}"
 	/usr/bin/curl --output /home/vagrant/.ssh/authorized_keys --location https://raw.github.com/mitchellh/vagrant/master/keys/vagrant.pub
 	/usr/bin/chown vagrant:users /home/vagrant/.ssh/authorized_keys
 	/usr/bin/chmod 0600 /home/vagrant/.ssh/authorized_keys
+
+    /usr/bin/pacman -S --noconfirm --needed python2 python2-virtualenv elasticsearch git vim
 
 	# clean up
 	/usr/bin/pacman -Rcns --noconfirm gptfdisk

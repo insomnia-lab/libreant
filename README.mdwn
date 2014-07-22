@@ -22,7 +22,7 @@ virtualenv2 --no-site-packages ve
 ./ve/bin/pip install -r requirements.txt
 ```
 
-Now your environment is ready and you can run `./run_all_dev.sh`
+Now your environment is ready and you can run `./run_all_dev.sh ve`
 
 Implementation
 ==============
@@ -32,7 +32,7 @@ Main building blocks are python, elasticsearch, flask.
 Testing
 =======
 
-There is not much, still. However, after having created your virtualenv, start
+There is not much, still. However, after having activated your virtualenv, start
 elasticsearch, running `./run_es.sh -d`
 
 Now you can run the unit test, using `nosetests -c nose.cfg`

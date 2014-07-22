@@ -14,8 +14,13 @@ def create_app(configfile=None):
         # TODO remove me
         app.config['SECRET_KEY'] = 'asjdkasjdlkasdjlksajsdlsajdlsajd'
 
-    app.db = DB(Elasticsearch())
-    app.db.setup_db()
+    app._db = None
+
+    def get_db():
+        if app._db is None:
+            app._db = DB(Elasticsearch())
+            app._db.setup_db()
+        return app._db
 
     @app.route('/')
     def index():
@@ -26,7 +31,7 @@ def create_app(configfile=None):
         query = request.args.get('q', None)
         if query is None:
             abort(400, "No query given")
-        res = app.db.get_books_simplequery(query)['hits']['hits']
+        res = get_db().get_books_simplequery(query)['hits']['hits']
         books = []
         for b in res:
             src = b['_source']
@@ -36,7 +41,7 @@ def create_app(configfile=None):
 
     @app.route('/view/<bookid>')
     def view_book(bookid):
-        b = app.db.get_by_id(bookid)
+        b = get_db().get_by_id(bookid)
         return render_template('details.html', book=b)
 
     return app

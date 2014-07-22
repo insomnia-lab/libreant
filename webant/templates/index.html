@@ -3,12 +3,11 @@
 
 {% block content %}
 <div class="container">
-    <h1>Webant</h1>
+    <h1>Libreant <small>What do you want to read today?</small></h1>
 
-    Hello, just search now!
+    <form action="/search" role="form form-horizontal">
+	    <input name="q" class="form-control" />
+	    <button type="submit" class="btn btn-primary">Search</button>
+    </form>
 
-    <form action="/search">
-    <input name="q" />
-    <button type="submit">Search</button>
-</form>
 {% endblock content %}

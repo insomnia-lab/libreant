@@ -4,7 +4,9 @@ def validate_book(body):
     if len(body['language']) > 2:
         raise ValueError('invalid language: %s' % body['language'])
     allfields = []
-    for field in body.values():
+    for name, field in body.items():
+        if name.startswith('_') or name == 'language':
+            continue
         if type(field) in (str, unicode):
             separate = field.split()
         elif type(field) is (list):
@@ -53,6 +55,9 @@ class DB(object):
 
     def get_books_by_actor(self, authorname):
         return self._search(self._get_search_field('actors', authorname))
+
+    def get_book_by_id(self, id):
+        return self.es.get(index=self.index_name, id=id)
 
     def autocomplete(self, fieldname, start):
         raise NotImplementedError()

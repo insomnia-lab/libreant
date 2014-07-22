@@ -1,0 +1,44 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/fixes.html" as fixes %}
+
+{% block content %}
+
+<header>
+	<h1>{{ book['title'] }}
+		<small>{{ book['actors'] | sort | join(',') }}</small>
+	</h1>
+</header>
+
+<article>
+	{% if '_files' in book %}
+	<h3>Download</h3>
+	<ul>
+		{% for file in  book['_files'] %}
+		<li><a href="{{
+			url_for('download_book', bookid=bookid, fname=file['path'])
+			}}">{{ file['path'] }}</a> ({{file['notes']}})
+		</li>
+		{% endfor %}
+	</ul>
+	{% endif %}
+
+	<h3>Details</h3>
+	<table class="table table-striped">
+		<thead>
+			<tr>
+				<th>Field</th>
+				<th>Value</th>
+			</tr>
+		</thead>
+		<tbody>
+
+		{% for key in book %}
+		<tr>
+			<td>{{ key }}</td>
+			<td>{{ book[key] }}</td>
+		</tr>
+		{% endfor %}
+		</tbody>
+	</table>
+</article>
+{% endblock content %}

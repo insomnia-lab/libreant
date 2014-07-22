@@ -5,6 +5,7 @@ FQDN='libreant.taz'
 KEYMAP='it'
 LANGUAGE='it_IT.UTF-8'
 PASSWORD=$(/usr/bin/openssl passwd -crypt 'pass')
+LIBREANT_PASSWORD=$(/usr/bin/openssl passwd -crypt 'libreant')
 TIMEZONE='UTC'
 
 CONFIG_SCRIPT='/usr/local/bin/arch-config.sh'
@@ -44,6 +45,7 @@ echo '==> generating the system configuration script'
 /usr/bin/install --mode=0755 /dev/null "${TARGET_DIR}${CONFIG_SCRIPT}"
 
 /usr/bin/mv libreant.tar.gz ${TARGET_DIR}
+/usr/bin/mv autologin.conf ${TARGET_DIR}
 cat <<-EOF > "${TARGET_DIR}${CONFIG_SCRIPT}"
 	echo '${FQDN}' > /etc/hostname
 	/usr/bin/ln -s /usr/share/zoneinfo/${TIMEZONE} /etc/localtime
@@ -69,7 +71,19 @@ cat <<-EOF > "${TARGET_DIR}${CONFIG_SCRIPT}"
 	/usr/bin/chown vagrant:users /home/vagrant/.ssh/authorized_keys
 	/usr/bin/chmod 0600 /home/vagrant/.ssh/authorized_keys
 
+    #### That's libreant time!
     /usr/bin/pacman -S --noconfirm --needed python2 python2-virtualenv elasticsearch git vim
+	/usr/bin/groupadd libreant
+    /usr/bin/useradd --password ${LIBREANT_PASSWORD} --create-home --gid users --groups libreant libreant
+    mv /libreant.tar.gz /home/libreant
+    cd /home/libreant
+    tar xaf libreant.tar.gz
+    virtualenv2 --no-site-packages /home/libreant/libre_ve
+    ./libre_ve/bin/pip install -r libreant/requirements.txt
+    chown libreant. /home/libreant -R
+    # autologin (https://wiki.archlinux.org/index.php/Automatic_login_to_virtual_console)
+    mkdir -p /etc/systemd/system/getty@tty1.service.d
+    mv /autologin.conf /etc/systemd/system/getty@tty1.service.d
 
 	# clean up
 	/usr/bin/pacman -Rcns --noconfirm gptfdisk

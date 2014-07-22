@@ -1,5 +1,5 @@
 all: qemu-images/libreant-qemu.qcow2
-BUILDFILES=libreant.tar.gz poweroff.timer
+BUILDFILES=libreant.tar.gz poweroff.timer autologin.conf
 
 qemu-images/libreant-qemu.qcow2: arch-template.json install-qemu.sh $(BUILDFILES)
 	rm -rf qemu-images

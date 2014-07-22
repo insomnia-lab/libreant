@@ -15,7 +15,7 @@
             "boot_wait": "5s",
             "boot_command": [
                 "<enter><wait10><wait10><wait10>",
-                "/usr/bin/wget http://{{.HTTPIP}}:{{.HTTPPort}}/{install-qemu.sh,poweroff.timer,libreant.tar.gz} && /usr/bin/bash ./install-qemu.sh<enter>"
+                "/usr/bin/wget http://{{.HTTPIP}}:{{.HTTPPort}}/{install-qemu.sh,poweroff.timer,libreant.tar.gz,autologin.conf} && /usr/bin/bash ./install-qemu.sh<enter>"
             ],
             "disk_interface": "scsi",
             "disk_size": 20480,

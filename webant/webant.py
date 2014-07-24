@@ -37,7 +37,7 @@ def create_app(configfile=None):
             src = b['_source']
             src['_id'] = b['_id']
             books.append(src)
-        return render_template('search.html', books=books)
+        return render_template('search.html', books=books, query=query)
 
     @app.route('/view/<bookid>')
     def view_book(bookid):

@@ -1,9 +1,17 @@
 {% extends "bootstrap/base.html" %}
 {% import "bootstrap/fixes.html" as fixes %}
 
+{% block styles %}
+{{ super() }}
+<link href="{{ url_for('static', filename='search.css') }}" rel="stylesheet">
+{% endblock styles %}
+
 {% block content %}
 <div class="container">
-    <h1>Webant - Search results</h1>
+    <hgroup class="mb20">
+        <h1>Search results</h1>
+        <h2 class="lead">{{ books | length }} results were found for <strong>{{ query }}</strong></h2>
+    </hgroup>
 
     {% if not books %}
 
@@ -11,11 +19,34 @@
 
     {% else %}
 
-    <ul>
+    <section class="search-results col-xs-12 col-sm-12 col-md-12 col-lg-12">
     {% for b in books %}
-    <li><a href="{{url_for('view_book', bookid=b['_id'])}}">{{ b['title'] }}</a></li>
+    <article class="search-result row">
+        <div class="hidden-xs col-sm-2 col-md-2 col-lg-2">
+            {# TODO: cover image #}
+            <i class="glyphicon glyphicon-book" style="font-size: 400%"></i>
+        </div>
+        <div class="col-xs-12 col-sm-5 col-md-6 col-lg-6 excerpet">
+            <h3><a href="{{url_for('view_book', bookid=b['_id'])}}" title="{{ b['_id'] }}">
+                    {{ b['title'] }}
+            </a></h3>
+        </div>
+        <div class="col-xs-12 col-sm-5 col-md-4 col-lg-4">
+            <ul class="meta-search">
+                {# TODO: default_locale.languages[b['language']] #}
+                <li><i class="glyphicon glyphicon-flag"></i> <span>{{ b['language'] }}</span></li>
+                {% if 'actors' in b %}
+                <li><i class="glyphicon glyphicon-user"></i> <span>{{ b['actors'] | join(',')}}</span></li>
+                {% endif %}
+                {% if 'tags' in b %}
+                <li><i class="glyphicon glyphicon-tags"></i> <span>{{ b['tags'] | join(',') }}</span></li>
+                {% endif %}
+            </ul>
+        </div>
+        <span class="clearfix border"></span>
+    </article>
     {% endfor %}
-    </ul>
+    </section>
 
     {% endif %}
 

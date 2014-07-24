@@ -7,40 +7,29 @@ from __future__ import print_function
 
 from nose.tools import eq_, with_setup, raises
 
-from . import db, api
+from . import db, api, cleanall
 
 
-def setup_func():
-    db.es.delete_by_query(index=db.index_name,
-                          body={'query': {'match_all': {}}})
-    db.es.indices.refresh(index=db.index_name)
-
-
-def teardown_func():
-    db.es.delete_by_query(index=db.index_name,
-                          body={'query': {'match_all': {}}})
-
-
-@with_setup(setup_func, teardown_func)
+@with_setup(cleanall)
 def test_start_hasindex():
     '''If the test is setup properly, we got our own index'''
     assert 'test-book' in db.es.indices.status()['indices']
 
 
-@with_setup(setup_func, teardown_func)
+@with_setup(cleanall)
 def notest_start_empty():
     '''If the test is setup properly, it's all empty'''
     assert not db.get_all_books()['hits']['hits']
 
 
-@with_setup(setup_func, teardown_func)
+@with_setup(cleanall, cleanall)
 def test_add():
     '''Add should not complain'''
     db.add_book(doc_type='book',
                 body=dict(title='Un libro', language='it'))
 
 
-@with_setup(setup_func, teardown_func)
+@with_setup(cleanall, cleanall)
 def test_addget():
     '''Coherence'''
     db.es.indices.refresh(index=db.index_name)
@@ -54,13 +43,13 @@ def test_addget():
     eq_(res['hits']['total'], 1)
 
 
-@with_setup(setup_func, teardown_func)
+@with_setup(cleanall, cleanall)
 @raises(ValueError)
 def test_invalid_book():
+    '''Book without language'''
     db.add_book(doc_type='book', body=dict(title='Un libro'))
 
 
-@with_setup(setup_func, teardown_func)
 def test_allfields():
     """
     when adding a book, a new field must be added with the purpose of fts
@@ -76,7 +65,7 @@ def test_allfields():
         assert word in body['text_it'], body['text_it']
 
 
-@with_setup(setup_func, teardown_func)
+@with_setup(cleanall, cleanall)
 def test_fts_basic():
     '''Simple fts, without stemming or anything fancy'''
     db.add_book(doc_type='book',

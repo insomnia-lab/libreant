@@ -1,15 +1,30 @@
 #!/usr/bin/env bash
 
 DISK='/dev/sda'
-FQDN='vagrant-arch.vagrantup.com'
-KEYMAP='us'
-LANGUAGE='en_US.UTF-8'
-PASSWORD=$(/usr/bin/openssl passwd -crypt 'vagrant')
+FQDN='libreant.taz'
+KEYMAP='it'
+LANGUAGE='it_IT.UTF-8'
+PASSWORD=$(/usr/bin/openssl passwd -crypt 'pass')
+LIBREANT_PASSWORD=$(/usr/bin/openssl passwd -crypt 'libreant')
 TIMEZONE='UTC'
 
 CONFIG_SCRIPT='/usr/local/bin/arch-config.sh'
 ROOT_PARTITION="${DISK}1"
 TARGET_DIR='/mnt'
+
+echo "==> new repositories"
+/usr/bin/cat <<EOPAC >> /etc/pacman.conf
+[xyne-x86_64]
+SigLevel = Required
+Server = http://xyne.archlinux.ca/repos/xyne
+EOPAC
+/usr/bin/pacman -Syyq --noconfirm pacserve
+/usr/bin/pacman.conf-insert_pacserve > p.conf
+mv p.conf /etc/pacman.conf
+/usr/bin/cat <<EOPAC >> /etc/pacserve/pacserve.service.conf
+PACSERVE_ARGS="--multicast --peer http://10.0.2.2:15678 --list-remote"
+EOPAC
+/usr/bin/systemctl start pacserve
 
 echo "==> clearing partition table on ${DISK}"
 /usr/bin/sgdisk --zap ${DISK}
@@ -32,7 +47,7 @@ echo "==> mounting ${ROOT_PARTITION} to ${TARGET_DIR}"
 
 echo '==> bootstrapping the base installation'
 /usr/bin/pacstrap ${TARGET_DIR} base base-devel
-/usr/bin/arch-chroot ${TARGET_DIR} pacman -S --noconfirm gptfdisk openssh syslinux
+/usr/bin/arch-chroot ${TARGET_DIR} pacman -Sq  --needed --noconfirm gptfdisk openssh syslinux ucommon
 /usr/bin/arch-chroot ${TARGET_DIR} syslinux-install_update -i -a -m
 /usr/bin/sed -i 's/sda3/sda1/' "${TARGET_DIR}/boot/syslinux/syslinux.cfg"
 /usr/bin/sed -i 's/TIMEOUT 50/TIMEOUT 10/' "${TARGET_DIR}/boot/syslinux/syslinux.cfg"
@@ -43,6 +58,14 @@ echo '==> generating the filesystem table'
 echo '==> generating the system configuration script'
 /usr/bin/install --mode=0755 /dev/null "${TARGET_DIR}${CONFIG_SCRIPT}"
 
+echo '==> preseeding pacman cache'
+/usr/bin/mkdir -p ${TARGET_DIR}/var/cache/pacman/pkg/
+/usr/bin/cp -f /var/cache/pacman/pkg/*.pkg.* ${TARGET_DIR}/var/cache/pacman/pkg/
+
+/usr/bin/mv libreant.tar.gz ${TARGET_DIR}
+/usr/bin/mv autologin.conf ${TARGET_DIR}
+/usr/bin/mv install-* ${TARGET_DIR}
+
 cat <<-EOF > "${TARGET_DIR}${CONFIG_SCRIPT}"
 	echo '${FQDN}' > /etc/hostname
 	/usr/bin/ln -s /usr/share/zoneinfo/${TIMEZONE} /etc/localtime
@@ -51,39 +74,42 @@ cat <<-EOF > "${TARGET_DIR}${CONFIG_SCRIPT}"
 	/usr/bin/locale-gen
 	/usr/bin/mkinitcpio -p linux
 	/usr/bin/usermod --password ${PASSWORD} root
+
 	# https://wiki.archlinux.org/index.php/Network_Configuration#Device_names
 	/usr/bin/ln -s /dev/null /etc/udev/rules.d/80-net-setup-link.rules
 	/usr/bin/ln -s '/usr/lib/systemd/system/dhcpcd@.service' '/etc/systemd/system/multi-user.target.wants/dhcpcd@eth0.service'
 	/usr/bin/sed -i 's/#UseDNS yes/UseDNS no/' /etc/ssh/sshd_config
 	/usr/bin/systemctl enable sshd.service
 
-	# VirtualBox Guest Additions
-	/usr/bin/pacman -S --noconfirm linux-headers virtualbox-guest-utils virtualbox-guest-dkms
-	echo -e 'vboxguest\nvboxsf\nvboxvideo' > /etc/modules-load.d/virtualbox.conf
-	guest_version=\$(/usr/bin/pacman -Q virtualbox-guest-dkms | awk '{ print \$2 }' | cut -d'-' -f1)
-	kernel_version="\$(/usr/bin/pacman -Q linux | awk '{ print \$2 }')-ARCH"
-	/usr/bin/dkms install "vboxguest/\${guest_version}" -k "\${kernel_version}/x86_64"
-	/usr/bin/systemctl enable dkms.service
-	/usr/bin/systemctl enable vboxservice.service
+	echo '==> new repositories'
+	/usr/bin/cat <<EOPAC >> /etc/pacman.conf
+[xyne-x86_64]
+SigLevel = Required
+Server = http://xyne.archlinux.ca/repos/xyne
+EOPAC
+	/usr/bin/pacman -Syyq --noconfirm pacserve
+	/usr/bin/pacman.conf-insert_pacserve > p.conf
+	mv p.conf /etc/pacman.conf
+	/usr/bin/cat <<EOPAC >> /etc/pacserve/pacserve.service.conf
+	PACSERVE_ARGS="--multicast --peer http://10.0.2.2:15678 --list-remote"
+	EOPAC
+	/usr/bin/systemctl start pacserve
 
-	# Vagrant-specific configuration
-	/usr/bin/groupadd vagrant
-	/usr/bin/useradd --password ${PASSWORD} --comment 'Vagrant User' --create-home --gid users --groups vagrant,vboxsf vagrant
-	echo 'Defaults env_keep += "SSH_AUTH_SOCK"' > /etc/sudoers.d/10_vagrant
-	echo 'vagrant ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers.d/10_vagrant
-	/usr/bin/chmod 0440 /etc/sudoers.d/10_vagrant
-	/usr/bin/install --directory --owner=vagrant --group=users --mode=0700 /home/vagrant/.ssh
-	/usr/bin/curl --output /home/vagrant/.ssh/authorized_keys --location https://raw.github.com/mitchellh/vagrant/master/keys/vagrant.pub
-	/usr/bin/chown vagrant:users /home/vagrant/.ssh/authorized_keys
-	/usr/bin/chmod 0600 /home/vagrant/.ssh/authorized_keys
-
-	# clean up
-	/usr/bin/pacman -Rcns --noconfirm gptfdisk
-	/usr/bin/pacman -Scc --noconfirm
+	LIBREANT_PASSWORD="$LIBREANT_PASSWORD"
+	PASSWORD="$PASSWORD"
+	ROOT_PARTITION="$ROOT_PARTITION"
+    # Install scripts!
+    run-parts --list / | while read installer; do
+        echo "----> Running \$installer"
+        source "\$installer"
+    done
 EOF
 
 echo '==> entering chroot and configuring system'
-/usr/bin/arch-chroot ${TARGET_DIR} ${CONFIG_SCRIPT}
+if ! /usr/bin/arch-chroot ${TARGET_DIR} ${CONFIG_SCRIPT}; then
+	echo "Errors in chroot, inspect freely"
+	exit 1
+fi
 rm "${TARGET_DIR}${CONFIG_SCRIPT}"
 
 # http://comments.gmane.org/gmane.linux.arch.general/48739

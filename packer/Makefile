@@ -1,12 +1,12 @@
-all: qemu-images/libreant-qemu.qcow2
-BUILDFILES=libreant.tar.gz poweroff.timer autologin.conf
+all: qemu-images/libreant-qemu.qcow2 vbox-images/libreant-vbox.ovf
+BUILDFILES=libreant.tar.gz poweroff.timer autologin.conf install.sh 
 
-qemu-images/libreant-qemu.qcow2: arch-template.json install-qemu.sh $(BUILDFILES)
+qemu-images/libreant-qemu.qcow2: arch-template.json $(BUILDFILES)
 	rm -rf qemu-images
-	packer build -only qemu arch-template.json
+	packer build -only qemu $<
 
-vbox-images/libreant-vbox.ova: arch-template.json install-virtualbox.sh $(BUILDFILES)
-	packer build -only virtualbox-iso arch-template.json
+vbox-images/libreant-vbox.ovf: arch-template.json $(BUILDFILES)
+	packer build -only virtualbox-iso $<
 
 libreant.tar.gz:
 	rm -f $@

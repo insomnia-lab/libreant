@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+cd /
+
+# system dependencies
+/usr/bin/pacman -Sq --noconfirm --needed python2 python2-virtualenv python2-pip elasticsearch git vim
+
+# user
+/usr/bin/groupadd libreant
+echo useradd --password "${LIBREANT_PASSWORD}" -m -g users -G libreant libreant
+/usr/bin/useradd --password "${LIBREANT_PASSWORD}" -m -g users -G libreant libreant
+echo $?
+if [[ ! -d "/home/libreant" ]]; then
+	echo "No home!"
+	exit 1
+fi
+
+# installing code right in HOME
+tar xaf /libreant.tar.gz -C /home/libreant || exit 1
+
+# python dependencies
+virtualenv2 --no-site-packages /home/libreant/libre_ve || exit 1
+/home/libreant/libre_ve/bin/pip install -r /home/libreant/libreant/requirements.txt || exit 1
+chown libreant. /home/libreant -R || exit 1
+
+# autologin ( see https://wiki.archlinux.org/index.php/Automatic_login_to_virtual_console)
+mkdir -p /etc/systemd/system/getty@tty1.service.d
+mv /autologin.conf /etc/systemd/system/getty@tty1.service.d
+
+#TODO: automatically source libre_ve/bin/activate
+#TODO: motd which explains how to use the virtual machine

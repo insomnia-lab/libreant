@@ -5,26 +5,53 @@
         "iso_checksum_type": "sha1"
     },
     "builders": [
-        {
-            "type": "qemu",
-            "iso_url": "{{user `iso_url`}}",
-            "iso_checksum": "{{user `iso_checksum`}}",
-            "iso_checksum_type": "{{user `iso_checksum_type`}}",
-            "http_directory": ".",
-            "qemuargs": [ [ "-boot", "order=cd" ], [ "-m", "300m" ] ],
-            "boot_wait": "5s",
-            "boot_command": [
-                "<enter><wait10><wait10><wait10>",
-                "/usr/bin/wget http://{{.HTTPIP}}:{{.HTTPPort}}/{install-qemu.sh,poweroff.timer,libreant.tar.gz,autologin.conf} && /usr/bin/bash ./install-qemu.sh<enter>"
+    {
+        "type": "virtualbox-iso",
+        "iso_url": "{{user `iso_url`}}",
+        "iso_checksum": "{{user `iso_checksum`}}",
+        "iso_checksum_type": "{{user `iso_checksum_type`}}",
+        "guest_os_type": "ArchLinux_64",
+        "guest_additions_mode": "disable",
+        "http_directory": ".",
+        "boot_wait": "5s",
+        "boot_command": [
+            "<enter><wait10><wait10>",
+        "/usr/bin/wget http://{{.HTTPIP}}:{{.HTTPPort}}/{install.sh,poweroff.timer,libreant.tar.gz,autologin.conf,install-{20-virtualbox,50-vagrant,70-libreant,99-cleanup}} ; /usr/bin/bash install.sh<enter>"
             ],
-            "disk_interface": "scsi",
-            "disk_size": 20480,
-            "ssh_username": "root",
-            "ssh_password": "pass",
-            "shutdown_command": "systemctl start poweroff.timer",
-            "output_directory": "qemu-images",
-            "format": "qcow2",
-            "vm_name": "libreant-qemu"
-        }
+        "disk_size": 20480,
+        "hard_drive_interface": "sata",
+        "ssh_username": "root",
+        "ssh_password": "pass",
+        "shutdown_command": "systemctl start poweroff.timer",
+        "output_directory": "vbox-images",
+        "vm_name": "libreant-vbox",
+        "vboxmanage": [
+            ["modifyvm", "{{.Name}}", "--memory", "512"],
+        ["modifyvm", "{{.Name}}", "--cpus", "2"],
+        ["modifyvm", "{{.Name}}", "--natpf1", "web,tcp,,5000,,5000"],
+        ["modifyvm", "{{.Name}}", "--natpf1", "elasticsearch,tcp,,9200,,9200"]
+        ]
+    },
+    {
+        "type": "qemu",
+        "iso_url": "{{user `iso_url`}}",
+        "iso_checksum": "{{user `iso_checksum`}}",
+        "iso_checksum_type": "{{user `iso_checksum_type`}}",
+        "http_directory": ".",
+        "qemuargs": [ [ "-boot", "order=cd" ], [ "-m", "300m" ] ],
+        "boot_wait": "5s",
+        "boot_command": [
+            "<enter><wait10><wait10><wait10>",
+        "/usr/bin/wget http://{{.HTTPIP}}:{{.HTTPPort}}/{install.sh,poweroff.timer,libreant.tar.gz,autologin.conf,install-50-vagrant,install-70-libreant,install-99-cleanup} && /usr/bin/bash ./install.sh<enter>"
+            ],
+        "disk_interface": "scsi",
+        "disk_size": 20480,
+        "ssh_username": "root",
+        "ssh_password": "pass",
+        "shutdown_command": "systemctl start poweroff.timer",
+        "output_directory": "qemu-images",
+        "format": "qcow2",
+        "vm_name": "libreant-qemu"
+    }
     ]
 }

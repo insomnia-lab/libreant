@@ -22,6 +22,7 @@
         "hard_drive_interface": "sata",
         "ssh_username": "root",
         "ssh_password": "pass",
+        "ssh_wait_timeout": "4h",
         "shutdown_command": "systemctl start poweroff.timer",
         "output_directory": "vbox-images",
         "vm_name": "libreant-vbox",

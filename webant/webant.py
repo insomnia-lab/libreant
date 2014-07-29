@@ -18,8 +18,12 @@ def create_app(configfile=None):
 
     def get_db():
         if app._db is None:
-            app._db = DB(Elasticsearch())
-            app._db.setup_db()
+            db = DB(Elasticsearch())
+            db.setup_db()
+            # deferring assignment is meant to avoid that we _first_ cache the
+            # DB object, then the setup_db() fails. This will let us with a
+            # non-setupped DB
+            app._db = db
         return app._db
 
     @app.route('/')
@@ -42,7 +46,8 @@ def create_app(configfile=None):
     @app.route('/view/<bookid>')
     def view_book(bookid):
         b = get_db().get_book_by_id(bookid)
-        return render_template('details.html', book=b['_source'], bookid=bookid)
+        return render_template('details.html',
+                               book=b['_source'], bookid=bookid)
 
     @app.route('/download/<bookid>/<fname>')
     def download_book(bookid, fname):

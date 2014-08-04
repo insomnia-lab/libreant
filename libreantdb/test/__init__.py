@@ -15,10 +15,14 @@ def setUpPackage():
 
 
 def tearDownPackage():
-    es.indices.delete('test-book')
+    if es.indices.exists('test-book'):
+        es.indices.delete('test-book')
 
 
 def cleanall():
-    db.es.delete_by_query(index=db.index_name,
-                          body={'query': {'match_all': {}}})
+    if db.es.indices.exists(db.index_name):
+        db.es.delete_by_query(index=db.index_name,
+                            body={'query': {'match_all': {}}})
+        db.es.indices.delete(index=db.index_name)
+    db.setup_db()
     db.es.indices.refresh(index=db.index_name)

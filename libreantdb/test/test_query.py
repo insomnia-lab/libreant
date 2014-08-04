@@ -3,7 +3,6 @@ This module will connect to your elasticsearch instance.
 An index will be reserved to the tests.
 '''
 from __future__ import print_function
-# from pprint import pprint
 
 from nose.tools import eq_, with_setup, raises
 
@@ -31,15 +30,27 @@ def test_add():
 
 @with_setup(cleanall, cleanall)
 def test_addget():
-    '''Coherence'''
+    '''Coherence (by title)'''
     db.es.indices.refresh(index=db.index_name)
 
-    eq_(db.get_books_by_title('libro')['hits']['total'], 0)
     db.add_book(doc_type='book',
                 body=dict(title='Un libro', language='it'))
     db.es.indices.refresh(index=db.index_name)
 
     res = db.get_books_by_title('libro')
+    eq_(res['hits']['total'], 1)
+
+
+@with_setup(cleanall, cleanall)
+def test_addget_simple():
+    '''Coherence (simple)'''
+    db.es.indices.refresh(index=db.index_name)
+
+    db.add_book(doc_type='book',
+                body=dict(title='Un libro', language='it'))
+    db.es.indices.refresh(index=db.index_name)
+
+    res = db.get_books_simplequery('libro')
     eq_(res['hits']['total'], 1)
 
 
@@ -63,15 +74,3 @@ def test_allfields():
     words = ('Ok', 'computer', 'mazinga', 'batman')
     for word in words:
         assert word in body['text_it'], body['text_it']
-
-
-@with_setup(cleanall, cleanall)
-def test_fts_basic():
-    '''Simple fts, without stemming or anything fancy'''
-    db.add_book(doc_type='book',
-                body=dict(title='La fine', language='it'))
-    db.add_book(doc_type='book',
-                body=dict(title="It's fine", language='en'))
-    db.es.indices.refresh(index=db.index_name)
-    res = db.get_books_simplequery('fine')
-    eq_(res['hits']['total'], 2)

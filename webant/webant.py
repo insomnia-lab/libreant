@@ -35,7 +35,7 @@ def create_app(configfile=None):
         query = request.args.get('q', None)
         if query is None:
             abort(400, "No query given")
-        res = get_db().get_books_simplequery(query)['hits']['hits']
+        res = get_db().user_search(query)['hits']['hits']
         books = []
         for b in res:
             src = b['_source']

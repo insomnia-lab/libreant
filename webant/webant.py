@@ -8,6 +8,7 @@ from libreantdb import DB
 
 def create_app(configfile=None):
     app = Flask(__name__)
+    app.config['BOOTSTRAP_SERVE_LOCAL'] = True
     AppConfig(app, configfile)
     Bootstrap(app)
     if 'SECRET_KEY' not in app.config:

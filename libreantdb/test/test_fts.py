@@ -4,7 +4,6 @@ An index will be reserved to the tests.
 '''
 from __future__ import print_function
 from pprint import pprint
-from time import sleep
 
 from nose.tools import eq_, with_setup
 
@@ -38,7 +37,6 @@ def test_fts_it_plural_manual():
                                      body=phrase,
                                      analyzer='it_analyzer')['tokens'])
     db.es.indices.refresh(index=db.index_name)
-    sleep(0.3)
 
     res = db._search(db._get_search_field('text_it', query))
     eq_(res['hits']['total'], 1)
@@ -56,7 +54,6 @@ def test_fts_it_plural():
                                      body=phrase,
                                      analyzer='it_analyzer')['tokens'])
     db.es.indices.refresh(index=db.index_name)
-    sleep(0.3)
 
     res = db.get_books_multilanguage(query)
     eq_(res['hits']['total'], 1)
@@ -76,7 +73,6 @@ def test_fts_en_manual():
                                      body=phrase,
                                      analyzer='english')['tokens'])
     db.es.indices.refresh(index=db.index_name)
-    sleep(0.3)
     res = db._search(db._get_search_field('text_en', 'living'))
     eq_(res['hits']['total'], 1)
     res = db._search(db._get_search_field('text_en', wrong_query))
@@ -97,7 +93,6 @@ def test_fts_en_verbs():
                                      body=phrase,
                                      analyzer='english')['tokens'])
     db.es.indices.refresh(index=db.index_name)
-    sleep(0.3)
     res = db.get_books_multilanguage('living')
     eq_(res['hits']['total'], 1)
     res = db.get_books_multilanguage(wrong_query)
@@ -118,7 +113,6 @@ def test_fts_en_plural():
                                      body=phrase,
                                      analyzer='english')['tokens'])
     db.es.indices.refresh(index=db.index_name)
-    sleep(0.3)
     res = db.get_books_multilanguage('bugs')
     eq_(res['hits']['total'], 1)
     res = db.get_books_multilanguage(wrong_query)

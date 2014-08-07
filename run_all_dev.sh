@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
 set -e
 
+webrun=flaskdev
 if [ -n "$1" ]; then
-    act="$1/bin/activate"
-    if [ ! -f "$act" ]; then
+    webrun="$1/bin/$webrun"
+    shift
+    if [ ! -f "$webrun" ]; then
         echo "Virtualenv not found"
         exit 1
     fi
-    source "$act"
 fi
 
 ./run_es.sh -d
-cd webant/
-./run_web.sh
+PYTHONPATH=. $webrun webant $*
 pid=$(cat elasticsearch/data/pid 2> /dev/null)
 if [ -n "$pid" ]; then
 	kill $pid

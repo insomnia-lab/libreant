@@ -95,6 +95,29 @@ class DB(object):
                 {'match': {field: value}}
                 }
 
+    def mlt(self, _id):
+        '''
+        High-level method to do "more like this".
+
+        Its exact implementation can vary; at the moment it just searches by
+        title, but it could change
+        '''
+        # query = {'mlt': {
+        #     'fields': ['book.text_it'],
+        #     'ids': [_id],
+        #     'min_term_freq': 1}}
+        book = self.get_book_by_id(_id)
+        from pprint import pprint
+        pprint(book)
+        ret = self.get_books_by_title(book['_source']['title'])
+        # "fixing" the results, changing main fields. This sucks, because other
+        # fields (ie: max_score) can be wrong now
+        h = [b for b in ret['hits']['hits'] if b['_id'] != _id]
+        ret['hits']['hits'] = h
+        ret['hits']['total'] = ret['hits']['total'] - 1
+        pprint(ret)
+        return ret
+
     def get_all_books(self):
         return self._search({})
 

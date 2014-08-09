@@ -23,8 +23,12 @@
     {% for b in books %}
     <article class="search-result row">
         <div class="hidden-xs col-sm-2 col-md-2 col-lg-2">
-            {# TODO: cover image #}
-            <i class="glyphicon glyphicon-book" style="font-size: 400%"></i>
+		{# TODO: cover image #}
+		<a href="{{url_for('view_book', bookid=b['_id'])}}"
+			title="{{ b['_id'] }}">
+			<i class="glyphicon glyphicon-book"
+				style="font-size: 400%"></i>
+		</a>
         </div>
         <div class="col-xs-12 col-sm-5 col-md-6 col-lg-6 excerpet">
             <h3><a href="{{url_for('view_book', bookid=b['_id'])}}" title="{{ b['_id'] }}">
@@ -40,6 +44,12 @@
                 {% endif %}
                 {% if 'tags' in b %}
                 <li><i class="glyphicon glyphicon-tags"></i> <span>{{ b['tags'] | join(',') }}</span></li>
+                {% endif %}
+                {% if 'location' in b %}
+		<li><i class="glyphicon glyphicon-globe"></i>
+			<span title="{{ b['location'] }}">
+				{{ b['location'] | truncate(length=40) }}
+			</span></li>
                 {% endif %}
             </ul>
         </div>

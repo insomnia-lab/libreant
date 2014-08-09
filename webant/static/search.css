@@ -23,3 +23,4 @@ hgroup h2.lead {
 .search-result .meta-search .glyphicon { color: #248dc1 !important; }
 .search-result p { font: normal normal 1.125em "Roboto",Arial,Verdana,sans-serif; } 
 .search-result span.border { display: block; width: 97%; margin: 0 15px; border-bottom: 1px dotted #ccc; }
+.search-result .glyphicon-book { color: #333; }

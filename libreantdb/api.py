@@ -131,12 +131,16 @@ class DB(object):
     def get_book_by_id(self, id):
         return self.es.get(index=self.index_name, id=id)
 
+    def get_books_querystring(self, query):
+        q = {'query': query, 'fields': ['text_*']}
+        return self._search({'query': dict(query_string=q)})
+
     def user_search(self, query):
         '''
         This acts like a "wrapper" that always point to the recommended
         function for user searching.
         '''
-        return self.get_books_multilanguage(query)
+        return self.get_books_querystring(query)
 
     def autocomplete(self, fieldname, start):
         raise NotImplementedError()

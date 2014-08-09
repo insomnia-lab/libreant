@@ -40,5 +40,20 @@
 		{% endfor %}
 		</tbody>
 	</table>
+
+	<h3>Similar books</h3>
+	<table class="table table-striped"> <!-- definitely should not be formatted like this! -->
+		<tbody>
+			{% for book in similar %}
+			<tr>
+				<td><a href="{{url_for('view_book',
+				bookid=book['_id'])}}">
+				{{ book['_source']['title'] }}
+					</a></td>
+				<td>{{ book['_source']['actors'] | join(',') }}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
 </article>
 {% endblock content %}

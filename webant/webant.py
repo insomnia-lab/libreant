@@ -47,8 +47,10 @@ def create_app(configfile=None):
     @app.route('/view/<bookid>')
     def view_book(bookid):
         b = get_db().get_book_by_id(bookid)
+        similar = get_db().mlt(bookid)['hits']['hits'][:10]
         return render_template('details.html',
-                               book=b['_source'], bookid=bookid)
+                               book=b['_source'], bookid=bookid,
+                               similar=similar)
 
     @app.route('/download/<bookid>/<fname>')
     def download_book(bookid, fname):

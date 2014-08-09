@@ -87,8 +87,8 @@ class DB(object):
     # End setup }}
 
     # Queries {{{2
-    def _search(self, body):
-        return self.es.search(index=self.index_name, body=body)
+    def _search(self, body, size=30):
+        return self.es.search(index=self.index_name, body=body, size=size)
 
     def _get_search_field(self, field, value):
         return {'query':

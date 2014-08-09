@@ -99,24 +99,17 @@ class DB(object):
         '''
         High-level method to do "more like this".
 
-        Its exact implementation can vary; at the moment it just searches by
-        title, but it could change
+        Its exact implementation can vary.
         '''
-        # query = {'mlt': {
-        #     'fields': ['book.text_it'],
-        #     'ids': [_id],
-        #     'min_term_freq': 1}}
-        book = self.get_book_by_id(_id)
-        from pprint import pprint
-        pprint(book)
-        ret = self.get_books_by_title(book['_source']['title'])
-        # "fixing" the results, changing main fields. This sucks, because other
-        # fields (ie: max_score) can be wrong now
-        h = [b for b in ret['hits']['hits'] if b['_id'] != _id]
-        ret['hits']['hits'] = h
-        ret['hits']['total'] = ret['hits']['total'] - 1
-        pprint(ret)
-        return ret
+        query = {'more_like_this': {
+            # FIXME: text_* does not seem to work, so we're relying on listing
+            # them manually
+            'fields': ['book.text_it', 'book.text_en'],
+            'ids': [_id],
+            'min_term_freq': 1,
+            'min_doc_freq': 1,
+        }}
+        return self._search(dict(query=query))
 
     def get_all_books(self):
         return self._search({})

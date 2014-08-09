@@ -36,3 +36,61 @@ def test_mlt_choose_same():
     res = db.mlt(book_id1)['hits']
     eq_(res['total'], 1)
     eq_(res['hits'][0]['_id'], book_id2)
+
+
+@with_setup(cleanall, cleanall)
+def test_mlt_author():
+    '''MLT: There is only one other book, and it's from the same authors'''
+    b = dict(title='Un libro fico',
+             actors=['marco', 'giulio'],
+             language='it')
+    book_id1 = db.add_book(doc_type='book', body=b)['_id']
+    b = dict(title='Il seguito',
+             actors=['marco', 'giulio'],
+             language='it')
+    book_id2 = db.add_book(doc_type='book', body=b)['_id']
+    assert book_id1 != book_id2
+    db.es.indices.refresh(index=db.index_name)
+    res = db.mlt(book_id1)['hits']
+    eq_(res['total'], 1)
+    eq_(res['hits'][0]['_id'], book_id2)
+
+
+@with_setup(cleanall, cleanall)
+def test_mlt_en_topic():
+    '''MLT: There is only one book, and the topic is the same (english)'''
+    b = dict(title='On the origins of Africa',
+             actors=['marco', 'giulio'],
+             language='en')
+    book_id1 = db.add_book(doc_type='book', body=b)['_id']
+    b = dict(title='Africa: a tour on the origins',
+             actors=['frank', 'johnny'],
+             language='en')
+    book_id2 = db.add_book(doc_type='book', body=b)['_id']
+    assert book_id1 != book_id2
+    db.es.indices.refresh(index=db.index_name)
+    res = db.mlt(book_id1)['hits']
+    eq_(res['total'], 1)
+    eq_(res['hits'][0]['_id'], book_id2)
+
+
+@with_setup(cleanall, cleanall)
+def test_mlt_en_topic():
+    '''MLT: There are two books; one about same topic, one totally different'''
+    b = dict(title='On the origins of Africa',
+             actors=['marco', 'giulio'],
+             language='en')
+    book_id1 = db.add_book(doc_type='book', body=b)['_id']
+    b = dict(title='Africa: a tour on the origins',
+             actors=['frank', 'johnny'],
+             language='en')
+    book_id2 = db.add_book(doc_type='book', body=b)['_id']
+    b = dict(title='Computer networks',
+             actors=['switch', 'router'],
+             language='en')
+    book_id3 = db.add_book(doc_type='book', body=b)['_id']
+    assert book_id1 != book_id2
+    db.es.indices.refresh(index=db.index_name)
+    res = db.mlt(book_id1)['hits']
+    eq_(res['total'], 1)
+    eq_(res['hits'][0]['_id'], book_id2)

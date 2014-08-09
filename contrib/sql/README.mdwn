@@ -1,0 +1,19 @@
+This directory
+==============
+
+Colibri
+-------
+
+Colibri is a library manager, developed by MSAck.[3]
+
+colibri2json take the mysql database and creates colibri.json
+
+Rabbia
+------
+
+RABbiA is a network of self-managed libraries [1]. rabbia2json is a script to
+help migrating from its database (which is a slight variant on [2])
+
+[1] https://www.inventati.org/rabbia/
+[2] https://wordpress.org/plugins/weblibrarian/
+[3] http://colibri.msack.org/

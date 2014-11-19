@@ -39,7 +39,7 @@
         "iso_checksum": "{{user `iso_checksum`}}",
         "iso_checksum_type": "{{user `iso_checksum_type`}}",
         "http_directory": ".",
-        "qemuargs": [ [ "-boot", "order=cd" ], [ "-m", "300m" ] ],
+        "qemuargs": [ [ "-boot", "order=cd" ], [ "-m", "300" ] ],
         "boot_wait": "5s",
         "boot_command": [
             "<enter><wait10><wait10><wait10>",

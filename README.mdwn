@@ -15,10 +15,13 @@ Quick start
 
 First of all, make sure you have elasticsearch and python2 and virtualenv2 on your computer.
 On archlinux, this is `pacman -S elasticsearch python2 python2-virtualenv`
+
+On debian, this is `apt-get install python python-virtualenv`
+
 Then, run
 
 ```sh
-virtualenv2 --no-site-packages ve
+virtualenv -p /usr/bin/python2 --no-site-packages ve
 ./ve/bin/pip install -r requirements.txt
 ```
 

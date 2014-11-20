@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, abort
+from flask import Flask, render_template, request, abort, Response
 from flask_bootstrap import Bootstrap
 from flask_appconfig import AppConfig
 from elasticsearch import Elasticsearch
@@ -42,8 +42,14 @@ def create_app(configfile=None):
             src = b['_source']
             src['_id'] = b['_id']
             books.append(src)
-        return render_template('search.html', books=books, query=query)
+        format = request.args.get('format', 'html')
+        if format == 'html':
+            return render_template('search.html', books=books, query=query)
+        if format == 'opensearch':
+            return Response(render_template('opens.xml', books=books, query=query),mimetype='text/xml')
 
+        abort(400, "Wrong format")
+ 
     @app.route('/view/<bookid>')
     def view_book(bookid):
         b = get_db().get_book_by_id(bookid)

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ <rss version="2.0" 
+      xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/"
+      xmlns:atom="http://www.w3.org/2005/Atom">
+   <channel>
+     <title>Search: {{query}}</title>
+     <link>{{url_for('search', q=query, _external=True)}}</link>
+     <description>Search results for {{query}}</description>
+     <opensearch:totalResults>{{books | length}}</opensearch:totalResults>
+     <opensearch:startIndex>1</opensearch:startIndex>
+     <opensearch:itemsPerPage>{{books | length}}</opensearch:itemsPerPage>
+     <atom:link rel="search" type="application/opensearchdescription+xml" href="http://example.com/opensearchdescription.xml"/>
+     <opensearch:Query role="request" searchTerms="{{query}}" startPage="1" />
+    {% for b in books %}
+     <item>
+       <title>{{b['title']}}</title>
+       <link>{{url_for('view_book', bookid=b['_id'], _external=True)}}</link>
+       <description>{{b['title']}}</description>
+     </item>
+    {% endfor %}
+   </channel>
+ </rss>
+
+
+

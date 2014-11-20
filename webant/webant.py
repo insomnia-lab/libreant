@@ -49,6 +49,11 @@ def create_app(configfile=None):
             return Response(render_template('opens.xml', books=books, query=query),mimetype='text/xml')
 
         abort(400, "Wrong format")
+
+    @app.route('/description.xml')
+    def description():
+        return Response(render_template('opens_desc.xml'),mimetype='text/xml')
+
  
     @app.route('/view/<bookid>')
     def view_book(bookid):

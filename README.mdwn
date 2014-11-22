@@ -12,7 +12,19 @@ Its main UI is a web one
 
 Quick start
 -----------
-
+On Debian you must download and install the Public Signing Key for elasticsearch repo
+```sh
+wget -qO - http://packages.elasticsearch.org/GPG-KEY-elasticsearch | sudo apt-key add -
+```
+then add elasticsearch repos in /etc/apt/sources.list.d/elasticsearch.list
+```sh
+deb http://packages.elasticsearch.org/elasticsearch/1.2/debian stable main
+```
+important choose version 1.2 or higher because more like this query doesn't work for elasticsearch < 1.2
+install elasticsearch
+```sh
+sudo apt-get update && sudo apt-get install elasticsearch
+```
 First of all, make sure you have elasticsearch and python2 and virtualenv2 on your computer.
 On archlinux, this is `pacman -S elasticsearch python2 python2-virtualenv`
 

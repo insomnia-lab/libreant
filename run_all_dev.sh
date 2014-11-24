@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-webrun=flaskdev
+webrun=webant
 if [ -n "$1" ]; then
     webrun="$1/bin/$webrun"
     shift
@@ -12,7 +12,7 @@ if [ -n "$1" ]; then
 fi
 
 ./run_es.sh -d
-PYTHONPATH=. $webrun webant $*
+PYTHONPATH=. $webrun $*
 pid=$(cat elasticsearch/data/pid 2> /dev/null)
 if [ -n "$pid" ]; then
 	kill $pid

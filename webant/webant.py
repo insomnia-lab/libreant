@@ -46,15 +46,17 @@ def create_app(configfile=None):
         if format == 'html':
             return render_template('search.html', books=books, query=query)
         if format == 'opensearch':
-            return Response(render_template('opens.xml', books=books, query=query),mimetype='text/xml')
+            return Response(render_template('opens.xml',
+                                            books=books, query=query),
+                            mimetype='text/xml')
 
         abort(400, "Wrong format")
 
     @app.route('/description.xml')
     def description():
-        return Response(render_template('opens_desc.xml'),mimetype='text/xml')
+        return Response(render_template('opens_desc.xml'),
+                        mimetype='text/xml')
 
- 
     @app.route('/view/<bookid>')
     def view_book(bookid):
         b = get_db().get_book_by_id(bookid)
@@ -69,5 +71,9 @@ def create_app(configfile=None):
 
     return app
 
-if __name__ == '__main__':
+
+def main():
     create_app().run(debug=True, host='0.0.0.0')
+
+if __name__ == '__main__':
+    main()

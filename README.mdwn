@@ -34,7 +34,7 @@ Then, run
 
 ```sh
 virtualenv -p /usr/bin/python2 --no-site-packages ve
-./ve/bin/pip install -r requirements.txt
+./ve/bin/python setup.py develop
 ```
 
 Now your environment is ready and you can run `./run_all_dev.sh ve`

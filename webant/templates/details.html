@@ -11,7 +11,7 @@
 
 <article>
 	{% if '_files' in book %}
-	<h3>Download</h3>
+	<h3>{%trans%}Download{%endtrans%}</h3>
 	<ul>
 		{% for file in  book['_files'] %}
 		<li><a href="{{
@@ -22,12 +22,12 @@
 	</ul>
 	{% endif %}
 
-	<h3>Details</h3>
+	<h3>{%trans%}Details{%endtrans%}</h3>
 	<table class="table table-striped">
 		<thead>
 			<tr>
-				<th>Field</th>
-				<th>Value</th>
+				<th>{%trans%}Field{%endtrans%}</th>
+				<th>{%trans%}Value{%endtrans%}</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -41,7 +41,7 @@
 		</tbody>
 	</table>
 
-	<h3>Similar books</h3>
+	<h3>{%trans%}Similar books{%endtrans%}</h3>
 	<table class="table table-striped"> <!-- definitely should not be formatted like this! -->
 		<tbody>
 			{% for book in similar %}

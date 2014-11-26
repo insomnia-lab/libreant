@@ -3,11 +3,11 @@
 
 {% block content %}
 <div class="container">
-    <h1>Libreant <small>What do you want to read today?</small></h1>
+    <h1>Libreant <small>{%trans%}What do you want to read today?{%endtrans%}</small></h1>
 
     <form action="/search" role="form form-horizontal">
 	    <input name="q" class="form-control" />
-	    <button type="submit" class="btn btn-primary">Search</button>
+	    <button type="submit" class="btn btn-primary">{%trans%}Search{%endtrans%}</button>
     </form>
 
 {% endblock content %}

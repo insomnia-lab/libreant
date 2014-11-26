@@ -12,8 +12,13 @@ if [ -n "$1" ]; then
 fi
 
 ./run_es.sh -d
-PYTHONPATH=. $webrun $*
+
+cleanup() {
 pid=$(cat elasticsearch/data/pid 2> /dev/null)
 if [ -n "$pid" ]; then
-	kill $pid
+    kill $pid
 fi
+}
+trap cleanup EXIT
+
+PYTHONPATH=. $webrun $*

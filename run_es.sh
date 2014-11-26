@@ -1,5 +1,6 @@
+
 #!/usr/bin/env bash
-base=$(realpath $(dirname $0)/elasticsearch)
+base=$(readlink -f $(dirname $0)/elasticsearch)
 PID_FILE="$base/data/pid"
 if [[ -f "$PID_FILE" ]]; then
     pid=$(cat "$PID_FILE")
@@ -10,6 +11,8 @@ if [[ -f "$PID_FILE" ]]; then
         rm "$PID_FILE"
     fi
 fi
+
+PATH=/usr/share/elasticsearch/bin:$PATH
 
 elasticsearch -p "$PID_FILE" "-Dcustom.prefix=$base/" \
 	"-Des.config=$base/conf/elasticsearch.yml" $*

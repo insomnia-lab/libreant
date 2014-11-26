@@ -12,32 +12,33 @@ Its main UI is a web one
 
 Quick start
 -----------
-On Debian you must download and install the Public Signing Key for elasticsearch repo
+###Dependencies
+####Debian
+Download and install the Public Signing Key for elasticsearch repo
 ```sh
 wget -qO - http://packages.elasticsearch.org/GPG-KEY-elasticsearch | sudo apt-key add -
 ```
-then add elasticsearch repos in /etc/apt/sources.list.d/elasticsearch.list
+Add elasticsearch repos in /etc/apt/sources.list.d/elasticsearch.list
 ```sh
-deb http://packages.elasticsearch.org/elasticsearch/1.2/debian stable main
+deb http://packages.elasticsearch.org/elasticsearch/1.4/debian stable main
 ```
-important choose version 1.2 or higher because more like this query doesn't work for elasticsearch < 1.2
-install elasticsearch
+*important choose version 1.2 or higher because "more like this" query doesn't work for elasticsearch < 1.2*  
+Install all necessary packages
 ```sh
-sudo apt-get update && sudo apt-get install elasticsearch
+sudo apt-get update && sudo apt-get install python python-virtualenv openjdk-7-jre-headless elasticsearch
 ```
-First of all, make sure you have elasticsearch and python2 and virtualenv2 on your computer.
-On archlinux, this is `pacman -S elasticsearch python2 python2-virtualenv`
+####Arch
+Install all necessary packages
+`pacman -S elasticsearch python2 python2-virtualenv`
 
-On debian, this is `apt-get install python python-virtualenv`
-
-Then, run
-
+###Install
+Create a virtual env and install libreant in it 
 ```sh
 virtualenv -p /usr/bin/python2 --no-site-packages ve
 ./ve/bin/python setup.py develop
 ```
-
-Now your environment is ready and you can run `./run_all_dev.sh ve`
+###Run
+`./run_all_dev.sh ve`
 
 Implementation
 ==============

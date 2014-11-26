@@ -9,7 +9,7 @@ def read(fname):
 
 setup(name='libreant',
       version='0.1',
-      description='{e,}book archive, focused on small grass root archives, distributed search, low assumptions',
+      description='{e,}book archive focused on small grass root archives, distributed search, low assumptions',
       long_description=read('README.mdwn'),
       author='boyska',
       author_email='piuttosto@logorroici.org',
@@ -22,6 +22,7 @@ setup(name='libreant',
           'flask-appconfig',
           'wtforms'
       ],
+      include_package_data=True,
       tests_require=['nose'],
       test_suite='nose.collector',
       zip_safe=False,

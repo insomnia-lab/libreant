@@ -1,11 +1,21 @@
+from __future__ import print_function
+
+
 def validate_book(body):
+    '''
+    This does not only accept/refuse a book. It also returns an ENHANCED
+    version of body, with (mostly fts-related) additional fields.
+
+    This function is idempotent.
+    '''
     if 'language' not in body:
         raise ValueError('language needed')
     if len(body['language']) > 2:
         raise ValueError('invalid language: %s' % body['language'])
     allfields = []
     for name, field in body.items():
-        if name.startswith('_') or name == 'language':
+        if name.startswith('_') or name == 'language' or \
+           name.startswith('text_'):  # excluding text_* is for idempotency
             continue
         if type(field) in (str, unicode):
             separate = field.split()
@@ -151,12 +161,29 @@ class DB(object):
         '''
         Call it like this:
             db.add_book(doc_type='book',
-                        body={'title': 'foobar'})
+            body={'title': 'foobar', 'language': 'it'})
         '''
         if 'doc_type' not in book:
             book['doc_type'] = 'book'
         book['body'] = validate_book(book['body'])
         return self.es.create(index=self.index_name, **book)
+
+    def update_book(self, id, doc_type='book', body={}):
+        '''
+        Update a book. The "body" is merged with the current one.
+        Yes, it is NOT overwritten.
+        '''
+        # note that we are NOT overwriting all the _source, just merging
+        doc = {'doc': body}
+        ret = self.es.update(index=self.index_name, id=id,
+                             doc_type=doc_type, body=doc)
+        # text_* fields need to be "updated"; atomicity is provided by the
+        # idempotency of validate_book
+        book = self.get_book_by_id(ret['_id'])['_source']
+        book = validate_book(book)
+        ret = self.es.update(index=self.index_name, id=id,
+                             doc_type=doc_type, body={'doc': book})
+        return ret
     # End operations }}}
 
 # vim: set fdm=marker fdl=1:

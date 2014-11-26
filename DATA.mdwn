@@ -1,0 +1,28 @@
+Rationale
+===========
+
+You have installed elasticsearch, setup your virtualenv and your python dependencies. Now you want to test it
+a bit. Or maybe you want to develop, and need some "lorem ipsum" data. This howto is for you!
+
+HowTo
+=====
+
+First of all, make sure that elasticsearch is running. If it it not, run
+```sh
+./run_es.sh -d
+```
+
+"Enter" your virtualenv. This typically is
+
+```sh
+source ve/bin/activate
+```
+
+Now run
+```sh
+curl -s 'http://boyska.s.pt-labs.net/libreant/contrib/colibri.json' 'http://boyska.s.pt-labs.net/libreant/contrib/rabbia/rabbia.json' 'http://boyska.s.pt-labs.net/libreant/contrib/csv2json/info_forte.json' |  python ./contrib/importjson/json2es.py
+```
+
+This will fetch three sample "libraries" and add every book to your elasticsearch.
+
+Of course you can exclude the ones that you don't like, or create your own.

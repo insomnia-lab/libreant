@@ -11,13 +11,10 @@ if [ -n "$1" ]; then
     fi
 fi
 
-./run_es.sh -d
+./run_es.sh start -d
 
 cleanup() {
-pid=$(cat elasticsearch/data/pid 2> /dev/null)
-if [ -n "$pid" ]; then
-    kill $pid
-fi
+	./run_es.sh stop
 }
 trap cleanup EXIT
 

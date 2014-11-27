@@ -73,7 +73,7 @@ def create_app(configfile=None):
 
     @babel.localeselector
     def get_locale():
-     return request.accept_languages.best_match(['en','it'])   
+     return request.accept_languages.best_match(['en','it','sq'])   
 
     return app
 

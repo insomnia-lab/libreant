@@ -4,3 +4,5 @@
 .noseids
 ve/
 .*.sw*
+*.mo
+libreant.egg-info/*

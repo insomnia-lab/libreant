@@ -1,7 +1,7 @@
 import os
+import subprocess
 
 from setuptools import setup
-
 
 def read(fname):
     with open(os.path.join(os.path.dirname(__file__), fname)) as buf:
@@ -32,3 +32,8 @@ setup(name='libreant',
                               ]
       }
       )
+
+# compile translations
+print("\nCompiling translations:")
+subprocess.call( os.path.join(os.path.dirname(__file__), "webant/babel/trans_compile.sh") )
+

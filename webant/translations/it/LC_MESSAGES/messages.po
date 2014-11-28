@@ -2,11 +2,11 @@
 # Copyright (C) 2014 ORGANIZATION
 # This file is distributed under the same license as the PROJECT project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2014.
-
+#
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-11-26 11:56-0600\n"
-"PO-Revision-Date: 2014-11-26 11:56-0600\n"
+"POT-Creation-Date: 2014-11-27 20:09-0600\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: it <LL@li.org>\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
@@ -15,7 +15,45 @@
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 1.3\n"
 
-#: /home/libreant/project/libreant/webant/webant.py:79
-msgid "TID_1"
-msgstr "testo1"
+#: /home/libreant/libreant/webant/templates/details.html:14
+msgid "Download"
+msgstr ""
 
+#: /home/libreant/libreant/webant/templates/details.html:25
+msgid "Details"
+msgstr "Dettagli"
+
+#: /home/libreant/libreant/webant/templates/details.html:29
+msgid "Field"
+msgstr "Campo"
+
+#: /home/libreant/libreant/webant/templates/details.html:30
+msgid "Value"
+msgstr "Valore"
+
+#: /home/libreant/libreant/webant/templates/details.html:44
+msgid "Similar books"
+msgstr "Libri simili"
+
+#: /home/libreant/libreant/webant/templates/index.html:6
+msgid "What do you want to read today?"
+msgstr "Cosa vorresti leggere oggi?"
+
+#: /home/libreant/libreant/webant/templates/index.html:10
+msgid "Search"
+msgstr "Cerca"
+
+#: /home/libreant/libreant/webant/templates/search.html:12
+msgid "Search results"
+msgstr "Risultati"
+
+#: /home/libreant/libreant/webant/templates/search.html:13
+#, python-format
+msgid "%(num)s result was found for"
+msgid_plural "%(num)s results were found for"
+msgstr[0] "é stato trovato un solo risultato per"
+msgstr[1] "Sono stati trovati %(num)s risultati per"
+
+#: /home/libreant/libreant/webant/templates/search.html:18
+msgid "Sorry, no books matching your query"
+msgstr "Spiacenti, non è stato trovato nessun elemento che soddisfi la tua richiesta"

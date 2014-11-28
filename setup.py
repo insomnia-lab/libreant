@@ -19,6 +19,7 @@ setup(name='libreant',
           'elasticsearch',
           'Flask',
           'flask-bootstrap',
+          'Flask-Babel',
           'flask-appconfig',
           'wtforms'
       ],

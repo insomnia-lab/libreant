@@ -1,2 +1,3 @@
 recursive-include webant/static *
 recursive-include webant/templates *
+recursive-include webant/translations *.mo

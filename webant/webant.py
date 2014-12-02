@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, abort, Response
 from flask_bootstrap import Bootstrap
 from flask_appconfig import AppConfig
 from elasticsearch import Elasticsearch
+from flask.ext.babel import Babel
 
 from libreantdb import DB
 
@@ -11,6 +12,7 @@ def create_app(configfile=None):
     app.config['BOOTSTRAP_SERVE_LOCAL'] = True
     AppConfig(app, configfile)
     Bootstrap(app)
+    babel = Babel(app)
     if 'SECRET_KEY' not in app.config:
         # TODO remove me
         app.config['SECRET_KEY'] = 'asjdkasjdlkasdjlksajsdlsajdlsajd'
@@ -69,8 +71,11 @@ def create_app(configfile=None):
     def download_book(bookid, fname):
         raise NotImplementedError()
 
-    return app
+    @babel.localeselector
+    def get_locale():
+     return request.accept_languages.best_match(['en','it','sq'])   
 
+    return app
 
 def main():
     create_app().run(debug=True, host='0.0.0.0')

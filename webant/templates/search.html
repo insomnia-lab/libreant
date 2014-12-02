@@ -9,13 +9,13 @@
 {% block content %}
 <div class="container">
     <hgroup class="mb20">
-        <h1>Search results</h1>
-        <h2 class="lead">{{ books | length }} results were found for <strong>{{ query }}</strong></h2>
+        <h1>{%trans%}Search results{%endtrans%}</h1>
+        <h2 class="lead">{% trans num = books|length%}{{num}} result was found for{%pluralize%}{{num}} results were found for{% endtrans %} <strong>{{ query }}</strong></h2>
     </hgroup>
 
     {% if not books %}
 
-    Sorry, no books matching your query
+    {%trans%}Sorry, no books matching your query{%endtrans%}
 
     {% else %}
 

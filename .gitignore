@@ -1,8 +1,16 @@
 *.swp
 *.pyc
-.coverage
-.noseids
-ve/
 .*.sw*
 *.mo
+
+# nosetest
+.coverage
+.noseids
+
+# virtualenv
+ve/
+
+# setuptools
+build/*
+dist/*
 libreant.egg-info/*

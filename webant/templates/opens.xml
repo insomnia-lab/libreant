@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
  <rss version="2.0" 
       xmlns:opensearch="http://a9.com/-/spec/opensearch/1.1/"
-      xmlns:atom="http://www.w3.org/2005/Atom">
+      xmlns:atom="http://www.w3.org/2005/Atom"
+      xmlns:relevance="http://a9.com/-/opensearch/extensions/relevance/1.0/">
    <channel>
      <title>Search: {{query}}</title>
      <link>{{url_for('search', q=query, _external=True)}}</link>
@@ -16,6 +17,7 @@
        <title>{{b['title']}}</title>
        <link>{{url_for('view_book', bookid=b['_id'], _external=True)}}</link>
        <description>{{b['title']}}</description>
+       <relevance:score>{{b['_score']}}</relevance:score>
      </item>
     {% endfor %}
    </channel>

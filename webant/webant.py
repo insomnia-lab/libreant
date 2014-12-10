@@ -21,19 +21,15 @@ def initLoggers():
 def create_app(configfile=None):
     initLoggers()
     app = Flask("webant")
-    app.config['BOOTSTRAP_SERVE_LOCAL'] = True
-    AppConfig(app, configfile)
+    app.config.update({
+        'BOOTSTRAP_SERVE_LOCAL': True,
+        'DEBUG': True,
+        'PRESET_PATHS': [],
+        'SECRET_KEY': 'really insecure, please change me!'
+    })
+    AppConfig(app, configfile, default_settings=False)
     Bootstrap(app)
     babel = Babel(app)
-
-    if 'SECRET_KEY' not in app.config:
-        # TODO remove me
-        app.config['SECRET_KEY'] = 'asjdkasjdlkasdjlksajsdlsajdlsajd'
-
-    if 'PRESET_PATHS' not in app.config:
-        app.config['PRESET_PATHS'] = []
-    else:
-        app.config['PRESET_PATHS'] = app.config['PRESET_PATHS'].split(':')
     presetManager = PresetManager(app.config['PRESET_PATHS'])
 
     app._db = None
@@ -92,7 +88,7 @@ def create_app(configfile=None):
 
     @babel.localeselector
     def get_locale():
-     return request.accept_languages.best_match(['en','it','sq'])   
+     return request.accept_languages.best_match(['en','it','sq'])
 
     def reuqestedFormat(acceptedFormat):
         """Return the response format requested by client
@@ -121,7 +117,19 @@ def create_app(configfile=None):
     return app
 
 def main():
-    create_app().run(debug=True, host='0.0.0.0')
+    from gevent.wsgi import WSGIServer
+    import gevent.monkey
+    from werkzeug.debug import DebuggedApplication
+    from werkzeug.serving import run_with_reloader
+    gevent.monkey.patch_socket()
+    app = create_app()
+    if app.config['DEBUG']:
+        app = DebuggedApplication(app)
+
+    @run_with_reloader
+    def run_server():
+        http_server = WSGIServer(('', 5000), app)
+        http_server.serve_forever()
 
 if __name__ == '__main__':
     main()

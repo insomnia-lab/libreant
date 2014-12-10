@@ -48,6 +48,7 @@ setup(name='libreant',
       license='AGPL',
       packages=['libreantdb', 'webant'],
       install_requires=[
+          'gevent',
           'elasticsearch',
           'Flask',
           'flask-bootstrap',

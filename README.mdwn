@@ -25,7 +25,7 @@ deb http://packages.elasticsearch.org/elasticsearch/1.4/debian stable main
 *important choose version 1.2 or higher because "more like this" query doesn't work for elasticsearch < 1.2*  
 Install all necessary packages
 ```sh
-sudo apt-get update && sudo apt-get install python python-virtualenv openjdk-7-jre-headless elasticsearch
+sudo apt-get update && sudo apt-get install python python-dev python-virtualenv openjdk-7-jre-headless elasticsearch
 ```
 ####Arch
 Install all necessary packages

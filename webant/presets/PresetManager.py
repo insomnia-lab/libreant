@@ -23,6 +23,10 @@ class PresetManager(object):
         for i in range(len(paths)):
             path = paths[i]
 
+            #avoid empty string
+            if not path:
+                continue
+
             # cleanUp path
             if depth == 0:
                 path = os.path.expanduser(path) # replace ~
@@ -80,6 +84,7 @@ class Preset(object):
         self.skeleton = skeleton
         self.required = []
         self.description = ""
+        self.allowUpload = True
 
         # ID
         if 'id' not in skeleton:
@@ -94,6 +99,13 @@ class Preset(object):
                 self.description = skeleton['description']
             else:
                 raise SkeletonException("'description' field must be a string")
+
+        # ALLOW UPLAOD
+        if 'allowUpload' in skeleton:
+            if isinstance(skeleton['allowUpload'], bool):
+                self.allowUpload = skeleton['allowUpload']
+            else:
+                raise SkeletonException("'allowUpload' field must be a boolean")
 
         # PROPERTIES
         if 'properties' not in skeleton:

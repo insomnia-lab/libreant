@@ -6,5 +6,6 @@
                   "required": true
                 },
         "actors":{ "description":"people who contributed to the creation of the work" }
-        }
+        },
+    "allowUpload": true
 }

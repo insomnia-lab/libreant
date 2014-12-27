@@ -4,7 +4,7 @@
    <Description>Use Example.com to search the Web.</Description>
    <Tags>example web</Tags>
    <Contact>admin@example.com</Contact>
-   <Url type="text/xml"
+   <Url type="application/rss+xml"
         template="{{ request.scheme }}://{{request.host}}{{url_for('search',format='application/opensearchdescription+xml') |e }}&amp;q={searchTerms}"/>
    <Url type="text/html" 
         template="{{ request.scheme }}://{{request.host}}{{url_for('search',format='text/html') |e }}&amp;q={searchTerms}"/>

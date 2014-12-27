@@ -7,6 +7,7 @@ from presets import PresetManager
 import logging
 
 from libreantdb import DB
+from agherant import agherant
 
 def initLoggers():
     streamHandler = logging.StreamHandler()
@@ -28,6 +29,7 @@ def create_app(configfile=None):
         'SECRET_KEY': 'really insecure, please change me!'
     })
     AppConfig(app, configfile, default_settings=False)
+    app.register_blueprint(agherant, url_prefix='/agherant')
     Bootstrap(app)
     babel = Babel(app)
     presetManager = PresetManager(app.config['PRESET_PATHS'])
@@ -88,7 +90,7 @@ def create_app(configfile=None):
 
     @babel.localeselector
     def get_locale():
-     return request.accept_languages.best_match(['en','it','sq'])
+        return request.accept_languages.best_match(['en', 'it', 'sq'])
 
     def reuqestedFormat(acceptedFormat):
         """Return the response format requested by client
@@ -115,6 +117,7 @@ def create_app(configfile=None):
             return request.accept_mimetypes.best_match(acceptedFormat)
 
     return app
+
 
 def main():
     from gevent.wsgi import WSGIServer

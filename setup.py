@@ -8,6 +8,7 @@ from setuptools.command.develop import develop as _develop
 from distutils.command.build import build as _build
 from distutils.cmd import Command
 
+
 class compileTranslations(Command):
     description = 'compile message catalogs to MO files via pybabel command'
 
@@ -50,10 +51,11 @@ setup(name='libreant',
       install_requires=[
           'gevent',
           'elasticsearch',
-          'Flask',
           'flask-bootstrap',
           'Flask-Babel',
           'flask-appconfig',
+          'Flask',
+          'opensearch',
           'wtforms'
       ],
       include_package_data=True,

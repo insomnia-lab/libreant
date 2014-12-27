@@ -26,6 +26,7 @@ def create_app(configfile=None):
         'BOOTSTRAP_SERVE_LOCAL': True,
         'DEBUG': True,
         'PRESET_PATHS': [],
+        'AGHERANT_DESCRIPTIONS': [],
         'SECRET_KEY': 'really insecure, please change me!'
     })
     AppConfig(app, configfile, default_settings=False)

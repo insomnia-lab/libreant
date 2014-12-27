@@ -1,9 +1,8 @@
 from itertools import chain
 
-from flask import Blueprint, render_template, abort, request, Response, jsonify
+from flask import Blueprint, render_template, abort, request, Response, \
+    current_app
 from opensearch import Client
-
-description_list = ['http://127.0.0.1:5000/description.xml']
 
 agherant = Blueprint('agherant', __name__)
 
@@ -13,7 +12,7 @@ def search():
     query = request.args.get('q', None)
     if query is None:
         abort(400, "No query given")
-    books = aggregate(description_list, query)
+    books = aggregate(current_app.config['AGHERANT_DESCRIPTIONS'], query)
     format = request.args.get('format', 'html')
     if format == 'html':
         return render_template('os_search.html', books=books, query=query)
@@ -21,8 +20,6 @@ def search():
         return Response(render_template('os_opens.xml', books=books,
                                         query=query),
                         mimetype='text/xml')
-    if format == 'json':
-        return jsonify(dict(results=books))
     abort(400, "Wrong format")
 
 
@@ -34,6 +31,7 @@ def aggregate(descriptions, query):
     return results
 
 if __name__ == '__main__':
+    description_list = ['http://127.0.0.1:5000/description.xml']
     results = aggregate(description_list, 'russia')
 
     for result in results:

@@ -88,36 +88,24 @@ class Preset(object):
         self.description = ""
         self.allowUpload = True
 
-        # ID
-        if 'id' not in skeleton:
-            raise SkeletonException("missing 'id' field")
-        if not isinstance(skeleton['id'], basestring):
-            raise SkeletonException("'id' field must be a string")
-        self.id = skeleton['id']
+        requiredFields = ['id','properties']
+        fieldsType = {
+            'id':basestring,
+            'description':basestring,
+            'allowUpload':bool,
+            'properties': dict
+        }
 
-        # DESCRIPTION
-        if 'description' in skeleton:
-            if isinstance(skeleton['description'], basestring):
-                self.description = skeleton['description']
-            else:
-                raise SkeletonException("'description' field must be a string")
+        for reqField in requiredFields:
+            if reqField not in skeleton:
+                raise SkeletonException("missing '{}' field".format(reqField))
 
-        # ALLOW UPLAOD
-        if 'allowUpload' in skeleton:
-            if isinstance(skeleton['allowUpload'], bool):
-                self.allowUpload = skeleton['allowUpload']
-            else:
-                raise SkeletonException("'allowUpload' field must be a boolean")
+        for field, reqType in fieldsType.items():
+            if field in skeleton and not isinstance(skeleton[field], reqType):
+                raise SkeletonException("'{}' field must be of type {}".format(field,reqType.__name__))
 
-        # PROPERTIES
-        if 'properties' not in skeleton:
-            raise SkeletonException("missing 'properties' field")
+
         props = skeleton['properties']
-        if not isinstance(props, dict):
-            raise SkeletonException("'properties' field must be a json object")
-        if not len(props) > 0:
-            raise SkeletonException("'properties' field could not be empty")
-
         for key in props:
             if ('description' in props[key]) and not isinstance(props[key]['description'], basestring):
                 raise SkeletonException("'{}' field of '{}' property must be a {}".format("description", key, "string"))
@@ -127,8 +115,13 @@ class Preset(object):
                 else:
                     self.required.append(key)
 
+        self.id = skeleton['id']
         self.properties = props
-
+        
+        if 'description' in skeleton:
+            self.description = skeleton['description']
+        if 'allowUpload' in skeleton:
+            self.allowUpload = skeleton['allowUpload']
 
 class SkeletonException(Exception):
     pass

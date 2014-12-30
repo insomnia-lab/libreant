@@ -25,16 +25,16 @@ class PresetManager(object):
         for i in range(len(paths)):
             path = paths[i]
 
-            #avoid empty string
+            # avoid empty string
             if not path:
                 continue
 
             # cleanUp path
             if depth == 0:
-                path = os.path.expanduser(path) # replace ~
-                path = os.path.expandvars(path) # replace vars
-                path = os.path.normpath(path) # replace /../ and so on
-                path = os.path.realpath(path) # resolve links
+                path = os.path.expanduser(path)  # replace ~
+                path = os.path.expandvars(path)  # replace vars
+                path = os.path.normpath(path)  # replace /../ and so on
+                path = os.path.realpath(path)  # resolve links
 
             if not os.path.exists(path):
                 self._warn(path, "file does not exists")
@@ -88,11 +88,11 @@ class Preset(object):
         self.description = ""
         self.allowUpload = True
 
-        requiredFields = ['id','properties']
+        requiredFields = ['id', 'properties']
         fieldsType = {
-            'id':basestring,
-            'description':basestring,
-            'allowUpload':bool,
+            'id': basestring,
+            'description': basestring,
+            'allowUpload': bool,
             'properties': dict
         }
 
@@ -102,8 +102,7 @@ class Preset(object):
 
         for field, reqType in fieldsType.items():
             if field in skeleton and not isinstance(skeleton[field], reqType):
-                raise SkeletonException("'{}' field must be of type {}".format(field,reqType.__name__))
-
+                raise SkeletonException("'{}' field must be of type {}".format(field, reqType.__name__))
 
         props = skeleton['properties']
         for key in props:
@@ -117,11 +116,12 @@ class Preset(object):
 
         self.id = skeleton['id']
         self.properties = props
-        
+
         if 'description' in skeleton:
             self.description = skeleton['description']
         if 'allowUpload' in skeleton:
             self.allowUpload = skeleton['allowUpload']
+
 
 class SkeletonException(Exception):
     pass

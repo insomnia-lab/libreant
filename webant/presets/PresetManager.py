@@ -1,13 +1,15 @@
 import os.path
-import warnings
+import logging
 import json
 
 
 class PresetManager(object):
-    SKIPPING_PATH_MSG = "PresetManager: skipping preset path: \"{}\" ({})"
+    SKIPPING_PATH_MSG = "skipping preset path: \"{}\" ( {} )"
     MAX_DEPTH = 2
 
     def __init__(self, paths):
+
+        self.logger = logging.getLogger(__name__)
         self.presets = {}
 
         # normalize paramter type string -> array
@@ -74,7 +76,7 @@ class PresetManager(object):
             self.presets[preset.id] = preset
 
     def _warn(self, path, details):
-        warnings.warn(self.SKIPPING_PATH_MSG.format(path, details), RuntimeWarning)
+        self.logger.error(self.SKIPPING_PATH_MSG.format(path, details))
 
 
 class Preset(object):

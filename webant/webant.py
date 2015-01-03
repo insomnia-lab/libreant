@@ -3,19 +3,38 @@ from flask_bootstrap import Bootstrap
 from flask_appconfig import AppConfig
 from elasticsearch import Elasticsearch
 from flask.ext.babel import Babel
+from presets import PresetManager
+import logging
 
 from libreantdb import DB
 
+def initLoggers():
+    streamHandler = logging.StreamHandler()
+    streamHandler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    streamHandler.setFormatter(formatter)
+
+    loggers = [logging.getLogger('webant')]
+    for logger in loggers:
+        logger.addHandler(streamHandler)
 
 def create_app(configfile=None):
-    app = Flask(__name__)
+    initLoggers()
+    app = Flask("webant")
     app.config['BOOTSTRAP_SERVE_LOCAL'] = True
     AppConfig(app, configfile)
     Bootstrap(app)
     babel = Babel(app)
+
     if 'SECRET_KEY' not in app.config:
         # TODO remove me
         app.config['SECRET_KEY'] = 'asjdkasjdlkasdjlksajsdlsajdlsajd'
+
+    if 'PRESET_PATHS' not in app.config:
+        app.config['PRESET_PATHS'] = []
+    else:
+        app.config['PRESET_PATHS'] = app.config['PRESET_PATHS'].split(':')
+    presetManager = PresetManager(app.config['PRESET_PATHS'])
 
     app._db = None
 

@@ -1,0 +1,11 @@
+{
+    "id":"book",
+    "description":"simple book",
+    "properties": {
+        "title":{ "description":"a required property",
+                  "required": true
+                },
+        "actors":{ "description":"people who contributed to the creation of the work" }
+        },
+    "allowUpload": true
+}

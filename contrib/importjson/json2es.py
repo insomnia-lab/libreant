@@ -20,7 +20,7 @@ if __name__ == '__main__':
         buf = sys.stdin
     for line in buf:
         i += 1
-        book = {'language': 'it'}
+        book = {'_language': 'it'}
         book.update(json.loads(line))
         if i % 50:
             print("\rLoading\t%d" % i, end='')

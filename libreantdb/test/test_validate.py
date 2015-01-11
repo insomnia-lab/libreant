@@ -14,6 +14,6 @@ def test_invalid_book():
 
 
 def test_idempotent_simple():
-    b = dict(title='Un libro', language='it')
+    b = dict(title='Un libro', _language='it')
     b = validate_book(b)
     eq_(sorted(b.items()), sorted(validate_book(validate_book(b)).items()))

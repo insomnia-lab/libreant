@@ -10,7 +10,7 @@ def test_noquotes():
     '''Quoting means "exact portion of text"'''
     b = dict(title='Manifesto del partito comunista',
              actors=['Karl Marx', 'Friedrich Engels'],
-             language='it')
+             _language='it')
     db.add_book(doc_type='book', body=b)
     db.es.indices.refresh(index=db.index_name)
     res = db.user_search('manifesto comunista')['hits']
@@ -30,11 +30,11 @@ def test_field():
     '''Query string support field:value'''
     b = dict(title='Manifesto del partito comunista',
              actors=['Karl Marx', 'Friedrich Engels'],
-             language='it')
+             _language='it')
     bookid1 = db.add_book(doc_type='book', body=b)['_id']
     b = dict(title='Viva Marx',
              actors=['Topo gigio', 'paolino paperino'],
-             language='it')
+             _language='it')
     bookid2 = db.add_book(doc_type='book', body=b)['_id']
     db.es.indices.refresh(index=db.index_name)
 
@@ -56,11 +56,11 @@ def test_quotedfield():
     '''Query string support field:"test phrase"'''
     b = dict(title='Manifesto del partito comunista',
              actors=['Karl Marx', 'Friedrich Engels'],
-             language='it')
+             _language='it')
     bookid1 = db.add_book(doc_type='book', body=b)['_id']
     b = dict(title='La guerra lampo dei fratelli Marx',
              actors=['Groucho Marx', 'Zeppo Marx'],
-             language='it')
+             _language='it')
     db.add_book(doc_type='book', body=b)['_id']
     db.es.indices.refresh(index=db.index_name)
 

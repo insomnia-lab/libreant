@@ -25,7 +25,7 @@ def notest_start_empty():
 def test_add():
     '''Add should not complain'''
     db.add_book(doc_type='book',
-                body=dict(title='Un libro', language='it'))
+                body=dict(title='Un libro', _language='it'))
 
 
 @with_setup(cleanall, cleanall)
@@ -34,7 +34,7 @@ def test_addget():
     db.es.indices.refresh(index=db.index_name)
 
     db.add_book(doc_type='book',
-                body=dict(title='Un libro', language='it'))
+                body=dict(title='Un libro', _language='it'))
     db.es.indices.refresh(index=db.index_name)
 
     res = db.get_books_by_title('libro')
@@ -47,7 +47,7 @@ def test_addget_simple():
     db.es.indices.refresh(index=db.index_name)
 
     db.add_book(doc_type='book',
-                body=dict(title='Un libro', language='it'))
+                body=dict(title='Un libro', _language='it'))
     db.es.indices.refresh(index=db.index_name)
 
     res = db.get_books_simplequery('libro')
@@ -67,10 +67,10 @@ def test_allfields():
     """
     body = {'title': "Ok computer",
             'actors': ["mazinga", "batman"],
-            'language': 'it'
+            '_language': 'it'
             }
     body = api.validate_book(body)
-    assert 'text_it' in body
+    assert '_text_it' in body
     words = ('Ok', 'computer', 'mazinga', 'batman')
     for word in words:
-        assert word in body['text_it'], body['text_it']
+        assert word in body['_text_it'], body['_text_it']

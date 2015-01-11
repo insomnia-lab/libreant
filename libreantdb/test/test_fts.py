@@ -14,9 +14,9 @@ from . import db, cleanall
 def test_fts_basic():
     '''Simple fts, without stemming or anything fancy'''
     db.add_book(doc_type='book',
-                body=dict(title='La fine', language='it'))
+                body=dict(title='La fine', _language='it'))
     db.add_book(doc_type='book',
-                body=dict(title="It's fine", language='en'))
+                body=dict(title="It's fine", _language='en'))
     db.es.indices.refresh(index=db.index_name)
     res = db.get_books_simplequery('fine')
     eq_(res['hits']['total'], 2)
@@ -31,14 +31,14 @@ def test_fts_it_plural_manual():
     '''
     title = "La donna nella russia di pietro"
     query = 'donne'
-    db.add_book(doc_type='book', body=dict(title=title, language='it'))
+    db.add_book(doc_type='book', body=dict(title=title, _language='it'))
     for phrase in title, query:
         pprint(db.es.indices.analyze(index=db.index_name,
                                      body=phrase,
                                      analyzer='it_analyzer')['tokens'])
     db.es.indices.refresh(index=db.index_name)
 
-    res = db._search(db._get_search_field('text_it', query))
+    res = db._search(db._get_search_field('_text_it', query))
     eq_(res['hits']['total'], 1)
 
 
@@ -48,7 +48,7 @@ def test_fts_it_plural():
     title = "La donna nella russia di pietro"
     query = 'donne'
     wrong_query = 'donato'
-    db.add_book(doc_type='book', body=dict(title=title, language='it'))
+    db.add_book(doc_type='book', body=dict(title=title, _language='it'))
     for phrase in title, query:
         pprint(db.es.indices.analyze(index=db.index_name,
                                      body=phrase,
@@ -67,17 +67,17 @@ def test_fts_en_manual():
     title = 'Living with cats'
     query = 'live'
     wrong_query = 'love'
-    db.add_book(doc_type='book', body=dict(title=title, language='en'))
+    db.add_book(doc_type='book', body=dict(title=title, _language='en'))
     for phrase in title, query, wrong_query:
         pprint(db.es.indices.analyze(index=db.index_name,
                                      body=phrase,
                                      analyzer='english')['tokens'])
     db.es.indices.refresh(index=db.index_name)
-    res = db._search(db._get_search_field('text_en', 'living'))
+    res = db._search(db._get_search_field('_text_en', 'living'))
     eq_(res['hits']['total'], 1)
-    res = db._search(db._get_search_field('text_en', wrong_query))
+    res = db._search(db._get_search_field('_text_en', wrong_query))
     eq_(res['hits']['total'], 0)
-    res = db._search(db._get_search_field('text_en', query))
+    res = db._search(db._get_search_field('_text_en', query))
     eq_(res['hits']['total'], 1)
 
 
@@ -87,7 +87,7 @@ def test_fts_en_verbs():
     title = 'Living with cats'
     query = 'live'
     wrong_query = 'love'
-    db.add_book(doc_type='book', body=dict(title=title, language='en'))
+    db.add_book(doc_type='book', body=dict(title=title, _language='en'))
     for phrase in title, query, wrong_query:
         pprint(db.es.indices.analyze(index=db.index_name,
                                      body=phrase,
@@ -107,7 +107,7 @@ def test_fts_en_plural():
     title = 'Bugs are not ok, with unit testing'
     query = 'bug'
     wrong_query = 'buggy'
-    db.add_book(doc_type='book', body=dict(title=title, language='en'))
+    db.add_book(doc_type='book', body=dict(title=title, _language='en'))
     for phrase in title, query, wrong_query:
         pprint(db.es.indices.analyze(index=db.index_name,
                                      body=phrase,

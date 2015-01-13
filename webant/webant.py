@@ -155,7 +155,10 @@ def create_app(configfile=None):
 
     @app.route('/view/<bookid>')
     def view_book(bookid):
-        b = get_db().get_book_by_id(bookid)
+        try:        
+             b = get_db().get_book_by_id(bookid)
+        except NotFoundError, e:
+             return renderErrorPage(message='no element found with id "{}"'.format(bookid), httpCode=404)
         similar = get_db().mlt(bookid)['hits']['hits'][:10]
         return render_template('details.html',
                                book=b['_source'], bookid=bookid,

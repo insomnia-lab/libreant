@@ -94,6 +94,30 @@ def create_app(configfile=None):
     def get_locale():
      return request.accept_languages.best_match(['en','it','sq'])   
 
+    def reuqestedFormat(acceptedFormat):
+        """Return the response format requested by client
+
+        Client could specify requested format using:
+        (options are processed in this order)
+            - `format` field in http request
+            - `Accept` header in http request
+        Example:
+            chooseFormat(['text/html','application/json'])
+        Args:
+            acceptedFormat: list containing all the accepted format
+        Returns:
+            string: the user requested mime-type (if supported)
+        Raises:
+            ValueError: if user request a mime-type not supported
+        """
+        if 'format' in request.args:
+            fieldFormat = request.args.get('format')
+            if fieldFormat not in acceptedFormat:
+                raise ValueError("requested format not supported")
+            return fieldFormat
+        else:
+            return request.accept_mimetypes.best_match(acceptedFormat)
+
     return app
 
 def main():

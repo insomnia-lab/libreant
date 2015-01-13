@@ -164,9 +164,22 @@ def create_app(configfile=None):
                                book=b['_source'], bookid=bookid,
                                similar=similar)
 
-    @app.route('/download/<bookid>/<fname>')
-    def download_book(bookid, fname):
-        raise NotImplementedError()
+    @app.route('/download/<bookid>/<fileid>')
+    def download_book(bookid, fileid):
+        try:        
+            b = get_db().get_book_by_id(bookid)
+        except NotFoundError, e:
+            return renderErrorPage(message='no element found with id "{}"'.format(bookid), httpCode=404)
+        if '_files' not in b['_source']:
+            return renderErrorPage(message='element with id "{}" has no files attached'.format(bookid), httpCode=404)
+        for file in b['_source']['_files']:
+            if file['digest'] == fileid:
+                return send_file(fsdb.getFilePath(fileid),
+                                  mimetype=file['mime'],
+                                  attachment_filename=file['name'],
+                                  as_attachment=True)
+        # no file found with the given digest
+        return renderErrorPage(message='no file found with id "{}" on item "{}"'.format(fileid, bookid), httpCode=404)
 
     @babel.localeselector
     def get_locale():

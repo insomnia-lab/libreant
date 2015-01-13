@@ -49,6 +49,8 @@ class DB(object):
     def setup_db(self):
         maps = {
             'book': {  # this need to be the document type!
+                "_timestamp" : { "enabled" : "true",
+                                 "store": "yes"},
                 "properties": {
                     "_text_en": {
                         "type": "string",
@@ -128,6 +130,11 @@ class DB(object):
 
     def get_all_books(self):
         return self._search({})
+
+    def get_last_inserted(self, size=30):
+        query = { "query" : { "match_all" : {} },
+                  "sort" : [ {"_timestamp": "desc"} ] }
+        return self._search(body=query, size=size)
 
     def get_books_simplequery(self, query):
         return self._search(self._get_search_field('_all', query))

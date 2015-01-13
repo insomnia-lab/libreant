@@ -1,0 +1,18 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/fixes.html" as fixes %}
+
+{% block title %}
+Libreant | {%trans%}Error{%endtrans%} {{ code }}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <br><br><br>
+    <div class='row'><div class='col-xs-12  col-sm-offset-1 col-sm-10  col-md-offset-2 col-md-8 col-lg-offset-3 col-lg-6'>
+        <div class='alert alert-danger' role='alert'>
+            <p class='text-center'><strong>{%trans%}Error{%endtrans%} {{ code }}</strong></p>
+            <p class='text-center'>{{ message }}</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -125,6 +125,9 @@ def create_app(configfile=None):
     return app
 
 
+def renderErrorPage(message, httpCode):
+    return render_template('error.html', message=message, code=httpCode), httpCode
+
 def main():
     app = create_app()
     gevent_run(app)

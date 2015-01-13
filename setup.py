@@ -47,7 +47,7 @@ setup(name='libreant',
       author='boyska',
       author_email='piuttosto@logorroici.org',
       license='AGPL',
-      packages=['libreantdb', 'webant'],
+      packages=['libreantdb', 'webant', 'webant.presets'],
       install_requires=[
           'gevent',
           'elasticsearch',
@@ -56,7 +56,7 @@ setup(name='libreant',
           'flask-appconfig',
           'Flask',
           'opensearch',
-          'wtforms'
+          'Fsdb'
       ],
       include_package_data=True,
       tests_require=['nose'],

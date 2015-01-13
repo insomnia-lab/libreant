@@ -49,6 +49,9 @@ class DB(object):
     def setup_db(self):
         maps = {
             'book': {  # this need to be the document type!
+                # special elasticsearch field
+                # http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/mapping-timestamp-field.html
+                # initialized with element creation date, hidden by default in query result
                 "_timestamp" : { "enabled" : "true",
                                  "store": "yes"},
                 "properties": {

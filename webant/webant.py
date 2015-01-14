@@ -8,6 +8,8 @@ import logging
 
 from libreantdb import DB
 from agherant import agherant
+from webserver_utils import gevent_run
+
 
 def initLoggers():
     streamHandler = logging.StreamHandler()
@@ -121,19 +123,8 @@ def create_app(configfile=None):
 
 
 def main():
-    from gevent.wsgi import WSGIServer
-    import gevent.monkey
-    from werkzeug.debug import DebuggedApplication
-    from werkzeug.serving import run_with_reloader
-    gevent.monkey.patch_socket()
     app = create_app()
-    if app.config['DEBUG']:
-        app = DebuggedApplication(app)
-
-    @run_with_reloader
-    def run_server():
-        http_server = WSGIServer(('', 5000), app)
-        http_server.serve_forever()
+    gevent_run(app)
 
 if __name__ == '__main__':
     main()

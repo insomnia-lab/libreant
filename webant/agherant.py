@@ -1,7 +1,7 @@
 from itertools import chain
 
 from flask import Blueprint, render_template, abort, request, Response, \
-    current_app
+    current_app, url_for
 from opensearch import Client
 
 agherant = Blueprint('agherant', __name__)
@@ -24,6 +24,11 @@ def search():
 
 
 def aggregate(descriptions, query):
+    def autoreplace(description_url):
+        if description_url == 'SELF':
+            return url_for('description', _external=True)
+        return description_url
+    descriptions = map(autoreplace, descriptions)
     clients = map(Client, descriptions)
     results = map(lambda c: c.search(query), clients)
     results = list(chain(*results))

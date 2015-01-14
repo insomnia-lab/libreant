@@ -66,7 +66,10 @@ setup(name='libreant',
                 'install_lib': install_lib,
                 'develop':develop,
                 'compileTranslations': compileTranslations },
-      entry_points={'console_scripts': ['webant=webant.webant:main'] },
+      entry_points={'console_scripts': [
+          'webant=webant.webant:main',
+          'agherant=webant.agherant_standalone:main'
+      ] },
       classifiers=[
                   "Framework :: Flask",
                   "License :: OSI Approved :: GNU Affero General Public License v3",

@@ -14,12 +14,14 @@ from webserver_utils import gevent_run
 def initLoggers():
     streamHandler = logging.StreamHandler()
     streamHandler.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     streamHandler.setFormatter(formatter)
 
     loggers = [logging.getLogger('webant')]
     for logger in loggers:
         logger.addHandler(streamHandler)
+
 
 def create_app(configfile=None):
     initLoggers()
@@ -32,7 +34,8 @@ def create_app(configfile=None):
         'SECRET_KEY': 'really insecure, please change me!'
     })
     AppConfig(app, configfile, default_settings=False)
-    app.register_blueprint(agherant, url_prefix='/agherant')
+    if app.config['AGHERANT_DESCRIPTIONS']:
+        app.register_blueprint(agherant, url_prefix='/agherant')
     Bootstrap(app)
     babel = Babel(app)
     presetManager = PresetManager(app.config['PRESET_PATHS'])

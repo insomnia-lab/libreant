@@ -2,9 +2,12 @@ from itertools import chain
 
 from flask import Blueprint, render_template, abort, request, Response, \
     current_app, url_for
-from opensearch import Client
+import opensearch
+
+from utils import memoize
 
 agherant = Blueprint('agherant', __name__)
+Client = memoize(opensearch.Client)
 
 
 @agherant.route('/search')

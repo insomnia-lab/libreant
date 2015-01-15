@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, abort, Response, redirect, url_for, send_file
 from werkzeug import secure_filename
+from utils import requestedFormat
 from flask_bootstrap import Bootstrap
 from flask_appconfig import AppConfig
 from elasticsearch import Elasticsearch, NotFoundError
@@ -79,11 +80,14 @@ def create_app(configfile=None):
             src['_id'] = b['_id']
             src['_score'] = b['_score']
             books.append(src)
-        format = reuqestedFormat(['text/html','application/opensearchdescription+xml','opensearch'])
+        format = requestedFormat( request,
+                                  ['text/html',
+                                   'text/xml',
+                                   'application/rss+xml',
+                                   'opensearch'])
         if format == 'text/html':
             return render_template('search.html', books=books, query=query)
-        if format == 'application/opensearchdescription+xml' or\
-           format == 'opensearch':
+        if format in ['opensearch', 'text/xml','application/rss+xml']:
             return Response(render_template('opens.xml',
                                             books=books, query=query),
                             mimetype='text/xml')
@@ -184,30 +188,6 @@ def create_app(configfile=None):
     @babel.localeselector
     def get_locale():
         return request.accept_languages.best_match(['en', 'it', 'sq'])
-
-    def reuqestedFormat(acceptedFormat):
-        """Return the response format requested by client
-
-        Client could specify requested format using:
-        (options are processed in this order)
-            - `format` field in http request
-            - `Accept` header in http request
-        Example:
-            chooseFormat(['text/html','application/json'])
-        Args:
-            acceptedFormat: list containing all the accepted format
-        Returns:
-            string: the user requested mime-type (if supported)
-        Raises:
-            ValueError: if user request a mime-type not supported
-        """
-        if 'format' in request.args:
-            fieldFormat = request.args.get('format')
-            if fieldFormat not in acceptedFormat:
-                raise ValueError("requested format not supported: "+ fieldFormat)
-            return fieldFormat
-        else:
-            return request.accept_mimetypes.best_match(acceptedFormat)
 
     return app
 

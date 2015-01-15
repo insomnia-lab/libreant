@@ -4,7 +4,7 @@ from flask import Blueprint, render_template, abort, request, Response, \
     current_app, url_for
 import opensearch
 
-from utils import memoize
+from utils import memoize, requestedFormat
 
 agherant = Blueprint('agherant', __name__)
 Client = memoize(opensearch.Client)
@@ -16,10 +16,14 @@ def search():
     if query is None:
         abort(400, "No query given")
     books = aggregate(current_app.config['AGHERANT_DESCRIPTIONS'], query)
-    format = request.args.get('format', 'html')
-    if format == 'html':
+    format = requestedFormat(request,
+                             ['text/html',
+                             'text/xml',
+                             'application/rss+xml',
+                             'opensearch'])
+    if format == 'text/html':
         return render_template('os_search.html', books=books, query=query)
-    if format == 'opensearch':
+    if format in ['opensearch', 'text/xml','application/rss+xml']:
         return Response(render_template('os_opens.xml', books=books,
                                         query=query),
                         mimetype='text/xml')

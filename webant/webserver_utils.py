@@ -9,10 +9,14 @@ def gevent_run(app):
     from werkzeug.debug import DebuggedApplication
     from werkzeug.serving import run_with_reloader
     gevent.monkey.patch_socket()
+    run_app = app
     if app.config['DEBUG']:
-        app = DebuggedApplication(app)
+        run_app = DebuggedApplication(app)
 
     @run_with_reloader
     def run_server():
-        http_server = WSGIServer(('', 5000), app)
+        port = int(app.config.get('PORT', 5000))
+        address = app.config.get('ADDRESS', '')
+        print('Listening on http://%s:%d/' % (address or '0.0.0.0', port))
+        http_server = WSGIServer((address, port), run_app)
         http_server.serve_forever()

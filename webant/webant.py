@@ -63,15 +63,14 @@ def create_app(configfile=None):
             src = b['_source']
             src['_id'] = b['_id']
             books.append(src)
-        format = request.args.get('format', 'html')
-        if format == 'html':
+        format = reuqestedFormat(['text/html','application/opensearchdescription+xml','opensearch'])
+        if format == 'text/html':
             return render_template('search.html', books=books, query=query)
-        if format == 'opensearch':
+        if format == 'application/opensearchdescription+xml' or\
+           format == 'opensearch':
             return Response(render_template('opens.xml',
                                             books=books, query=query),
                             mimetype='text/xml')
-
-        abort(400, "Wrong format")
 
     @app.route('/description.xml')
     def description():
@@ -93,6 +92,30 @@ def create_app(configfile=None):
     @babel.localeselector
     def get_locale():
      return request.accept_languages.best_match(['en','it','sq'])   
+
+    def reuqestedFormat(acceptedFormat):
+        """Return the response format requested by client
+
+        Client could specify requested format using:
+        (options are processed in this order)
+            - `format` field in http request
+            - `Accept` header in http request
+        Example:
+            chooseFormat(['text/html','application/json'])
+        Args:
+            acceptedFormat: list containing all the accepted format
+        Returns:
+            string: the user requested mime-type (if supported)
+        Raises:
+            ValueError: if user request a mime-type not supported
+        """
+        if 'format' in request.args:
+            fieldFormat = request.args.get('format')
+            if fieldFormat not in acceptedFormat:
+                raise ValueError("requested format not supported: "+ fieldFormat)
+            return fieldFormat
+        else:
+            return request.accept_mimetypes.best_match(acceptedFormat)
 
     return app
 

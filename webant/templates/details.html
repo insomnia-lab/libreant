@@ -41,6 +41,7 @@
 		</tbody>
 	</table>
 
+	{% if similar %}
 	<h3>{%trans%}Similar books{%endtrans%}</h3>
 	<table class="table table-striped"> <!-- definitely should not be formatted like this! -->
 		<tbody>
@@ -55,5 +56,6 @@
 			{% endfor %}
 		</tbody>
 	</table>
+	{% endif %}
 </article>
 {% endblock content %}

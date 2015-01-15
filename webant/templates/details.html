@@ -1,61 +1,79 @@
 {% extends "bootstrap/base.html" %}
 {% import "bootstrap/fixes.html" as fixes %}
 
+{% block title %}
+Libreant | {{ book['title'] if 'title' in book else bookid }}
+{% endblock %}
+
+{% block navbar %}
+{% import 'navbar.html' as navbar %}
+{{navbar.navbar()}}
+{% endblock %}
+
 {% block content %}
 
-<header>
-	<h1>{{ book['title'] }}
-		<small>{{ book['actors'] | sort | join(',') }}</small>
-	</h1>
-</header>
-
-<article>
-	{% if '_files' in book %}
-	<h3>{%trans%}Download{%endtrans%}</h3>
-	<ul>
-		{% for file in  book['_files'] %}
-		<li><a href="{{
-			url_for('download_book', bookid=bookid, fname=file['path'])
-			}}">{{ file['path'] }}</a> ({{file['notes']}})
-		</li>
-		{% endfor %}
-	</ul>
-	{% endif %}
-
-	<h3>{%trans%}Details{%endtrans%}</h3>
-	<table class="table table-striped">
-		<thead>
-			<tr>
-				<th>{%trans%}Field{%endtrans%}</th>
-				<th>{%trans%}Value{%endtrans%}</th>
-			</tr>
-		</thead>
-		<tbody>
-
-		{% for key in book %}
-		<tr>
-			<td>{{ key }}</td>
-			<td>{{ book[key] }}</td>
-		</tr>
-		{% endfor %}
-		</tbody>
-	</table>
-
-	{% if similar %}
-	<h3>{%trans%}Similar books{%endtrans%}</h3>
-	<table class="table table-striped"> <!-- definitely should not be formatted like this! -->
-		<tbody>
-			{% for book in similar %}
-			<tr>
-				<td><a href="{{url_for('view_book',
-				bookid=book['_id'])}}">
-				{{ book['_source']['title'] }}
-					</a></td>
-				<td>{{ book['_source']['actors'] | join(',') }}</td>
-			</tr>
-			{% endfor %}
-		</tbody>
-	</table>
-	{% endif %}
-</article>
+<div class="container">
+    <header class="page-header" style="margin-top:0px">
+	    <h1>{{ book['title'] if 'title' in book else bookid }}
+		    <small>{{ book['actors'] | sort | join(',') }}</small>
+	    </h1>
+    </header>
+     {% if '_files' in book %}
+        {% for file in  book['_files'] %}
+             <a class="btn btn-default" href="{{ url_for('download_book', bookid=bookid, fileid=file['digest']) }}">
+                <div class="row" style="display: flex; align-items: center;">
+                    <div class="col-xs-1">
+                        <span class="glyphicon glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+                    </div>
+                    <div class="col-xs-11">
+                        <strong>{{ file['name'] }}</strong>
+                        <p style="margin-bottom: 0px">{{ file['size'] | filesizeformat() }}</p>
+                    </div>
+                </div>
+             </a>
+        {% endfor %}
+    <br>
+    <br>
+    {% endif %}
+    
+    <article>
+        <h4>{%trans%}Details{%endtrans%}</h4>
+        <table class="table table-striped">
+	        <thead>
+		        <tr>
+			        <th>{%trans%}Field{%endtrans%}</th>
+			        <th>{%trans%}Value{%endtrans%}</th>
+		        </tr>
+	        </thead>
+	        <tbody>
+	        {% for key in book %}
+                {% if not key.startswith('_') %}
+	            <tr>
+		            <td>{{ key }}</td>
+		            <td>{{ book[key] }}</td>
+	            </tr>
+                {% endif %}
+	        {% endfor %}
+	        </tbody>
+        </table>
+        <br>
+        <br>
+        {% if similar %}
+        <h3>{%trans%}Similar books{%endtrans%}</h3>
+        <table class="table table-striped"> <!-- definitely should not be formatted like this! -->
+	        <tbody>
+		        {% for book in similar %}
+		        <tr>
+			        <td><a href="{{url_for('view_book',
+			        bookid=book['_id'])}}">
+			        {{ book['_source']['title'] }}
+				        </a></td>
+			        <td>{{ book['_source']['actors'] | join(',') }}</td>
+		        </tr>
+		        {% endfor %}
+	        </tbody>
+        </table>
+        {% endif %}
+    </article>
+<div class="container">
 {% endblock content %}

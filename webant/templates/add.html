@@ -1,0 +1,325 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/fixes.html" as fixes %}
+
+{% block title %}
+Libreant | {%trans%}Add new{%endtrans%} {{ preset.id if preset else "item"}}
+{% endblock %}
+
+{% block navbar %}
+{% import 'navbar.html' as navbar %}
+{{navbar.navbar()}}
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        
+        <header><center><h1>{%trans%}Add new{%endtrans%} {{ preset.id if preset else "item"}}</h1></center></header>
+        <br>
+        <form id="mega-form" class="form-horizontal" method="POST" action="/add" onsubmit="return validateForm()" enctype="multipart/form-data">
+            
+            {% if availablePresets | length != 0 %}            
+            <div class="form-group">
+                <div class="col-xs-6 col-xs-offset-6 col-sm-4 col-sm-offset-8 col-md-3 col-md-offset-9" align="right">
+                    <div class="input-group">
+                        <label class="input-group-addon" for="presetSelect">Preset</label>
+                        <select id="presetSelect" class="form-control" onchange="presetChangeListener()">
+                            <option value="None" {{ "selected" if not preset }}>generic</option>
+                            {% for id in availablePresets.keys() %}
+                            <option value="{{ id }}" {{ "selected" if  id == preset.id }}>{{ id }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="form-group">
+                <div class="col-sm-12">
+                    <div class="input-group">
+                        <label class="input-group-addon" for="title">{%trans%}Language{%endtrans%}</label>  
+                        <select id="language" name="_language" placeholder="Language" class="form-control" type="text" required>
+                            <option value="" disabled selected>{%trans%}Select a language{%endtrans%}</option>
+                            {% for lang in isoLangs %}
+                            <option value="{{ lang['code'] }}">{{ lang['name']}}</option>
+                            {% endfor %}
+                        </select>
+                        <span class="glyphicon glyphicon-info-sign input-group-addon"
+                        tabindex="-1" data-trigger="focus" data-placement="auto right" data-toggle="popover" 
+                        title="{%trans%}Description{%endtrans%}"  
+                        aria-label="{%trans%}Field description{%endtrans%}" 
+                        data-content="{%trans%}This is the language that you are using to fill this form.{%endtrans%}"></span>  
+                    </div>
+                </div>
+            </div>
+
+            {% if preset %}
+            {% for key in preset.properties.keys() %}
+            <div class="form-group">
+                <div class="col-sm-12">
+                    <div class="input-group">
+                        <label class="input-group-addon" for="title">{{ key }}</label>
+                        <input id="{{ key }}" name="field_{{ key }}" placeholder="{{ key }}" class="form-control" type="text" {% if preset.properties[key]['required'] == True %} required {% endif %}>
+                        {% if preset.properties[key]['description'] %}
+                        <span class="glyphicon glyphicon-info-sign input-group-addon"
+                        tabindex="-1" data-trigger="focus" data-placement="auto right" data-toggle="popover"
+                        title="{%trans%}Description{%endtrans%}"
+                        aria-label="{%trans%}Field description{%endtrans%}"
+                        data-content="{{ preset.properties[key]['description'] }}"/>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% endif %}
+        
+            <br>
+
+            {% if not preset or preset.allowUpload %}
+            <div id="files-div">
+                <div id="files-array"></div>
+                
+                <div class="form-group" style="margin-top:-10px">
+                    <div class="col-xs-12" align="right">
+                        <span id="file-minus-button" onClick="removeFileForm()" style="margin-right: 5px; display: none;" data-toggle="tooltip" data-trigger="hover" data-placement="auto left" 
+                           title="remove last file" class="glyphicon glyphicon glyphicon-minus"></span>
+                        <span id="file-plus-button" onClick="addFileForm(true)" style="margin-right: 10px" data-toggle="tooltip" data-trigger="hover" data-placement="auto left" title="add another file" class="glyphicon glyphicon glyphicon-plus"></span>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <br>
+
+            <div id="custom-fields-div">
+                <div id="custom-fields-array"></div>
+                <div class="form-group" style="margin-top:-10px">
+                    <div class="col-xs-12" align="right">
+                        <span id="custom-fields-minus-button" onClick="removeCustomField()" style="margin-right: 5px; display: none;" data-toggle="tooltip" data-trigger="hover" data-placement="auto left" 
+                           title="remove last custom field" class="glyphicon glyphicon glyphicon-minus"></span>
+                        <span id="custom-fields-plus-button" onClick="addCustomField(true)" style="margin-right: 10px" data-toggle="tooltip" data-trigger="hover" data-placement="auto left" title="add another custom field" class="glyphicon glyphicon glyphicon-plus"></span>       
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group" align="center">
+                <button id="clear" class="btn btn-danger" onClick='resetForm()' type="button" >{%trans%}Reset{%endtrans%}</button>
+                <button id="submit_button" class="btn btn-primary" type="submit">{%trans%}Add{%endtrans%}</button>
+            </div>
+
+        </form>
+    </div>
+{% endblock %}
+{% block scripts %}
+{{ super() }}
+<script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap-filestyle.min.js') }}"></script>
+<script>
+   
+    fileForm='\
+        <div class="form-group file-form">\
+            <div class="col-sm-12">\
+                <div class="panel panel-default" style="margin-bottom: 0px">\
+                    <div class="panel-body" style="padding: 8px">\
+                        <input class="file" type="file" buttonText="{%trans%}Choose file{%endtrans%}">\
+                        <div class="input-group" style="margin-top: 8px">\
+                            <input class="form-control file-notes" placeholder="file notes"  type="text">\
+                            <span class="glyphicon glyphicon-info-sign input-group-addon"\
+                            tabindex="-1" data-trigger="focus" data-placement="auto right" data-toggle="popover"\
+                            title="{%trans%}Description{%endtrans%}"\
+                            aria-label="{%trans%}Field description{%endtrans%}"\
+                            data-content="{%trans%} Here you can insert specific info about this file.{%endtrans%}"/>\
+                        </div>\
+                    </div>\
+                </div>\
+            </div>\
+        </div>';
+
+    customFieldForm='\
+        <div class="form-group custom-field-form">\
+            <div class="col-xs-3">\
+                <input class="form-control custom-key" placeholder="{%trans%}custom key{%endtrans%}" type="text">\
+            </div>\
+            <div class="col-xs-9">\
+                <input class="form-control custom-value" placeholder="{%trans%}custom value{%endtrans%}" type="text">\
+            </div>\
+        </div>';
+    
+    customFieldAlert=
+        '<div class="alert alert-warning alert-dismissible" role="alert" id="alert">\
+            <button type="button" class="close" data-dismiss="alert" aria-label="{%trans%}close{%endtrans%}"><span aria-hidden="true">&times;</span></button>\
+            {%trans%}With these additional fields you can add more information to your item.<br>\
+            In the form on the left you need to enter a keyword that identifies the\
+            attribute that you go to put in the form on the right.<br>\
+            For example, you can add information about the type of cover of a book\
+            in this way: "key: cover", "value: rigid".{%endtrans%}\
+        </div>';
+
+    
+    /********* Initialization *********/
+    addFileForm(false)
+    addCustomField(false)
+    $('[data-toggle="tooltip"]').tooltip();
+    initializePopover();
+    /******* End Initialization *******/
+
+
+    function initializePopover(){
+        $('[data-toggle="popover"]').popover();
+    }
+
+
+    /*********  file form stuff **********/
+    function updateFileMinusButton(){
+        if( $('#files-array .file-form').length > 1 )
+            $('#file-minus-button').show();
+        else
+            $('#file-minus-button').hide();
+    }
+
+    function addFileForm(animation){
+        newFileForm = $( fileForm );
+        newFileForm.find(' .file').filestyle();
+        if(animation){
+            newFileForm.hide();
+            $('#files-array').append(newFileForm);
+            newFileForm.slideDown('fast');        
+        }else    
+            $('#files-array').append(newFileForm);
+        initializePopover();
+        updateFileMinusButton();
+    }
+    
+    function removeFileForm(){
+        $('#files-array .file-form:last').slideUp('fast', function (){
+                this.remove();
+                updateFileMinusButton();           
+            });
+    }
+    
+    function resetFileForms(){   
+        $('#files-array .file-form').each(function( index ) {
+                if(index != 0){
+                    this.remove();
+                    updateFileMinusButton();
+                }  
+            });        
+    }
+    
+    /*
+    * set name attribute on all file and file_note elements 
+    * only if a file was choosen for the specific form.
+    */
+    function setNameOnFileForms(){
+        i = 0;
+        $('#files-array .file-form').each(function( index ) {
+            file = $(this).find('.file');            
+            if( file.prop('value') ){
+                file.attr('name','file_'+i);
+                $(this).find(' .file-notes').attr('name','file_'+i+'_notes');
+                i++;
+            }
+        });
+    }
+    /*********  end file form stuff **********/
+
+
+    /*********  custom fields stuff **********/
+
+    function updateCustomFieldMinusButton(){
+        if( $('#custom-fields-array .custom-field-form').length > 1 )
+            $('#custom-fields-minus-button').show();
+        else
+            $('#custom-fields-minus-button').hide();
+    }    
+
+    function addCustomField(animation) {
+        
+        //TODO show help allert only the first time
+
+        newCustomField = $(customFieldForm)
+        if(animation){
+            newCustomField.hide();
+            $('#custom-fields-array').append(newCustomField);
+            newCustomField.slideDown('fast');
+        }else{
+            $('#custom-fields-array').append(newCustomField)
+        }
+        initializePopover();
+        updateCustomFieldMinusButton();
+    }
+
+    function removeCustomField(animation) {
+         $('#custom-fields-array .custom-field-form:last').slideUp('fast', function (){
+                this.remove();
+                updateCustomFieldMinusButton();           
+            });
+    }
+    
+    function resetCustomFiledForms(){   
+        $('#custom-fields-array .custom-field-form').each(function( index ) {
+                if(index != 0){
+                    this.remove();
+                    updateCustomFieldMinusButton();
+                }  
+            });        
+    }
+    
+    /*
+    * set name attribute on all custom key-value  
+    * only if a key and a value was choosen for the specific custom field.
+    */
+    function setNameOnCustomFieldForms(){
+        $('#custom-fields-array .custom-field-form').each(function( index ) {
+            key = $(this).find('.custom-key');
+            value = $(this).find('.custom-value');          
+            if( key.prop('value') && value.prop('value') ){
+                value.attr('name','field_'+key.prop('value'));
+            }
+        });
+    }
+    /*********  end custom fields stuff **********/
+
+    
+    /********* preset selector stuff ************/    
+
+    function setNameOnPresetSelect(){
+        presetSelect = document.getElementById('presetSelect');
+        if( presetSelect && presetSelect.selectedIndex != 0 )
+            presetSelect.setAttribute("name", '_preset');    
+    }
+    
+    function presetChangeListener(){
+        presetSelect = document.getElementById('presetSelect');
+        if(presetSelect.selectedIndex == 0)
+            window.open("?","_self",true);
+        else{
+            selected = presetSelect.options[presetSelect.selectedIndex].value;
+            window.open("?preset="+selected,"_self",true);
+        }
+    }
+    
+    /********* end preset selector stuff ************/
+
+
+
+    function validateForm(){
+        //send custom field only if they was filled 
+        setNameOnCustomFieldForms();
+        
+        //send file info only if a file was choosen
+        setNameOnFileForms();
+        
+        //add preset if choosen
+        setNameOnPresetSelect();
+
+        return true;
+    }
+
+    function resetForm(){
+        resetFileForms();
+        resetCustomFiledForms();
+        $('#mega-form')[0].reset();
+    }
+
+</script>
+{%endblock%}
+

@@ -174,8 +174,9 @@ def create_app(configfile=None):
             return renderErrorPage(message='no element found with id "{}"'.format(bookid), httpCode=404)
         if '_files' not in b['_source']:
             return renderErrorPage(message='element with id "{}" has no files attached'.format(bookid), httpCode=404)
-        for file in b['_source']['_files']:
+        for i,file in enumerate(b['_source']['_files']):
             if file['sha1'] == fileid:
+                get_db().increment_download_count(bookid,i)
                 return send_file(fsdb.getFilePath(file['fsdb_id']),
                                   mimetype=file['mime'],
                                   attachment_filename=file['name'],

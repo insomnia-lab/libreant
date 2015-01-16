@@ -5,7 +5,7 @@
    <Tags>example web</Tags>
    <Contact>admin@example.com</Contact>
    <Url type="application/rss+xml"
-        template="{{ request.scheme }}://{{request.host}}{{url_for('search',format='application/opensearchdescription+xml') |e }}&amp;q={searchTerms}"/>
+        template="{{ request.scheme }}://{{request.host}}{{url_for('search',format='application/rss+xml') |e }}&amp;q={searchTerms}"/>
    <Url type="text/html" 
         template="{{ request.scheme }}://{{request.host}}{{url_for('search',format='text/html') |e }}&amp;q={searchTerms}"/>
    <OutputEncoding>UTF-8</OutputEncoding>

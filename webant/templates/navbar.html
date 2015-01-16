@@ -1,4 +1,4 @@
-{% macro navbar(search=True) %}
+{% macro navbar(search=True,search_query="") %}
 <nav class="navbar navbar-default">
     <div class="container-fluid">
         
@@ -18,7 +18,7 @@
             </ul>
             {% if search %}
             <form class="navbar-form navbar-left" action="{{url_for('search')}}">
-                <input class="form-control col-lg-8" placeholder="Search" type="text" id="search" name="q">
+                <input class="form-control col-lg-8" placeholder="Search" type="text" id="search" name="q" value="{{ search_query }}">
             </form>
             {% endif %}
         </div><!-- /.navbar-collapse -->

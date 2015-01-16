@@ -36,6 +36,7 @@ def create_app(configfile=None):
         'BOOTSTRAP_SERVE_LOCAL': True,
         'DEBUG': True,
         'PRESET_PATHS': [], #TODO defaultPreset should be loaded as default?
+        'FSDB_PATH': "",
         'AGHERANT_DESCRIPTIONS': [],
         'SECRET_KEY': 'really insecure, please change me!'
     })
@@ -48,8 +49,14 @@ def create_app(configfile=None):
 
     presetManager = PresetManager(app.config['PRESET_PATHS'])
 
-    #TODO change fsdb path
-    fsdb = Fsdb("/tmp/fsdbRoot")
+    if not app.config['FSDB_PATH']:
+        if not app.config['DEBUG']:
+            raise ValueError('FSDB_PATH cannot be empty')
+        else:
+            fsdbPath = os.path.join(tempfile.gettempdir(),'libreant_fsdb')
+            fsdb = Fsdb(fsdbPath)
+    else:
+        fsdb = Fsdb(app.config['FSDB_PATH'])
 
     app._db = None
 

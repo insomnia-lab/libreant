@@ -131,12 +131,14 @@ def create_app(configfile=None):
             fileInfo['size'] = os.path.getsize(tmpFilePath)
             fileInfo['mime'] = upFile.mimetype
             fileInfo['notes'] = request.form[upName+'_notes']
-            digest = fsdb.add(tmpFilePath)
+            fileInfo['sha1'] = Fsdb.fileDigest(tmpFilePath, algorithm="sha1")
+            fileInfo['download_count'] = 0
+            fsdb_id = fsdb.add(tmpFilePath)
             # close and delete tmpFile
             os.close(tmpFile)
             os.remove(tmpFilePath)
 
-            fileInfo['digest'] = digest
+            fileInfo['fsdb_id'] = fsdb_id
             files.append(fileInfo)
 
         if len(files) > 0:
@@ -183,9 +185,10 @@ def create_app(configfile=None):
             return renderErrorPage(message='no element found with id "{}"'.format(bookid), httpCode=404)
         if '_files' not in b['_source']:
             return renderErrorPage(message='element with id "{}" has no files attached'.format(bookid), httpCode=404)
-        for file in b['_source']['_files']:
-            if file['digest'] == fileid:
-                return send_file(fsdb.getFilePath(fileid),
+        for i,file in enumerate(b['_source']['_files']):
+            if file['sha1'] == fileid:
+                get_db().increment_download_count(bookid,i)
+                return send_file(fsdb.getFilePath(file['fsdb_id']),
                                   mimetype=file['mime'],
                                   attachment_filename=file['name'],
                                   as_attachment=True)

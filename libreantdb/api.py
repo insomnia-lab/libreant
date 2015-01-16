@@ -199,6 +199,14 @@ class DB(object):
         ret = self.es.update(index=self.index_name, id=id,
                              doc_type=doc_type, body={'doc': book})
         return ret
+    
+    def increment_download_count(self, id, fileIndex, doc_type='book'):
+        '''
+        Increment the download counter of a specific file 
+        '''
+        body = { 'script' : 'ctx._source._files[%i].download_count += 1' % fileIndex }
+        return self.es.update(index=self.index_name, id=id,
+                             doc_type=doc_type, body=body)
     # End operations }}}
 
 # vim: set fdm=marker fdl=1:

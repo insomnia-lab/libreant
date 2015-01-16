@@ -1,6 +1,15 @@
 {% extends "bootstrap/base.html" %}
 {% import "bootstrap/fixes.html" as fixes %}
 
+{% block title %}
+Libreant | {%trans%}Search{%endtrans%}: {{ query }}
+{% endblock %}
+
+{% block navbar %}
+{% import 'navbar.html' as navbar %}
+{{navbar.navbar(search=True, search_query=query)}}
+{% endblock %}
+
 {% block styles %}
 {{ super() }}
 <link href="{{ url_for('static', filename='search.css') }}" rel="stylesheet">

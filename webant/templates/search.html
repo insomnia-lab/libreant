@@ -37,8 +37,8 @@
         </div>
         <div class="col-xs-12 col-sm-5 col-md-4 col-lg-4">
             <ul class="meta-search">
-                {# TODO: default_locale.languages[b['language']] #}
-                <li><i class="glyphicon glyphicon-flag"></i> <span>{{ b['language'] }}</span></li>
+                {# TODO: default_locale.languages[b['_language']] #}
+                <li><i class="glyphicon glyphicon-flag"></i> <span>{{ b['_language'] }}</span></li>
                 {% if 'actors' in b %}
                 <li><i class="glyphicon glyphicon-user"></i> <span>{{ b['actors'] | join(',')}}</span></li>
                 {% endif %}

@@ -17,20 +17,19 @@ from agherant import agherant
 from webserver_utils import gevent_run
 
 
-def initLoggers():
-    streamHandler = logging.StreamHandler()
-    streamHandler.setLevel(logging.DEBUG)
-    formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    streamHandler.setFormatter(formatter)
-
-    loggers = [logging.getLogger('webant'),logging.getLogger('fsdb')]
-    for logger in loggers:
-        logger.addHandler(streamHandler)
-
-
 def create_app(configfile=None):
-    initLoggers()
+    def initLoggers():
+        logLvl = logging.DEBUG if app.config['DEBUG'] else logging.WARNING
+        streamHandler = logging.StreamHandler()
+        streamHandler.setLevel(logLvl)
+        formatter = logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        streamHandler.setFormatter(formatter)
+        loggers = [logging.getLogger('webant'),logging.getLogger('fsdb')]
+        for logger in loggers:
+            logger.setLevel(logLvl)
+            logger.addHandler(streamHandler)
+
     app = Flask("webant")
     app.config.update({
         'BOOTSTRAP_SERVE_LOCAL': True,
@@ -40,12 +39,12 @@ def create_app(configfile=None):
         'SECRET_KEY': 'really insecure, please change me!'
     })
     AppConfig(app, configfile, default_settings=False)
+    initLoggers()
 
     if app.config['AGHERANT_DESCRIPTIONS']:
         app.register_blueprint(agherant, url_prefix='/agherant')
     Bootstrap(app)
     babel = Babel(app)
-
     presetManager = PresetManager(app.config['PRESET_PATHS'])
 
     #TODO change fsdb path

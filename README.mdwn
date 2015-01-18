@@ -1,5 +1,8 @@
 LibreAnt
 ========
+[![License](https://pypip.in/license/libreant/badge.svg?style=flat)](https://pypi.python.org/pypi/libreant/)
+[![Development Status](https://pypip.in/status/libreant/badge.svg?style=flat)](https://pypi.python.org/pypi/libreant/)
+[![Latest Version](https://pypip.in/version/libreant/badge.svg?style=flat)](https://pypi.python.org/pypi/libreant/)
 
 This is libreant: a software to manage both your ebooks and your physical books.
 Its approach is:

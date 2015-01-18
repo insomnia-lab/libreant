@@ -76,5 +76,6 @@ setup(name='libreant',
                   "License :: OSI Approved :: GNU Affero General Public License v3",
                   "Operating System :: POSIX :: Linux",
                   "Programming Language :: Python :: 2"
+                  "Development Status :: 4 - Beta"
                   ]
       )

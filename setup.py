@@ -1,5 +1,7 @@
 import os
-from subprocess import call
+import sys
+import msgfmt
+from pprint import pprint
 
 from setuptools import setup
 from setuptools.command.install_lib import install_lib as _install_lib
@@ -9,35 +11,61 @@ from distutils.cmd import Command
 
 
 class compile_translations(Command):
-    description = 'compile message catalogs to MO files via pybabel command'
-    user_options = []
+    description = 'compile message catalogs to .mo files'
+    user_options = [('force', 'f', "compile also not updated message catalogs")]
+    boolean_options = ['force']
 
     def initialize_options(self):
-        pass
+        self.force = False
 
     def finalize_options(self):
         pass
 
     def run(self):
-            try:
-                call(["pybabel", "compile", "-d", "webant/translations", "-f"] )
-            except OSError, e:
-                print "WARNING: pybabel not already installed. skipping compilation of translation."
-                
+        """
+           Compile all message catalogs .mo files into .po files.
+           Skips not changed file based on source mtime.
+        """
+        # thanks to deluge guys ;)
+        po_dir = os.path.join(os.path.dirname(__file__), 'webant','translations')
+        print('Compiling po files from "{}"...'.format(po_dir))
+        for lang in os.listdir(po_dir):
+            sys.stdout.write("\tCompiling {}... ".format(lang))
+            sys.stdout.flush()
+            curr_lang_path = os.path.join(po_dir,lang)
+            for path, dirs, filenames in os.walk(curr_lang_path):
+                for f in filenames:
+                    if f.endswith('.po'):
+                        src = os.path.join(path, f)
+                        dst = os.path.join(path, f[:-3]+".mo")
+                        if not os.path.exists(dst) or self.force:
+                            msgfmt.make(src, dst)
+                            print("ok.")
+                        else:
+                            src_mtime = os.stat(src)[8]
+                            dst_mtime = os.stat(dst)[8]
+                            if src_mtime > dst_mtime:
+                                msgfmt.make(src, dst)
+                                print("ok.")
+                            else:
+                                print("already up to date.")
+        print('Finished compiling translation files.')
+
+
 class build(_build):
-    sub_commands =  _build.sub_commands + [('compile_translations', None)]
+    sub_commands =  [('compile_translations', None)] + _build.sub_commands
 
 
 class install_lib(_install_lib):
     def run(self):
-        _install_lib.run(self)
         self.run_command('compile_translations' )
+        _install_lib.run(self)
 
 
 class develop(_develop):
      def run(self):
-        _develop.run(self)
         self.run_command('compile_translations' )
+        _develop.run(self)
 
 
 def read(fname):

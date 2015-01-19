@@ -1,16 +1,16 @@
 import os
-import subprocess
+from subprocess import call
 
 from setuptools import setup
-
 from setuptools.command.install_lib import install_lib as _install_lib
 from setuptools.command.develop import develop as _develop
 from distutils.command.build import build as _build
 from distutils.cmd import Command
 
 
-class compileTranslations(Command):
+class compile_translations(Command):
     description = 'compile message catalogs to MO files via pybabel command'
+    user_options = []
 
     def initialize_options(self):
         pass
@@ -19,22 +19,26 @@ class compileTranslations(Command):
         pass
 
     def run(self):
-        print("\nCompiling translations:")
-        subprocess.call( os.path.join(os.path.dirname(__file__), "webant/babel/trans_compile.sh") )
-
+            try:
+                call(["pybabel", "compile", "-d", "webant/translations", "-f"] )
+            except OSError, e:
+                print "WARNING: pybabel not already installed. skipping compilation of translation."
+                
 class build(_build):
-    sub_commands = [('compileTranslations', None)] + _build.sub_commands
+    sub_commands =  _build.sub_commands + [('compile_translations', None)]
 
 
 class install_lib(_install_lib):
     def run(self):
-        self.run_command('compileTranslations')
         _install_lib.run(self)
+        self.run_command('compile_translations' )
+
 
 class develop(_develop):
      def run(self):
-        self.run_command('compileTranslations')
         _develop.run(self)
+        self.run_command('compile_translations' )
+
 
 def read(fname):
     with open(os.path.join(os.path.dirname(__file__), fname)) as buf:
@@ -66,7 +70,7 @@ setup(name='libreant',
       cmdclass={'build': build,
                 'install_lib': install_lib,
                 'develop':develop,
-                'compileTranslations': compileTranslations },
+                'compile_translations': compile_translations },
       entry_points={'console_scripts': [
           'webant=webant.webant:main',
           'agherant=webant.agherant_standalone:main'

@@ -94,7 +94,7 @@ setup(name='libreant',
       package_data = {
             # If any package contains *.mo include them:
             # important! leave all the stars!
-            'webant': ['translations/*/*/*.mo'] 
+            'webant': ['translations/*/*/*.mo']
         },
       include_package_data=True,
       tests_require=['nose'],
@@ -112,7 +112,7 @@ setup(name='libreant',
                   "Framework :: Flask",
                   "License :: OSI Approved :: GNU Affero General Public License v3",
                   "Operating System :: POSIX :: Linux",
-                  "Programming Language :: Python :: 2"
+                  "Programming Language :: Python :: 2",
                   "Development Status :: 4 - Beta"
                   ]
       )

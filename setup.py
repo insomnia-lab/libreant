@@ -91,6 +91,11 @@ setup(name='libreant',
           'opensearch',
           'Fsdb'
       ],
+      package_data = {
+            # If any package contains *.mo include them:
+            # important! leave all the stars!
+            'webant': ['translations/*/*/*.mo'] 
+        },
       include_package_data=True,
       tests_require=['nose'],
       test_suite='nose.collector',

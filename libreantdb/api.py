@@ -40,9 +40,9 @@ class DB(object):
     this class contains every query method and every operation on the index
     '''
     # Setup {{{2
-    def __init__(self, es):
+    def __init__(self, es, index_name):
         self.es = es
-        self.index_name = 'book'
+        self.index_name = index_name
         # book_validator can adjust the book, and raise if it's not valid
         self.book_validator = validate_book
 
@@ -199,10 +199,10 @@ class DB(object):
         ret = self.es.update(index=self.index_name, id=id,
                              doc_type=doc_type, body={'doc': book})
         return ret
-    
+
     def increment_download_count(self, id, fileIndex, doc_type='book'):
         '''
-        Increment the download counter of a specific file 
+        Increment the download counter of a specific file
         '''
         body = { 'script' : 'ctx._source._files[%i].download_count += 1' % fileIndex }
         return self.es.update(index=self.index_name, id=id,

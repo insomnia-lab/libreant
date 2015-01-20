@@ -38,7 +38,8 @@ def create_app(configfile=None):
         'PRESET_PATHS': [],  # TODO defaultPreset should be loaded as default?
         'FSDB_PATH': "",
         'AGHERANT_DESCRIPTIONS': [],
-        'SECRET_KEY': 'really insecure, please change me!'
+        'SECRET_KEY': 'really insecure, please change me!',
+        'ES_INDEXNAME': 'libreant'
     })
     AppConfig(app, configfile, default_settings=False)
     initLoggers()
@@ -62,7 +63,7 @@ def create_app(configfile=None):
 
     def get_db():
         if app._db is None:
-            db = DB(Elasticsearch())
+            db = DB(Elasticsearch(), index_name=app.config['ES_INDEXNAME'])
             db.setup_db()
             # deferring assignment is meant to avoid that we _first_ cache the
             # DB object, then the setup_db() fails. This will let us with a

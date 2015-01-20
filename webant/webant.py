@@ -54,14 +54,14 @@ def create_app(configfile=None):
         if not app.config['DEBUG']:
             raise ValueError('FSDB_PATH cannot be empty')
         else:
-            fsdbPath = os.path.join(tempfile.gettempdir(),'libreant_fsdb')
+            fsdbPath = os.path.join(tempfile.gettempdir(), 'libreant_fsdb')
             fsdb = Fsdb(fsdbPath)
     else:
         fsdb = Fsdb(app.config['FSDB_PATH'])
 
     app._db = None
 
-    def get_db():
+    def _get_db():
         if app._db is None:
             db = DB(Elasticsearch(), index_name=app.config['ES_INDEXNAME'])
             db.setup_db()
@@ -70,6 +70,8 @@ def create_app(configfile=None):
             # non-setupped DB
             app._db = db
         return app._db
+
+    app.get_db = _get_db
 
     @app.route('/')
     def index():
@@ -80,7 +82,7 @@ def create_app(configfile=None):
         query = request.args.get('q', None)
         if query is None:
             abort(400, "No query given")
-        res = get_db().user_search(query)['hits']['hits']
+        res = app.get_db().user_search(query)['hits']['hits']
         books = []
         for b in res:
             src = b['_source']
@@ -169,10 +171,10 @@ def create_app(configfile=None):
     @app.route('/view/<bookid>')
     def view_book(bookid):
         try:
-             b = get_db().get_book_by_id(bookid)
+             b = app.get_db().get_book_by_id(bookid)
         except NotFoundError, e:
              return renderErrorPage(message='no element found with id "{}"'.format(bookid), httpCode=404)
-        similar = get_db().mlt(bookid)['hits']['hits'][:10]
+        similar = app.get_db().mlt(bookid)['hits']['hits'][:10]
         return render_template('details.html',
                                book=b['_source'], bookid=bookid,
                                similar=similar)
@@ -180,14 +182,14 @@ def create_app(configfile=None):
     @app.route('/download/<bookid>/<fileid>')
     def download_book(bookid, fileid):
         try:
-            b = get_db().get_book_by_id(bookid)
+            b = app.get_db().get_book_by_id(bookid)
         except NotFoundError, e:
             return renderErrorPage(message='no element found with id "{}"'.format(bookid), httpCode=404)
         if '_files' not in b['_source']:
             return renderErrorPage(message='element with id "{}" has no files attached'.format(bookid), httpCode=404)
         for i,file in enumerate(b['_source']['_files']):
             if file['sha1'] == fileid:
-                get_db().increment_download_count(bookid,i)
+                app.get_db().increment_download_count(bookid,i)
                 return send_file(fsdb.getFilePath(file['fsdb_id']),
                                   mimetype=file['mime'],
                                   attachment_filename=file['name'],

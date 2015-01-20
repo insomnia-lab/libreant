@@ -20,7 +20,7 @@ source ve/bin/activate
 
 Now run
 ```sh
-curl -s 'http://boyska.s.pt-labs.net/libreant/contrib/colibri.json' 'http://boyska.s.pt-labs.net/libreant/contrib/rabbia/rabbia.json' 'http://boyska.s.pt-labs.net/libreant/contrib/csv2json/info_forte.json' |  python ./contrib/importjson/json2es.py
+curl -s 'http://boyska.s.pt-labs.net/libreant/contrib/colibri.json' 'http://boyska.s.pt-labs.net/libreant/contrib/rabbia/rabbia.json' 'http://boyska.s.pt-labs.net/libreant/contrib/csv2json/info_forte.json' |  webant-manage db_import -
 ```
 
 This will fetch three sample "libraries" and add every book to your elasticsearch.

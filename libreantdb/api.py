@@ -107,6 +107,10 @@ class DB(object):
     # End setup }}
 
     # Queries {{{2
+    def __len__(self):
+        stats = self.es.indices.stats()
+        return stats['indices'][self.index_name]['total']['docs']['count']
+
     def _search(self, body, size=30):
         return self.es.search(index=self.index_name, body=body, size=size)
 
@@ -131,8 +135,8 @@ class DB(object):
         }}
         return self._search(dict(query=query))
 
-    def get_all_books(self):
-        return self._search({})
+    def get_all_books(self, size=30):
+        return self._search({}, size=size)
 
     def get_last_inserted(self, size=30):
         query = { "query" : { "match_all" : {} },

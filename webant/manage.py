@@ -4,9 +4,9 @@ import json
 
 from flask.ext.script import Manager
 
-from webant import create_app
+from webant import LibreantCoreApp
 
-app = create_app()
+app = LibreantCoreApp('webant')
 manager = Manager(app)
 
 

@@ -18,7 +18,41 @@ from agherant import agherant
 from webserver_utils import gevent_run
 
 
-def create_app(configfile=None):
+class LibreantCoreApp(Flask):
+    def __init__(self, import_name):
+        super(LibreantCoreApp, self).__init__(import_name)
+        self.config.update({
+            'BOOTSTRAP_SERVE_LOCAL': True,
+            'DEBUG': True,
+            'PRESET_PATHS': [],  # defaultPreset should be loaded as default?
+            'FSDB_PATH': "",
+            'AGHERANT_DESCRIPTIONS': [],
+            'SECRET_KEY': 'really insecure, please change me!',
+            'ES_INDEXNAME': 'libreant'
+        })
+        AppConfig(self, None, default_settings=False)
+        self._db = None
+        if not self.config['FSDB_PATH']:
+            if not self.config['DEBUG']:
+                raise ValueError('FSDB_PATH cannot be empty')
+            else:
+                fsdbPath = os.path.join(tempfile.gettempdir(), 'libreant_fsdb')
+                self.fsdb = Fsdb(fsdbPath)
+        else:
+            self.fsdb = Fsdb(self.config['FSDB_PATH'])
+
+    def get_db(self):
+        if self._db is None:
+            db = DB(Elasticsearch(), index_name=self.config['ES_INDEXNAME'])
+            db.setup_db()
+            # deferring assignment is meant to avoid that we _first_ cache the
+            # DB object, then the setup_db() fails. This will let us with a
+            # non-setupped DB
+            self._db = db
+        return self._db
+
+
+def create_app():
     def initLoggers():
         logLvl = logging.DEBUG if app.config['DEBUG'] else logging.WARNING
         streamHandler = logging.StreamHandler()
@@ -31,17 +65,7 @@ def create_app(configfile=None):
             logger.setLevel(logLvl)
             logger.addHandler(streamHandler)
 
-    app = Flask("webant")
-    app.config.update({
-        'BOOTSTRAP_SERVE_LOCAL': True,
-        'DEBUG': True,
-        'PRESET_PATHS': [],  # TODO defaultPreset should be loaded as default?
-        'FSDB_PATH': "",
-        'AGHERANT_DESCRIPTIONS': [],
-        'SECRET_KEY': 'really insecure, please change me!',
-        'ES_INDEXNAME': 'libreant'
-    })
-    AppConfig(app, configfile, default_settings=False)
+    app = LibreantCoreApp("webant")
     initLoggers()
 
     if app.config['AGHERANT_DESCRIPTIONS']:
@@ -49,29 +73,6 @@ def create_app(configfile=None):
     Bootstrap(app)
     babel = Babel(app)
     presetManager = PresetManager(app.config['PRESET_PATHS'])
-
-    if not app.config['FSDB_PATH']:
-        if not app.config['DEBUG']:
-            raise ValueError('FSDB_PATH cannot be empty')
-        else:
-            fsdbPath = os.path.join(tempfile.gettempdir(), 'libreant_fsdb')
-            fsdb = Fsdb(fsdbPath)
-    else:
-        fsdb = Fsdb(app.config['FSDB_PATH'])
-
-    app._db = None
-
-    def _get_db():
-        if app._db is None:
-            db = DB(Elasticsearch(), index_name=app.config['ES_INDEXNAME'])
-            db.setup_db()
-            # deferring assignment is meant to avoid that we _first_ cache the
-            # DB object, then the setup_db() fails. This will let us with a
-            # non-setupped DB
-            app._db = db
-        return app._db
-
-    app.get_db = _get_db
 
     @app.route('/')
     def index():
@@ -135,7 +136,7 @@ def create_app(configfile=None):
             fileInfo['notes'] = request.form[upName+'_notes']
             fileInfo['sha1'] = Fsdb.fileDigest(tmpFilePath, algorithm="sha1")
             fileInfo['download_count'] = 0
-            fsdb_id = fsdb.add(tmpFilePath)
+            fsdb_id = app.fsdb.add(tmpFilePath)
             # close and delete tmpFile
             os.close(tmpFile)
             os.remove(tmpFilePath)
@@ -146,7 +147,7 @@ def create_app(configfile=None):
         if len(files) > 0:
             body['_files'] = files
 
-        addedItem = get_db().add_book(doc_type="book", body=body)
+        addedItem = app.get_db().add_book(doc_type="book", body=body)
         return redirect(url_for('view_book',bookid=addedItem['_id']))
 
     @app.route('/add', methods=['GET'])
@@ -190,7 +191,7 @@ def create_app(configfile=None):
         for i,file in enumerate(b['_source']['_files']):
             if file['sha1'] == fileid:
                 app.get_db().increment_download_count(bookid,i)
-                return send_file(fsdb.getFilePath(file['fsdb_id']),
+                return send_file(app.fsdb.getFilePath(file['fsdb_id']),
                                   mimetype=file['mime'],
                                   attachment_filename=file['name'],
                                   as_attachment=True)

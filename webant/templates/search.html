@@ -1,5 +1,6 @@
 {% extends "bootstrap/base.html" %}
 {% import "bootstrap/fixes.html" as fixes %}
+{% import 'searchbar.html' as searchbar %}
 
 {% block title %}
 Libreant | {%trans%}Search{%endtrans%}: {{ query }}
@@ -7,7 +8,7 @@ Libreant | {%trans%}Search{%endtrans%}: {{ query }}
 
 {% block navbar %}
 {% import 'navbar.html' as navbar %}
-{{navbar.navbar(search=True, search_query=query)}}
+{{navbar.navbar(search=False)}}
 {% endblock %}
 
 {% block styles %}
@@ -17,6 +18,11 @@ Libreant | {%trans%}Search{%endtrans%}: {{ query }}
 
 {% block content %}
 <div class="container">
+    
+    {{ searchbar.searchbar(search_query=query) }}
+
+    <hr />
+    
     <hgroup class="mb20">
         <h1>{%trans%}Search results{%endtrans%}</h1>
         <h2 class="lead">{% trans num = books|length%}{{num}} result was found for{%pluralize%}{{num}} results were found for{% endtrans %} <strong>{{ query }}</strong></h2>

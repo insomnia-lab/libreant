@@ -1,0 +1,13 @@
+{% macro searchbar(search_query="") %}
+
+<form action="{{ url_for('search') }}" role="form">
+    <div class="input-group">
+        <input name="q" class="form-control" type="text" value="{{ search_query }}"/>
+        <span class="input-group-btn">
+            <button type="submit" class="btn btn-primary">
+            <span class="glyphicon glyphicon-search" aria-hidden="true"></span> {%trans%}Search{%endtrans%}</button>
+        </span>
+    </div>
+</form>
+{% endmacro %}
+

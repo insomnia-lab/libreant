@@ -1,5 +1,6 @@
 {% extends "bootstrap/base.html" %}
 {% import "bootstrap/fixes.html" as fixes %}
+{% import 'searchbar.html' as searchbar %}
 
 {% block title %}
 Libreant | Homepage
@@ -14,14 +15,6 @@ Libreant | Homepage
 <div class="container">
     <h1>Libreant <small>{%trans%}What do you want to read today?{%endtrans%}</small></h1>
 
-    <form action="{{ url_for('search') }}" role="form">
-        <div class="input-group">
-	        <input name="q" class="form-control" type="text"/>
-            <span class="input-group-btn">
-                <button type="submit" class="btn btn-primary">
-                    <span class="glyphicon glyphicon-search" aria-hidden="true"></span> {%trans%}Search{%endtrans%}</button>
-            </span>
-        </div>
-    </form>
+    {{ searchbar.searchbar() }}
 
 {% endblock content %}

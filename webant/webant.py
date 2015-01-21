@@ -52,6 +52,17 @@ class LibreantCoreApp(Flask):
         return self._db
 
 
+class LibreantViewApp(LibreantCoreApp):
+    def __init__(self, import_name):
+        super(LibreantViewApp, self).__init__(import_name)
+        if self.config['AGHERANT_DESCRIPTIONS']:
+            self.register_blueprint(agherant, url_prefix='/agherant')
+        Bootstrap(self)
+        self.babel = Babel(self)
+
+        self.presetManager = PresetManager(self.config['PRESET_PATHS'])
+
+
 def create_app():
     def initLoggers():
         logLvl = logging.DEBUG if app.config['DEBUG'] else logging.WARNING
@@ -65,14 +76,8 @@ def create_app():
             logger.setLevel(logLvl)
             logger.addHandler(streamHandler)
 
-    app = LibreantCoreApp("webant")
+    app = LibreantViewApp("webant")
     initLoggers()
-
-    if app.config['AGHERANT_DESCRIPTIONS']:
-        app.register_blueprint(agherant, url_prefix='/agherant')
-    Bootstrap(app)
-    babel = Babel(app)
-    presetManager = PresetManager(app.config['PRESET_PATHS'])
 
     @app.route('/')
     def index():
@@ -155,14 +160,14 @@ def create_app():
         reqPreset = request.args.get('preset', None)
 
         if reqPreset is not None:
-            if reqPreset not in presetManager.presets:
+            if reqPreset not in app.presetManager.presets:
                 return renderErrorPage(gettext("preset not found"), 400)
             else:
-                preset = presetManager.presets[reqPreset]
+                preset = app.presetManager.presets[reqPreset]
         else:
             preset = None
 
-        return render_template('add.html', preset=preset, availablePresets=presetManager.presets, isoLangs=isoLangs)
+        return render_template('add.html', preset=preset, availablePresets=app.presetManager.presets, isoLangs=isoLangs)
 
     @app.route('/description.xml')
     def description():
@@ -198,7 +203,7 @@ def create_app():
         # no file found with the given digest
         return renderErrorPage(message='no file found with id "{}" on item "{}"'.format(fileid, bookid), httpCode=404)
 
-    @babel.localeselector
+    @app.babel.localeselector
     def get_locale():
         return request.accept_languages.best_match(['en', 'it', 'sq'])
 

@@ -1,3 +1,5 @@
+from logging import getLogger
+log = getLogger('agherant')
 from itertools import chain
 
 from flask import Blueprint, render_template, abort, request, Response, \
@@ -18,12 +20,12 @@ def search():
     books = aggregate(current_app.config['AGHERANT_DESCRIPTIONS'], query)
     format = requestedFormat(request,
                              ['text/html',
-                             'text/xml',
-                             'application/rss+xml',
-                             'opensearch'])
+                              'text/xml',
+                              'application/rss+xml',
+                              'opensearch'])
     if format == 'text/html':
         return render_template('os_search.html', books=books, query=query)
-    if format in ['opensearch', 'text/xml','application/rss+xml']:
+    if format in ['opensearch', 'text/xml', 'application/rss+xml']:
         return Response(render_template('os_opens.xml', books=books,
                                         query=query),
                         mimetype='text/xml')
@@ -36,7 +38,12 @@ def aggregate(descriptions, query):
             return url_for('description', _external=True)
         return description_url
     descriptions = map(autoreplace, descriptions)
-    clients = map(Client, descriptions)
+    clients = []
+    for url in descriptions:
+        try:
+            clients.append(Client(url))
+        except:
+            log.exception("Error retrieving description for '%s'" % url)
     results = map(lambda c: c.search(query), clients)
     results = list(chain(*results))
     results.sort(key=lambda r: r.score, reverse=True)

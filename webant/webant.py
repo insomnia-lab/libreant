@@ -26,7 +26,7 @@ def create_app(configfile=None):
         formatter = logging.Formatter(
             '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         streamHandler.setFormatter(formatter)
-        loggers = [logging.getLogger('webant'),logging.getLogger('fsdb')]
+        loggers = map(logging.getLogger, ('webant', 'fsdb', 'agherant'))
         for logger in loggers:
             logger.setLevel(logLvl)
             logger.addHandler(streamHandler)
@@ -35,7 +35,7 @@ def create_app(configfile=None):
     app.config.update({
         'BOOTSTRAP_SERVE_LOCAL': True,
         'DEBUG': True,
-        'PRESET_PATHS': [], #TODO defaultPreset should be loaded as default?
+        'PRESET_PATHS': [],  # TODO defaultPreset should be loaded as default?
         'FSDB_PATH': "",
         'AGHERANT_DESCRIPTIONS': [],
         'SECRET_KEY': 'really insecure, please change me!'
@@ -167,7 +167,7 @@ def create_app(configfile=None):
 
     @app.route('/view/<bookid>')
     def view_book(bookid):
-        try:        
+        try:
              b = get_db().get_book_by_id(bookid)
         except NotFoundError, e:
              return renderErrorPage(message='no element found with id "{}"'.format(bookid), httpCode=404)
@@ -178,7 +178,7 @@ def create_app(configfile=None):
 
     @app.route('/download/<bookid>/<fileid>')
     def download_book(bookid, fileid):
-        try:        
+        try:
             b = get_db().get_book_by_id(bookid)
         except NotFoundError, e:
             return renderErrorPage(message='no element found with id "{}"'.format(bookid), httpCode=404)

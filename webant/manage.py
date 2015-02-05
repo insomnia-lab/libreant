@@ -4,9 +4,10 @@ import json
 
 from flask.ext.script import Manager
 
-from webant import LibreantCoreApp
+from webant import LibreantCoreApp, initLoggers
 
 app = LibreantCoreApp('webant')
+initLoggers(app)
 manager = Manager(app)
 
 
@@ -55,7 +56,6 @@ def db_import(filename, language='it'):
             book = book['_source']
         if '_language' not in book:
             book['_language'] = language
-
 
         if i % 50:
             print("\rLoading\t%d" % i, end='')

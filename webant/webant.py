@@ -19,17 +19,17 @@ from webserver_utils import gevent_run
 
 
 class LibreantCoreApp(Flask):
-    def __init__(self, import_name):
+    def __init__(self, import_name, conf={}):
         super(LibreantCoreApp, self).__init__(import_name)
-        self.config.update({
-            'BOOTSTRAP_SERVE_LOCAL': True,
+        defaults = {
             'DEBUG': True,
             'PRESET_PATHS': [],  # defaultPreset should be loaded as default?
             'FSDB_PATH': "",
-            'AGHERANT_DESCRIPTIONS': [],
             'SECRET_KEY': 'really insecure, please change me!',
             'ES_INDEXNAME': 'libreant'
-        })
+        }
+        defaults.update(conf)
+        self.config.update(defaults)
         AppConfig(self, None, default_settings=False)
         self._db = None
         if not self.config['FSDB_PATH']:
@@ -40,6 +40,7 @@ class LibreantCoreApp(Flask):
                 self.fsdb = Fsdb(fsdbPath)
         else:
             self.fsdb = Fsdb(self.config['FSDB_PATH'])
+        self.presetManager = PresetManager(self.config['PRESET_PATHS'])
 
     def get_db(self):
         if self._db is None:
@@ -53,31 +54,35 @@ class LibreantCoreApp(Flask):
 
 
 class LibreantViewApp(LibreantCoreApp):
-    def __init__(self, import_name):
-        super(LibreantViewApp, self).__init__(import_name)
+    def __init__(self, import_name, conf={}):
+        defaults = {
+            'BOOTSTRAP_SERVE_LOCAL': True,
+            'AGHERANT_DESCRIPTIONS': [],
+        }
+        defaults.update(conf)
+        super(LibreantViewApp, self).__init__(import_name, defaults)
         if self.config['AGHERANT_DESCRIPTIONS']:
             self.register_blueprint(agherant, url_prefix='/agherant')
         Bootstrap(self)
         self.babel = Babel(self)
 
-        self.presetManager = PresetManager(self.config['PRESET_PATHS'])
+
+def initLoggers(app):
+    logLvl = logging.DEBUG if app.config['DEBUG'] else logging.WARNING
+    streamHandler = logging.StreamHandler()
+    streamHandler.setLevel(logLvl)
+    formatter = logging.Formatter(
+        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    streamHandler.setFormatter(formatter)
+    loggers = map(logging.getLogger, ('webant', 'fsdb', 'agherant'))
+    for logger in loggers:
+        logger.setLevel(logLvl)
+        logger.addHandler(streamHandler)
 
 
 def create_app():
-    def initLoggers():
-        logLvl = logging.DEBUG if app.config['DEBUG'] else logging.WARNING
-        streamHandler = logging.StreamHandler()
-        streamHandler.setLevel(logLvl)
-        formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        streamHandler.setFormatter(formatter)
-        loggers = map(logging.getLogger, ('webant', 'fsdb', 'agherant'))
-        for logger in loggers:
-            logger.setLevel(logLvl)
-            logger.addHandler(streamHandler)
-
     app = LibreantViewApp("webant")
-    initLoggers()
+    initLoggers(app)
 
     @app.route('/')
     def index():

@@ -74,9 +74,16 @@ packages built, etc.
 The most common reason you could care about it, is if you need to add some
 dependency to libreant.
 
+
+libreantdb
+##########
+
 ``libreantdb/`` is a package containing an abstraction over elasticsearch.
 Again: this is elasticsearch-only, and completely unaware of any other storage,
 or the logic of libreant itself.
+
+webant
+########
 
 ``webant/`` is a package; you could think that it only contains web-specific logic,
 but this is not the case. Instead, all that is not in ``libreantdb`` is in
@@ -100,6 +107,43 @@ framework more than a web framework.
 ``templates/`` is... well, it contains templates. They are written with jinja_
 templating language. The `render_template` function 
 
+documentation
+##############
+
+Documentation is kept on ``doc/source/`` and is comprised of ``.rst`` files. The
+syntax used is restructuredText_. Don't forget to update documentation when you
+change something!
+
+API
+~~~~
+
+You can read :doc:`api/modules`
+
+Coding style
+~~~~~~~~~~~~~
+
+PEP8_ must be used in all the code.
+
+Docstrings are used for autogenerating api documentation, so please don't
+forget to provide clear, detailed explanation of what the module/class/function
+does, how to use it, when is it useful, etc.
+If you want to be really nice, consider using `restructured-text directives`_
+to improve the structure of the documentation: they're fun to use.
+
+We care a lot about documentation, so please don't leave documentation
+out-of-date. If you change the parameters that a function is accepting, please
+document it. If you are making changes to the end user's experience, please
+fix the user manual.
+
+Never put "binary" files in the source. With 'binary', we also mean "any files
+that could be obtained programmatically, instead of being included". This is,
+for example, the case of ``.mo``.
+
+Unit tests are very important: if your function is testable, you should test
+it. Yes, even if its behaviour might seem obvious. Unit tests are important
+both as a way of avoding regressions and as a way to document how something
+behaves.
+
 Contributing
 ------------
 
@@ -121,3 +165,6 @@ git repository.
 .. _jinja: http://jinja.pocoo.org/
 .. _flask-script: https://flask-script.readthedocs.org/en/latest/
 .. _bugtracker: https://github.com/insomnia-lab/libreant/issues
+.. _PEP8: https://www.python.org/dev/peps/pep-0008/
+.. _restructured-text directives: http://sphinx-doc.org/domains.html#signatures
+.. _restructuredText: http://sphinx-doc.org/rest.html

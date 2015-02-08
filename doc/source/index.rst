@@ -4,15 +4,18 @@
    contain the root `toctree` directive.
 
 Welcome to libreant's documentation!
-================================
+=====================================
 
 Contents:
 
 .. toctree::
+   :maxdepth: 2
+
    about
    architecture
-   sysadmin
    librarian
+   sysadmin
+   developer
    api/modules
 
 

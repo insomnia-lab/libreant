@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, abort, Response, redirect, ur
 from werkzeug import secure_filename
 from utils import requestedFormat
 from flask_bootstrap import Bootstrap
-from flask_appconfig import AppConfig
 from elasticsearch import Elasticsearch, NotFoundError
 from flask.ext.babel import Babel, gettext
 from presets import PresetManager
@@ -16,13 +15,13 @@ import os
 from libreantdb import DB
 from agherant import agherant
 from webserver_utils import gevent_run
+import config_utils
 
 
 class LibreantCoreApp(Flask):
     def __init__(self, import_name, conf={}):
         super(LibreantCoreApp, self).__init__(import_name)
         defaults = {
-            'DEBUG': True,
             'PRESET_PATHS': [],  # defaultPreset should be loaded as default?
             'FSDB_PATH': "",
             'SECRET_KEY': 'really insecure, please change me!',
@@ -30,7 +29,6 @@ class LibreantCoreApp(Flask):
         }
         defaults.update(conf)
         self.config.update(defaults)
-        AppConfig(self, None, default_settings=False)
         self._db = None
         if not self.config['FSDB_PATH']:
             if not self.config['DEBUG']:
@@ -67,22 +65,27 @@ class LibreantViewApp(LibreantCoreApp):
         self.babel = Babel(self)
 
 
-def initLoggers(app):
-    logLvl = logging.DEBUG if app.config['DEBUG'] else logging.WARNING
+def initLoggers(logLevel=logging.WARNING):
     streamHandler = logging.StreamHandler()
-    streamHandler.setLevel(logLvl)
+    streamHandler.setLevel(logLevel)
     formatter = logging.Formatter(
         '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     streamHandler.setFormatter(formatter)
-    loggers = map(logging.getLogger, ('webant', 'fsdb', 'agherant'))
+    loggers = map(logging.getLogger,
+                  ('webant', 'fsdb', 'agherant', 'config_utils'))
     for logger in loggers:
-        logger.setLevel(logLvl)
-        logger.addHandler(streamHandler)
+        logger.setLevel(logLevel)
+        if not logger.handlers:
+            logger.addHandler(streamHandler)
 
 
 def create_app():
-    app = LibreantViewApp("webant")
-    initLoggers(app)
+    initLoggers()
+    conf = {'DEBUG': True}
+    conf.update(config_utils.from_envvar_file('WEBANT_SETTINGS'))
+    conf.update(config_utils.from_envvars(prefix='WEBANT_'))
+    initLoggers(logging.DEBUG if conf.get('DEBUG', False) else logging.WARNING)
+    app = LibreantViewApp("webant", conf)
 
     @app.route('/')
     def index():

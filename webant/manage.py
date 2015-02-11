@@ -70,6 +70,24 @@ def db_import(filename, language='it'):
     print("\rDone\t(%d books added)" % i)
 
 
+@manager.command
+def conf_list():
+    '''List every key,value pair in configuration'''
+    for key, value in app.config.items():
+        print('{}: {}'.format(key, value))
+
+
+@manager.command
+def conf_show(key):
+    '''Show the value for a given configuration key'''
+    if key in app.config:
+        print(app.config[key])
+        return 0
+    else:
+        print('Cannot find such option')
+        return 1
+
+
 def main():
     manager.run()
 

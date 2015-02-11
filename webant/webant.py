@@ -67,9 +67,8 @@ class LibreantViewApp(LibreantCoreApp):
 
 def initLoggers(logLevel=logging.WARNING):
     streamHandler = logging.StreamHandler()
-    streamHandler.setLevel(logLevel)
     formatter = logging.Formatter(
-        '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        '%(asctime)s [%(name)s] [%(levelname)s] %(message)s')
     streamHandler.setFormatter(formatter)
     loggers = map(logging.getLogger,
                   ('webant', 'fsdb', 'agherant', 'config_utils'))

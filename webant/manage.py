@@ -1,13 +1,19 @@
 from __future__ import print_function
 import sys
 import json
+import logging
 
 from flask.ext.script import Manager
 
 from webant import LibreantCoreApp, initLoggers
+import config_utils
 
-app = LibreantCoreApp('webant')
-initLoggers(app)
+initLoggers()
+conf = {'DEBUG': True}
+conf.update(config_utils.from_envvar_file('WEBANT_SETTINGS'))
+conf.update(config_utils.from_envvars(prefix='WEBANT_'))
+initLoggers(logging.DEBUG if conf.get('DEBUG', False) else logging.WARNING)
+app = LibreantCoreApp('webant', conf)
 manager = Manager(app)
 
 

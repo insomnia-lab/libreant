@@ -4,6 +4,7 @@ from itertools import chain
 
 from flask import Blueprint, render_template, abort, request, Response, \
     current_app, url_for
+from werkzeug.routing import BuildError
 import opensearch
 
 from utils import memoize, requestedFormat
@@ -35,9 +36,15 @@ def search():
 def aggregate(descriptions, query):
     def autoreplace(description_url):
         if description_url == 'SELF':
-            return url_for('description', _external=True)
+            try:
+                return url_for('description', _external=True)
+            except BuildError:
+                log.info('SELF is not a valid opensearch description if '
+                         'you are not running webant')
+                return None
         return description_url
-    descriptions = map(autoreplace, descriptions)
+    descriptions = filter(lambda x: x is not None,
+                          map(autoreplace, descriptions))
     clients = []
     for url in descriptions:
         log.debug("Fetching description %s")

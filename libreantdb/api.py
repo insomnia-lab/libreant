@@ -40,9 +40,9 @@ class DB(object):
     this class contains every query method and every operation on the index
     '''
     # Setup {{{2
-    def __init__(self, es):
+    def __init__(self, es, index_name):
         self.es = es
-        self.index_name = 'book'
+        self.index_name = index_name
         # book_validator can adjust the book, and raise if it's not valid
         self.book_validator = validate_book
 
@@ -107,6 +107,10 @@ class DB(object):
     # End setup }}
 
     # Queries {{{2
+    def __len__(self):
+        stats = self.es.indices.stats()
+        return stats['indices'][self.index_name]['total']['docs']['count']
+
     def _search(self, body, size=30):
         return self.es.search(index=self.index_name, body=body, size=size)
 
@@ -131,8 +135,8 @@ class DB(object):
         }}
         return self._search(dict(query=query))
 
-    def get_all_books(self):
-        return self._search({})
+    def get_all_books(self, size=30):
+        return self._search({}, size=size)
 
     def get_last_inserted(self, size=30):
         query = { "query" : { "match_all" : {} },
@@ -199,10 +203,10 @@ class DB(object):
         ret = self.es.update(index=self.index_name, id=id,
                              doc_type=doc_type, body={'doc': book})
         return ret
-    
+
     def increment_download_count(self, id, fileIndex, doc_type='book'):
         '''
-        Increment the download counter of a specific file 
+        Increment the download counter of a specific file
         '''
         body = { 'script' : 'ctx._source._files[%i].download_count += 1' % fileIndex }
         return self.es.update(index=self.index_name, id=id,

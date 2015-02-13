@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, abort, Response, redirect, ur
 from werkzeug import secure_filename
 from utils import requestedFormat
 from flask_bootstrap import Bootstrap
-from flask_appconfig import AppConfig
 from elasticsearch import Elasticsearch, NotFoundError
 from flask.ext.babel import Babel, gettext
 from presets import PresetManager
@@ -16,59 +15,76 @@ import os
 from libreantdb import DB
 from agherant import agherant
 from webserver_utils import gevent_run
+import config_utils
 
 
-def create_app(configfile=None):
-    def initLoggers():
-        logLvl = logging.DEBUG if app.config['DEBUG'] else logging.WARNING
-        streamHandler = logging.StreamHandler()
-        streamHandler.setLevel(logLvl)
-        formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        streamHandler.setFormatter(formatter)
-        loggers = map(logging.getLogger, ('webant', 'fsdb', 'agherant'))
-        for logger in loggers:
-            logger.setLevel(logLvl)
-            logger.addHandler(streamHandler)
-
-    app = Flask("webant")
-    app.config.update({
-        'BOOTSTRAP_SERVE_LOCAL': True,
-        'DEBUG': True,
-        'PRESET_PATHS': [],  # TODO defaultPreset should be loaded as default?
-        'FSDB_PATH': "",
-        'AGHERANT_DESCRIPTIONS': [],
-        'SECRET_KEY': 'really insecure, please change me!'
-    })
-    AppConfig(app, configfile, default_settings=False)
-    initLoggers()
-
-    if app.config['AGHERANT_DESCRIPTIONS']:
-        app.register_blueprint(agherant, url_prefix='/agherant')
-    Bootstrap(app)
-    babel = Babel(app)
-    presetManager = PresetManager(app.config['PRESET_PATHS'])
-
-    if not app.config['FSDB_PATH']:
-        if not app.config['DEBUG']:
-            raise ValueError('FSDB_PATH cannot be empty')
+class LibreantCoreApp(Flask):
+    def __init__(self, import_name, conf={}):
+        super(LibreantCoreApp, self).__init__(import_name)
+        defaults = {
+            'PRESET_PATHS': [],  # defaultPreset should be loaded as default?
+            'FSDB_PATH': "",
+            'SECRET_KEY': 'really insecure, please change me!',
+            'ES_INDEXNAME': 'libreant'
+        }
+        defaults.update(conf)
+        self.config.update(defaults)
+        self._db = None
+        if not self.config['FSDB_PATH']:
+            if not self.config['DEBUG']:
+                raise ValueError('FSDB_PATH cannot be empty')
+            else:
+                fsdbPath = os.path.join(tempfile.gettempdir(), 'libreant_fsdb')
+                self.fsdb = Fsdb(fsdbPath)
         else:
-            fsdbPath = os.path.join(tempfile.gettempdir(),'libreant_fsdb')
-            fsdb = Fsdb(fsdbPath)
-    else:
-        fsdb = Fsdb(app.config['FSDB_PATH'])
+            self.fsdb = Fsdb(self.config['FSDB_PATH'])
+        self.presetManager = PresetManager(self.config['PRESET_PATHS'])
 
-    app._db = None
-
-    def get_db():
-        if app._db is None:
-            db = DB(Elasticsearch())
+    def get_db(self):
+        if self._db is None:
+            db = DB(Elasticsearch(), index_name=self.config['ES_INDEXNAME'])
             db.setup_db()
             # deferring assignment is meant to avoid that we _first_ cache the
             # DB object, then the setup_db() fails. This will let us with a
             # non-setupped DB
-            app._db = db
-        return app._db
+            self._db = db
+        return self._db
+
+
+class LibreantViewApp(LibreantCoreApp):
+    def __init__(self, import_name, conf={}):
+        defaults = {
+            'BOOTSTRAP_SERVE_LOCAL': True,
+            'AGHERANT_DESCRIPTIONS': [],
+        }
+        defaults.update(conf)
+        super(LibreantViewApp, self).__init__(import_name, defaults)
+        if self.config['AGHERANT_DESCRIPTIONS']:
+            self.register_blueprint(agherant, url_prefix='/agherant')
+        Bootstrap(self)
+        self.babel = Babel(self)
+
+
+def initLoggers(logLevel=logging.WARNING):
+    streamHandler = logging.StreamHandler()
+    formatter = logging.Formatter(
+        '%(asctime)s [%(name)s] [%(levelname)s] %(message)s')
+    streamHandler.setFormatter(formatter)
+    loggers = map(logging.getLogger,
+                  ('webant', 'fsdb', 'agherant', 'config_utils'))
+    for logger in loggers:
+        logger.setLevel(logLevel)
+        if not logger.handlers:
+            logger.addHandler(streamHandler)
+
+
+def create_app():
+    initLoggers()
+    conf = {'DEBUG': True}
+    conf.update(config_utils.from_envvar_file('WEBANT_SETTINGS'))
+    conf.update(config_utils.from_envvars(prefix='WEBANT_'))
+    initLoggers(logging.DEBUG if conf.get('DEBUG', False) else logging.WARNING)
+    app = LibreantViewApp("webant", conf)
 
     @app.route('/')
     def index():
@@ -79,7 +95,7 @@ def create_app(configfile=None):
         query = request.args.get('q', None)
         if query is None:
             abort(400, "No query given")
-        res = get_db().user_search(query)['hits']['hits']
+        res = app.get_db().user_search(query)['hits']['hits']
         books = []
         for b in res:
             src = b['_source']
@@ -132,7 +148,7 @@ def create_app(configfile=None):
             fileInfo['notes'] = request.form[upName+'_notes']
             fileInfo['sha1'] = Fsdb.fileDigest(tmpFilePath, algorithm="sha1")
             fileInfo['download_count'] = 0
-            fsdb_id = fsdb.add(tmpFilePath)
+            fsdb_id = app.fsdb.add(tmpFilePath)
             # close and delete tmpFile
             os.close(tmpFile)
             os.remove(tmpFilePath)
@@ -143,7 +159,7 @@ def create_app(configfile=None):
         if len(files) > 0:
             body['_files'] = files
 
-        addedItem = get_db().add_book(doc_type="book", body=body)
+        addedItem = app.get_db().add_book(doc_type="book", body=body)
         return redirect(url_for('view_book',bookid=addedItem['_id']))
 
     @app.route('/add', methods=['GET'])
@@ -151,14 +167,14 @@ def create_app(configfile=None):
         reqPreset = request.args.get('preset', None)
 
         if reqPreset is not None:
-            if reqPreset not in presetManager.presets:
+            if reqPreset not in app.presetManager.presets:
                 return renderErrorPage(gettext("preset not found"), 400)
             else:
-                preset = presetManager.presets[reqPreset]
+                preset = app.presetManager.presets[reqPreset]
         else:
             preset = None
 
-        return render_template('add.html', preset=preset, availablePresets=presetManager.presets, isoLangs=isoLangs)
+        return render_template('add.html', preset=preset, availablePresets=app.presetManager.presets, isoLangs=isoLangs)
 
     @app.route('/description.xml')
     def description():
@@ -168,10 +184,10 @@ def create_app(configfile=None):
     @app.route('/view/<bookid>')
     def view_book(bookid):
         try:
-             b = get_db().get_book_by_id(bookid)
+             b = app.get_db().get_book_by_id(bookid)
         except NotFoundError, e:
              return renderErrorPage(message='no element found with id "{}"'.format(bookid), httpCode=404)
-        similar = get_db().mlt(bookid)['hits']['hits'][:10]
+        similar = app.get_db().mlt(bookid)['hits']['hits'][:10]
         return render_template('details.html',
                                book=b['_source'], bookid=bookid,
                                similar=similar)
@@ -179,22 +195,22 @@ def create_app(configfile=None):
     @app.route('/download/<bookid>/<fileid>')
     def download_book(bookid, fileid):
         try:
-            b = get_db().get_book_by_id(bookid)
+            b = app.get_db().get_book_by_id(bookid)
         except NotFoundError, e:
             return renderErrorPage(message='no element found with id "{}"'.format(bookid), httpCode=404)
         if '_files' not in b['_source']:
             return renderErrorPage(message='element with id "{}" has no files attached'.format(bookid), httpCode=404)
         for i,file in enumerate(b['_source']['_files']):
             if file['sha1'] == fileid:
-                get_db().increment_download_count(bookid,i)
-                return send_file(fsdb.getFilePath(file['fsdb_id']),
+                app.get_db().increment_download_count(bookid,i)
+                return send_file(app.fsdb.getFilePath(file['fsdb_id']),
                                   mimetype=file['mime'],
                                   attachment_filename=file['name'],
                                   as_attachment=True)
         # no file found with the given digest
         return renderErrorPage(message='no file found with id "{}" on item "{}"'.format(fileid, bookid), httpCode=404)
 
-    @babel.localeselector
+    @app.babel.localeselector
     def get_locale():
         return request.accept_languages.best_match(['en', 'it', 'sq'])
 

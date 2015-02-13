@@ -1,5 +1,5 @@
-libreant
-==========
+API
+=============
 
 .. toctree::
    :maxdepth: 4

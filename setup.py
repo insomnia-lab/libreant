@@ -86,7 +86,7 @@ setup(name='libreant',
           'elasticsearch',
           'flask-bootstrap',
           'Flask-Babel',
-          'flask-appconfig',
+          'flask-script',
           'Flask',
           'opensearch',
           'Fsdb'
@@ -106,6 +106,7 @@ setup(name='libreant',
                 'compile_translations': compile_translations },
       entry_points={'console_scripts': [
           'webant=webant.webant:main',
+          'libreant-manage=webant.manage:main',
           'agherant=webant.agherant_standalone:main'
       ] },
       classifiers=[

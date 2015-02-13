@@ -1,10 +1,10 @@
 from flask import Flask, request
 from flask_bootstrap import Bootstrap
-from flask_appconfig import AppConfig
 from flask.ext.babel import Babel
 
 import agherant
 from webserver_utils import gevent_run
+import config_utils
 
 
 def create_app():
@@ -14,7 +14,8 @@ def create_app():
         'DEBUG': True,
         'SECRET_KEY': 'really insecure, please change me!'
     })
-    AppConfig(app, None, default_settings=False)
+    app.config.update(config_utils.from_envvar_file('WEBANT_SETTINGS'))
+    app.config.update(config_utils.from_envvars(prefix='WEBANT_'))
     Bootstrap(app)
     babel = Babel(app)
     app.register_blueprint(agherant.agherant, url_prefix='/agherant')

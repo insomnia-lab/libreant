@@ -202,7 +202,11 @@ def create_app():
             return renderErrorPage(message='element with id "{}" has no files attached'.format(bookid), httpCode=404)
         for i,file in enumerate(b['_source']['_files']):
             if file['sha1'] == fileid:
-                app.get_db().increment_download_count(bookid,i)
+                try:
+                    app.get_db().increment_download_count(bookid, i)
+                except:
+                    app.logger.warn("Cannot increment download count",
+                                    exc_info=1)
                 return send_file(app.fsdb.getFilePath(file['fsdb_id']),
                                   mimetype=file['mime'],
                                   attachment_filename=file['name'],

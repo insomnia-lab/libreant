@@ -47,7 +47,7 @@ def aggregate(descriptions, query):
                           map(autoreplace, descriptions))
     clients = []
     for url in descriptions:
-        log.debug("Fetching description %s")
+        log.debug("Fetching description {}".format(url))
         try:
             clients.append(Client(url))
         except:

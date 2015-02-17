@@ -25,6 +25,7 @@ class LibreantCoreApp(Flask):
             'PRESET_PATHS': [],  # defaultPreset should be loaded as default?
             'FSDB_PATH': "",
             'SECRET_KEY': 'really insecure, please change me!',
+            'ES_HOSTS': None,
             'ES_INDEXNAME': 'libreant'
         }
         defaults.update(conf)
@@ -42,7 +43,8 @@ class LibreantCoreApp(Flask):
 
     def get_db(self):
         if self._db is None:
-            db = DB(Elasticsearch(), index_name=self.config['ES_INDEXNAME'])
+            db = DB(Elasticsearch(hosts=self.config['ES_HOSTS']),
+                    index_name=self.config['ES_INDEXNAME'])
             db.setup_db()
             # deferring assignment is meant to avoid that we _first_ cache the
             # DB object, then the setup_db() fails. This will let us with a

@@ -23,10 +23,13 @@ Fsdb_ is a quite simple "file database": the main idea behind it is that it is a
 
 Flask_ is a "web microframework for python". It's not a big and complete solution like django, so you'll probably get familiar with it quite soon.
 
+.. _dev-installation:
+
 Installation
 -------------
 
-We will assume that you are familiar with virtualenvs. If you are not, please get familiar!
+We will assume that you are familiar with virtualenvs. If you are not, please
+get familiar!
 
 Inside a clean virtualenv, run
 

@@ -15,6 +15,7 @@ Contents:
    architecture
    librarian
    sysadmin
+   documentation
    developer
    api/modules
 

@@ -23,6 +23,22 @@ You can read up-to-date documentation on [Read the docs](http://libreant.readthe
 
 Quick start
 -----------
+
+## Vagrant based setup
+
+Run:
+
+```
+vagrant up
+```
+
+You will then find in /liberant the installation of liberant, you can login to
+the vagrant box with:
+
+```
+vagrant ssh
+```
+
 ###Dependencies
 ####Debian
 Download and install the Public Signing Key for elasticsearch repo

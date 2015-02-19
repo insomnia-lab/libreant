@@ -17,9 +17,10 @@ wget -qO - https://packages.elasticsearch.org/GPG-KEY-elasticsearch | apt-key ad
 echo "deb http://packages.elasticsearch.org/elasticsearch/1.4/debian stable main" >> /etc/apt/sources.list
 apt-get update && apt-get install -y python python-dev python-virtualenv openjdk-7-jre-headless elasticsearch
 update-rc.d elasticsearch defaults
+service elasticsearch start
 cd /libreant
-virtualenv -p /usr/bin/python2 --no-site-packages ve-precise32
-./ve-precise32/bin/python setup.py develop
+virtualenv -p /usr/bin/python2 --no-site-packages /ve
+/ve/bin/python setup.py develop
 SCRIPT
 
 Vagrant.configure("2") do |config|

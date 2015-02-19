@@ -5,7 +5,7 @@ Vagrant.configure("2") do |config|
   config.vm.box = "precise32"
   config.vm.box_url = "http://cloud-images.ubuntu.com/vagrant/precise/current/precise-server-cloudimg-i386-vagrant-disk1.box"
   config.vm.box_download_checksum = "e720cb6ed0a9a46f1e5ada73243f8622f623d297de3035a5f745bcfb14ec8f68"
-  config.vm.checksum_type = "sha256"
+  config.vm.box_download_checksum_type = "sha256"
 
   config.vm.synced_folder ".", "/libreant"
   config.vm.network "forwarded_port", guest: 5000, host: 5000

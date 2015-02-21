@@ -8,7 +8,6 @@ from presets.presetManager import PresetMissingFieldException
 from presets.presetManager import PresetFieldTypeException
 from presets.presetManager import PresetException
 
-
 def test_creation():
     preset = {
         "id": "id_test",

@@ -92,7 +92,7 @@ setup(name='libreant',
       author_email='insomnialab@hacari.org',
       url='https://github.com/insomnia-lab/libreant',
       license='AGPL',
-      packages=['libreantdb', 'webant', 'webant.presets'],
+      packages=['libreantdb', 'webant', 'presets'],
       install_requires=[
           'gevent',
           'elasticsearch',

@@ -8,7 +8,7 @@ from shutil import rmtree
 from presets.presetManager import PresetException
 import json
 import os
-from webant.presets.presetManager import PresetManager
+from presets.presetManager import PresetManager
 
 
 minimalBody = { "id": "id_test",

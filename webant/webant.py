@@ -77,7 +77,7 @@ def initLoggers(logLevel=logging.WARNING):
         '%(asctime)s [%(name)s] [%(levelname)s] %(message)s')
     streamHandler.setFormatter(formatter)
     loggers = map(logging.getLogger,
-                  ('webant', 'fsdb', 'agherant', 'config_utils'))
+                  ('webant', 'fsdb', 'presets', 'agherant', 'config_utils'))
     for logger in loggers:
         logger.setLevel(logLevel)
         if not logger.handlers:

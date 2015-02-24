@@ -1,12 +1,12 @@
 import os
 import sys
 import msgfmt
-from pprint import pprint
 
 from setuptools import setup
 from setuptools.command.install_lib import install_lib as _install_lib
 from setuptools.command.develop import develop as _develop
 from distutils.command.build import build as _build
+from setuptools.command.test import test as TestCommand
 from distutils.cmd import Command
 
 
@@ -68,6 +68,18 @@ class develop(_develop):
         _develop.run(self)
 
 
+class NoseTestCommand(TestCommand):
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = []
+        self.test_suite = True
+
+    def run_tests(self):
+        # Run nose ensuring that argv simulates running nosetests directly
+        import nose
+        nose.run_exit(argv=['nosetests'])
+
+
 def read(fname):
     with open(os.path.join(os.path.dirname(__file__), fname)) as buf:
         return buf.read()
@@ -97,10 +109,10 @@ setup(name='libreant',
             'webant': ['translations/*/*/*.mo']
         },
       include_package_data=True,
-      tests_require=['nose'],
-      test_suite='nose.collector',
+      tests_require=['nose', 'coverage'],
       zip_safe=False,
       cmdclass={'build': build,
+                'test': NoseTestCommand,
                 'install_lib': install_lib,
                 'develop':develop,
                 'compile_translations': compile_translations },

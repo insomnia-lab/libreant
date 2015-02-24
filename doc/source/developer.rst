@@ -146,6 +146,9 @@ Unit tests are very important: if your function is testable, you should test
 it. Yes, even if its behaviour might seem obvious. Unit tests are important
 both as a way of avoding regressions and as a way to document how something
 behaves.
+If the code you are writing is not easy to test, you should think of making it
+more easy to test. Running unit tests is easy: ``python setup.py test`` is
+enough. This command will run all the tests, and print a coverage summary. Ensure that the module you are writing has high coverage, and investigate what has not been covered.
 
 Contributing
 ------------

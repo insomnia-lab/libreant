@@ -7,12 +7,9 @@ a bit. Or maybe you want to develop, and need some "lorem ipsum" data. This howt
 HowTo
 =====
 
-First of all, make sure that elasticsearch is running. If it it not, run
-```sh
-./run_es.sh -d
-```
+First of all, make sure that elasticsearch is running.
 
-"Enter" your virtualenv. This typically is
+Then, "enter" your virtualenv. This typically is
 
 ```sh
 source ve/bin/activate

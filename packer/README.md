@@ -19,8 +19,7 @@ user,id=interna,hostfwd=tcp::5000-:5000,restrict=off -device virtio-net-pci,netd
 Inside the vm, run
 
 ```sh
-cd libreant
-./run_all_web.sh ../libre_ve
+./libre_ve/bin/webant
 ```
 
 Then open your "normal" browser, and open http://localhost:5000/

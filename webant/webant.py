@@ -1,16 +1,17 @@
-from flask import Flask, render_template, request, abort, Response, redirect, url_for, send_file
+import tempfile
+import logging
+import os
+
+from flask import Flask, render_template, request, abort, Response, redirect, url_for, send_file, make_response
 from werkzeug import secure_filename
 from utils import requestedFormat
 from flask_bootstrap import Bootstrap
 from elasticsearch import Elasticsearch, NotFoundError
+from elasticsearch import exceptions as es_exceptions
 from flask.ext.babel import Babel, gettext
 from presets import PresetManager
 from constants import isoLangs
 from fsdb import Fsdb
-
-import tempfile
-import logging
-import os
 
 from libreantdb import DB
 from agherant import agherant
@@ -25,6 +26,7 @@ class LibreantCoreApp(Flask):
             'PRESET_PATHS': [],  # defaultPreset should be loaded as default?
             'FSDB_PATH': "",
             'SECRET_KEY': 'really insecure, please change me!',
+            'ES_HOSTS': None,
             'ES_INDEXNAME': 'libreant'
         }
         defaults.update(conf)
@@ -42,7 +44,8 @@ class LibreantCoreApp(Flask):
 
     def get_db(self):
         if self._db is None:
-            db = DB(Elasticsearch(), index_name=self.config['ES_INDEXNAME'])
+            db = DB(Elasticsearch(hosts=self.config['ES_HOSTS']),
+                    index_name=self.config['ES_INDEXNAME'])
             db.setup_db()
             # deferring assignment is meant to avoid that we _first_ cache the
             # DB object, then the setup_db() fails. This will let us with a
@@ -214,9 +217,16 @@ def create_app():
         # no file found with the given digest
         return renderErrorPage(message='no file found with id "{}" on item "{}"'.format(fileid, bookid), httpCode=404)
 
+
     @app.babel.localeselector
     def get_locale():
         return request.accept_languages.best_match(['en', 'it', 'sq'])
+
+    @app.errorhandler(es_exceptions.ConnectionError)
+    def handle_elasticsearch_down(error):
+        rsp = make_response('DB connection error', 503)
+        app.logger.error("Error connecting to DB; check your configuration")
+        return rsp
 
     return app
 

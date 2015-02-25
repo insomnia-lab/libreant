@@ -139,7 +139,8 @@ class DB(object):
         return self._search({}, size=size)
 
     def get_last_inserted(self, size=30):
-        query = { "query" : { "match_all" : {} },
+        query = { "fields": [ "_timestamp", "_source"],
+                  "query" : { "match_all" : {} },
                   "sort" : [ {"_timestamp": "desc"} ] }
         return self._search(body=query, size=size)
 

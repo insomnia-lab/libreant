@@ -8,7 +8,10 @@ from utils import requestedFormat
 from flask_bootstrap import Bootstrap
 from elasticsearch import Elasticsearch, NotFoundError
 from elasticsearch import exceptions as es_exceptions
-from flask.ext.babel import Babel, gettext
+from flask.ext.babel import Babel, gettext, get_locale
+from babel.dates import format_timedelta
+from datetime import datetime
+
 from presets import PresetManager
 from constants import isoLangs
 from fsdb import Fsdb
@@ -217,10 +220,27 @@ def create_app():
         # no file found with the given digest
         return renderErrorPage(message='no file found with id "{}" on item "{}"'.format(fileid, bookid), httpCode=404)
 
+    @app.route('/recents')
+    def recents():
+        res = app.get_db().get_last_inserted()['hits']['hits']
+        return render_template('recents.html', items=res)
 
     @app.babel.localeselector
     def get_locale():
         return request.accept_languages.best_match(['en', 'it', 'sq'])
+
+    @app.template_filter('timepassedformat')
+    def timepassedformat_filter(timestamp):
+        '''given a timestamp it returns a string
+           repesenting the time delta from now formatted in human language
+           according to the client locale
+        '''
+        try:
+            delta = datetime.fromtimestamp(timestamp/1000) - datetime.now()
+            return format_timedelta(delta, granularity='second', add_direction=True, format='medium', locale=get_locale())
+        except Exception:
+            app.logger.exception("could not convert timestamp")
+            return timestamp
 
     @app.errorhandler(es_exceptions.ConnectionError)
     def handle_elasticsearch_down(error):

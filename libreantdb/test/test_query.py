@@ -12,7 +12,7 @@ from . import db, api, cleanall
 @with_setup(cleanall)
 def test_start_hasindex():
     '''If the test is setup properly, we got our own index'''
-    assert 'test-book' in db.es.indices.status()['indices']
+    assert db.index_name in db.es.indices.status()['indices']
 
 
 @with_setup(cleanall)

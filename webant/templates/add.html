@@ -5,13 +5,30 @@
 Libreant | {%trans%}Add new{%endtrans%} {{ preset.id if preset else "item"}}
 {% endblock %}
 
+{% block styles %}
+{{super()}}
+<noscript><style>
+.only-script{ display: none;}
+</style></noscript>
+{% endblock %}
+
 {% block navbar %}
 {% import 'navbar.html' as navbar %}
 {{navbar.navbar()}}
 {% endblock %}
 
 {% block content %}
-    <div class="container">
+    <noscript>
+        <div class="container">
+            <div class="alert alert-danger" role="alert">
+                <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+                <span class="sr-only">Error:</span>
+                <strong>{%trans%}Error{%endtrans%}:</strong> {%trans%}Could not load the page because your browser does not support javascript{%endtrans%}
+            </div>
+        </div>
+    </noscript>
+
+    <div class="container only-script">
         
         <header><center><h1>{%trans%}Add new{%endtrans%} {{ preset.id if preset else "item"}}</h1></center></header>
         <br>

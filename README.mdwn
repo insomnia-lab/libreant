@@ -65,7 +65,7 @@ virtualenv -p /usr/bin/python2 --no-site-packages ve
 ./ve/bin/python setup.py develop
 ```
 ###Run
-`./run_all_dev.sh ve`
+./ve/bin/webant
 
 Implementation
 ==============
@@ -76,7 +76,8 @@ Testing
 =======
 
 There is not much, still. However, after having activated your virtualenv, start
-elasticsearch, running `./run_es.sh -d`
+elasticsearch: how to do so depend on your distribution. On debian, it is `sudo service start elasticsearch`.
+On systemd-based distribution, it is `sudo systemctl start elasticsearch.service`
 
 Now you can run the unit test, using `nosetests -c nose.cfg`
 

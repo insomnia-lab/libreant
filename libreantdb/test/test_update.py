@@ -4,7 +4,7 @@ An index will be reserved to the tests.
 '''
 from __future__ import print_function
 
-from nose.tools import eq_, with_setup, ok_
+from nose.tools import eq_, with_setup, ok_, raises
 
 from . import db, cleanall
 
@@ -58,3 +58,39 @@ def test_update_book_merge_fts_correct():
     src = res['hits']['hits'][0]['_source']
     ok_('mondo' in src['_text_it'])
     ok_('fine' in src['_text_it'])
+
+
+@raises(Exception)
+@with_setup(cleanall, cleanall)
+def test_update_nonexisting_download_count():
+    id_ = db.add_book(doc_type='book',
+                      body=dict(title='La fine', _language='it'))['_id']
+    db.increment_download_count(id_, 0)
+
+
+@raises(Exception)
+@with_setup(cleanall, cleanall)
+def test_download_count_mandatory():
+    '''
+    if you omit the field download_count, increment_download_count will fail
+    '''
+    id_ = db.add_book(doc_type='book',
+                      body=dict(title='La fine', _language='it',
+                                _files=[dict(
+                                    name='foo'
+                                )]))['_id']
+    db.increment_download_count(id_, 0)
+
+
+@with_setup(cleanall, cleanall)
+def test_update_download_count():
+    id_ = db.add_book(doc_type='book',
+                      body=dict(title='La fine', _language='it',
+                                _files=[dict(
+                                    download_count=0,
+                                    name='foo'
+                                )]))['_id']
+    for i in xrange(1, 5):
+        db.increment_download_count(id_, 0)
+        book = db.get_book_by_id(id_)
+        eq_(book['_source']['_files'][0]['download_count'], i)

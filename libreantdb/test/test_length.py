@@ -9,12 +9,12 @@ from nose.tools import eq_, with_setup
 from . import db, cleanall
 
 
-@with_setup(cleanall)
+@with_setup(cleanall, cleanall)
 def test_no_elements():
     eq_(len(db), 0)
 
 
-@with_setup(cleanall)
+@with_setup(cleanall, cleanall)
 def test_one_element():
     eq_(len(db), 0)
     db.add_book(doc_type='book',

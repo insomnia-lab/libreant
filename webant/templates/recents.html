@@ -1,0 +1,91 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/fixes.html" as fixes %}
+
+{% block title %}
+Libreant | {%trans%}Recents{%endtrans%}
+{% endblock %}
+
+{% block styles %}
+ {{super()}}
+<link href="{{ url_for('static', filename='item_list.css') }}" rel="stylesheet">
+<style>
+header{
+    margin-top:10px;
+    margin-bottom: 20px;
+}
+header h1{
+    margin-top:0px;
+    margin-bottom: 0px;
+    font-size: 2.3em;
+    
+}
+</style>
+{% endblock %}
+
+{% block navbar %}
+{% import 'navbar.html' as navbar %}
+{{ navbar.navbar(search=True) }}
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <header>
+        <h1>{%trans%}Recently added items{%endtrans%}</h1>
+    </header>
+
+    {% if not items %}
+
+    {%trans%}Sorry, no items added since now{%endtrans%}
+
+    {% else %}
+
+    <div id="item-list">
+        {% for b in items %}
+        <div class="item-div row dyn-href" href="{{url_for('view_book', bookid=b['_id'])}}">
+            <div class="item-thumbnail hidden-xs col-sm-1 vcenter">
+                <a href="{{url_for('view_book', bookid=b['_id'])}}">
+			        <span class="glyphicon glyphicon-book"></span>
+		        </a>
+            </div>
+            <div class="item-main col-xs-12 col-sm-7 vcenter">
+                <a class="item-title" href="{{url_for('view_book', bookid=b['_id'])}}"
+                    {% if 'title' in b['_source'] %}
+                        title="{{ b['_source']['title'] }}"> {{ b['_source']['title'] }}
+                    {% else %}
+                        title="{{ b['_id'] }}"> {{ b['_id'] }}
+                    {% endif %}
+                </a>
+            </div>
+            <div class="item-sub col-xs-12 col-sm-3 vcenter">
+                <ul class="meta-list list-unstyled">
+                    <li><span class="glyphicon glyphicon-time"></span>
+                        <date data-timestamp="{{ b['fields']['_timestamp'] }}">
+                            {{ b['fields']['_timestamp'] | timepassedformat }}
+                        </date></li>
+                    <li><span class="glyphicon glyphicon-flag"></span> {{ b['_source']['_language'] }}</li>
+                    {% if 'actors' in b['_source'] %}
+                    <li><span class="glyphicon glyphicon-user"></span> {{ b['_source']['actors'] | join(',')}}</li>
+                    {% endif %}
+                    {% if '_files' in b['_source'] %}
+                    <li><span class="glyphicon glyphicon-file"></span> {{ b['_source']['_files'] | length }}</li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% endif %}
+</div>
+{% endblock content %}
+
+{% block scripts %}
+    {{super()}}
+    <script>
+    $("date").each( function(){
+        var date = new Date($(this).data("timestamp"));
+        $(this).text(date.toLocaleString());
+    });
+    </script>
+    <script src="{{ url_for('static', filename='js/ui-main.js') }}"></script>    
+{% endblock scripts %}

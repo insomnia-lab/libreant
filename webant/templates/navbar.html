@@ -1,4 +1,4 @@
-{% macro navbar(search=True,search_query="") %}
+{% macro navbar(search=True, search_query="") %}
 <nav class="navbar navbar-default">
     <div class="container-fluid">
         
@@ -13,8 +13,13 @@
         
         <div class="navbar-collapse collapse" id="navbar-responsive-collapse">
             <ul class="nav navbar-nav">
-                <li><a href="{{url_for('add')}}">{%trans%}Add item{%endtrans%}</a></li>
+                <li class="{{ "active" if request.path == url_for('add') }}">
+                    <a href="{{url_for('add')}}">{%trans%}Add item{%endtrans%}</a>
+                </li>
                 <li><a href="{{url_for('search',q='*:*')}}">{%trans%}All items{%endtrans%}</a></li>
+                <li class="{{ "active" if request.path == url_for('recents') }}">
+                    <a href="{{url_for('recents')}}">{%trans%}Recently added{%endtrans%}</a>
+                </li>
             </ul>
             {% if search %}
             <form class="navbar-form navbar-left" action="{{url_for('search')}}">

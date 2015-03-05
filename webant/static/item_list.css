@@ -41,3 +41,12 @@
     cursor: pointer;
     background-color: #F7F7F7;
 }
+
+.list-warning{
+    text-align: center;
+}
+.list-warning .alert{
+    display: inline-block;
+    margin: auto;
+    margin-top: 25px;
+}

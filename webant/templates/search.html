@@ -13,68 +13,78 @@ Libreant | {%trans%}Search{%endtrans%}: {{ query }}
 
 {% block styles %}
 {{ super() }}
-<link href="{{ url_for('static', filename='search.css') }}" rel="stylesheet">
+<link href="{{ url_for('static', filename='item_list.css') }}" rel="stylesheet">
+<style>
+.search-info{
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-size: 0.8em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+</style>
 {% endblock styles %}
 
 {% block content %}
 <div class="container">
     
-    {{ searchbar.searchbar(search_query=query) }}
-
-    <hr />
+    <div class="search-bar">
+        {{ searchbar.searchbar(search_query=query) }}
+    </div>
     
-    <hgroup class="mb20">
-        <h1>{%trans%}Search results{%endtrans%}</h1>
-        <h2 class="lead">{% trans num = books|length%}{{num}} result was found for{%pluralize%}{{num}} results were found for{% endtrans %} <strong>{{ query }}</strong></h2>
-    </hgroup>
+    <div class='search-info'>
+        {% trans num = books|length%}{{num}} result was found for{%pluralize%}{{num}} results were found for{% endtrans %} <strong>{{ query }}</strong>
+    </div>
 
     {% if not books %}
 
-    {%trans%}Sorry, no books matching your query{%endtrans%}
+    <div class="list-warning">
+        <div class="alert alert-warning" role="alert">
+            <span class="sr-only">Error:</span>
+            {%trans%}Sorry, no books matching your query{%endtrans%}
+        </div>
+    <div>
 
     {% else %}
 
-    <section class="search-results col-xs-12 col-sm-12 col-md-12 col-lg-12">
-    {% for b in books %}
-    <article class="search-result row">
-        <div class="hidden-xs col-sm-2 col-md-2 col-lg-2">
-		{# TODO: cover image #}
-		<a href="{{url_for('view_book', bookid=b['_id'])}}"
-			title="{{ b['_id'] }}">
-			<i class="glyphicon glyphicon-book"
-				style="font-size: 400%"></i>
-		</a>
+    <div id="item-list">
+        {% for b in books %}
+        <div class="item-div row dyn-href" href="{{url_for('view_book', bookid=b['_id'])}}">
+            <div class="item-thumbnail hidden-xs col-sm-1 vcenter">
+                <a href="{{url_for('view_book', bookid=b['_id'])}}">
+			        <span class="glyphicon glyphicon-book"></span>
+		        </a>
+            </div>
+            <div class="item-main col-xs-12 col-sm-7 vcenter">
+                <a class="item-title" href="{{url_for('view_book', bookid=b['_id'])}}"
+                    {% if 'title' in b %}
+                        title="{{ b['title'] }}"> {{ b['title'] }}
+                    {% else %}
+                        title="{{ b['_id'] }}"> {{ b['_id'] }}
+                    {% endif %}
+                </a>
+            </div>
+            <div class="item-sub col-xs-12 col-sm-3 vcenter">
+                <ul class="meta-list list-unstyled">
+                    <li><span class="glyphicon glyphicon-flag"></span> {{ b['_language'] }}</li>
+                    {% if 'actors' in b %}
+                    <li><span class="glyphicon glyphicon-user"></span> {{ b['actors'] | join(',')}}</li>
+                    {% endif %}
+                    {% if '_files' in b %}
+                    <li><span class="glyphicon glyphicon-file"></span> {{ b['_files'] | length }}</li>
+                    {% endif %}
+                </ul>
+            </div>
         </div>
-        <div class="col-xs-12 col-sm-5 col-md-6 col-lg-6 excerpet">
-            <h3><a href="{{url_for('view_book', bookid=b['_id'])}}" title="{{ b['_id'] }}">
-                    {{ b['title'] }}
-            </a></h3>
-        </div>
-        <div class="col-xs-12 col-sm-5 col-md-4 col-lg-4">
-            <ul class="meta-search">
-                {# TODO: default_locale.languages[b['_language']] #}
-                <li><i class="glyphicon glyphicon-flag"></i> <span>{{ b['_language'] }}</span></li>
-                {% if 'actors' in b %}
-                <li><i class="glyphicon glyphicon-user"></i> <span>{{ b['actors'] | join(',')}}</span></li>
-                {% endif %}
-                {% if 'tags' in b %}
-                <li><i class="glyphicon glyphicon-tags"></i> <span>{{ b['tags'] | join(',') }}</span></li>
-                {% endif %}
-                {% if 'location' in b %}
-		<li><i class="glyphicon glyphicon-globe"></i>
-			<span title="{{ b['location'] }}">
-				{{ b['location'] | truncate(length=40) }}
-			</span></li>
-                {% endif %}
-            </ul>
-        </div>
-        <span class="clearfix border"></span>
-    </article>
-    {% endfor %}
-    </section>
+        {% endfor %}
+    </div>
 
     {% endif %}
-
 </div>
 {% endblock content %}
 
+{% block scripts %}
+    {{super()}}
+    <script src="{{ url_for('static', filename='js/ui-main.js') }}"></script>
+{% endblock scripts %}

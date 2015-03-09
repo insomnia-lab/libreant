@@ -70,18 +70,27 @@ Libreant | {%trans%}Add new{%endtrans%} {{ preset.id if preset else "item"}}
             </div>
 
             {% if preset %}
-            {% for key in preset.properties.keys() %}
+            {% for prop in preset.properties %}
             <div class="form-group">
                 <div class="col-sm-12">
                     <div class="input-group">
-                        <label class="input-group-addon" for="title">{{ key }}</label>
-                        <input id="{{ key }}" name="field_{{ key }}" placeholder="{{ key }}" class="form-control" type="text" {% if preset.properties[key]['required'] == True %} required {% endif %}>
-                        {% if preset.properties[key]['description'] %}
+                        <label class="input-group-addon" for="title">{{ prop.id }}</label>
+                        {% if prop.type == "enum" %}
+                        <select id="{{ prop.id }}" name="field_{{ prop.id }}" placeholder="{{ prop.id }}" class="form-control" type="text" {% if prop.required %} required {% endif %}>
+                            <option value="" disabled selected>{%trans%}Select a value{%endtrans%}</option>
+                            {% for value in prop.values %}
+                            <option value="{{ value }}">{{ value }}</option>
+                            {% endfor %}
+                        </select>
+                        {% else %}
+                        <input id="{{ prop.id }}" name="field_{{ prop.id }}" placeholder="{{ prop.id }}" class="form-control" type="text" {% if prop.required %} required {% endif %}>
+                        {% endif %}
+                        {% if prop.description %}
                         <span class="glyphicon glyphicon-info-sign input-group-addon"
                         tabindex="-1" data-trigger="focus" data-placement="auto right" data-toggle="popover"
                         title="{%trans%}Description{%endtrans%}"
                         aria-label="{%trans%}Field description{%endtrans%}"
-                        data-content="{{ preset.properties[key]['description'] }}"/>
+                        data-content="{{ prop.description }}"/>
                         {% endif %}
                     </div>
                 </div>
@@ -91,7 +100,7 @@ Libreant | {%trans%}Add new{%endtrans%} {{ preset.id if preset else "item"}}
         
             <br>
 
-            {% if not preset or preset.allowUpload %}
+            {% if not preset or preset.allow_upload %}
             <div id="files-div">
                 <div id="files-array"></div>
                 

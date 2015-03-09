@@ -1,0 +1,18 @@
+{
+    "id":"book",
+    "description":"simple book",
+    "properties": [{ "id": "category",
+                     "description": "book format",
+                     "required": true,
+                     "type": "enum",
+                     "values": ["scientific","novel","children"]
+                   },
+                   { "id": "title",
+                     "description": "a required property",
+                     "required": true
+                   },
+                   { "id": "actors", 
+                     "description":"people who contributed to the creation of the work" 
+                   }],
+    "allow_upload": true
+}

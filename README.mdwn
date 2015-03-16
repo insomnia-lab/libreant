@@ -71,14 +71,3 @@ Implementation
 ==============
 
 Main building blocks are python, elasticsearch, flask.
-
-Testing
-=======
-
-There is not much, still. However, after having activated your virtualenv, start
-elasticsearch: how to do so depend on your distribution. On debian, it is `sudo service start elasticsearch`.
-On systemd-based distribution, it is `sudo systemctl start elasticsearch.service`
-
-Now you can run the unit test, using `nosetests -c nose.cfg`
-
-For a more complete testing, wait a bit longer ;)

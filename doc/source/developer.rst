@@ -142,13 +142,26 @@ Never put "binary" files in the source. With 'binary', we also mean "any files
 that could be obtained programmatically, instead of being included". This is,
 for example, the case of ``.mo``.
 
-Unit tests are very important: if your function is testable, you should test
-it. Yes, even if its behaviour might seem obvious. Unit tests are important
-both as a way of avoding regressions and as a way to document how something
-behaves.
-If the code you are writing is not easy to test, you should think of making it
-more easy to test. Running unit tests is easy: ``python setup.py test`` is
-enough. This command will run all the tests, and print a coverage summary. Ensure that the module you are writing has high coverage, and investigate what has not been covered.
+Testing
+--------
+
+Unit tests are important both as a way of avoding regressions and as a way to document how something behaves.  
+If your code is testable, you should test it. Yes, even if its behaviour might seem obvious.
+If the code you are writing is not easy to test, you should think of making it more easy to test.  
+We use `nose suite`_ to manage tests, you can run all the tests and read coverage summary by typing::
+
+    python setup.py test
+
+We usually follow these simple steps to add new tests:
+ - create a directory named ``test`` inside the package you want to test
+ - create a file in this folder ``test/test_sometestgroupname.py``
+ - write `test functions`_ inside this file
+
+We prefer not to have one big file, instead we usually group tests in different file with a representative name.
+You can see a full testing example in the `preset package`_.
+
+.. note::
+    if you are testing a new package remember to add the new package name in ``cover-package`` directive under ``[nosetests]`` section in `/setup.cfg`_ file.
 
 Contributing
 ------------
@@ -174,3 +187,7 @@ git repository.
 .. _PEP8: https://www.python.org/dev/peps/pep-0008/
 .. _restructured-text directives: http://sphinx-doc.org/domains.html#signatures
 .. _restructuredText: http://sphinx-doc.org/rest.html
+.. _nose suite: https://nose.readthedocs.org
+.. _test functions: http://nose.readthedocs.org/en/latest/writing_tests.html#test-functions
+.. _/setup.cfg: https://github.com/insomnia-lab/libreant/blob/master/setup.cfg
+.. _preset package: https://github.com/insomnia-lab/libreant/tree/master/presets/test

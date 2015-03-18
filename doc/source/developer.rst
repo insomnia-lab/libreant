@@ -28,6 +28,9 @@ Flask_ is a "web microframework for python". It's not a big and complete solutio
 Installation
 -------------
 
+Using virtualenv
+~~~~~~~~~~~~~~~~~
+
 We will assume that you are familiar with virtualenvs. If you are not, please
 get familiar!
 
@@ -41,6 +44,18 @@ You are now ready to develop. And you'll find two tools inside your ``$PATH``:
 ``webant`` and ``libreant-manage``. The first is a webserver that will run the
 web interface of libreant, while the second is a command-line tool to do basic
 operations with libreant: exporting/importing items, searching, etc.
+
+Using Vagrant
+~~~~~~~~~~~~~~
+
+Download, setup and run the virtual machine::
+
+    vagrant up
+
+You will then find in /liberant the installation of liberant, you can login to
+the vagrant box with::
+
+    vagrant ssh
 
 Code design
 ------------------

@@ -22,52 +22,6 @@ You can read up-to-date documentation on [Read the docs](http://libreant.readthe
 
 
 Quick start
------------
+------------
 
-## Vagrant based setup
-
-Run:
-
-```
-vagrant up
-```
-
-You will then find in /liberant the installation of liberant, you can login to
-the vagrant box with:
-
-```
-vagrant ssh
-```
-
-###Dependencies
-####Debian
-Download and install the Public Signing Key for elasticsearch repo
-```sh
-wget -qO - http://packages.elasticsearch.org/GPG-KEY-elasticsearch | sudo apt-key add -
-```
-Add elasticsearch repos in /etc/apt/sources.list.d/elasticsearch.list
-```sh
-deb http://packages.elasticsearch.org/elasticsearch/1.4/debian stable main
-```
-*important choose version 1.2 or higher because "more like this" query doesn't work for elasticsearch < 1.2*  
-Install all necessary packages
-```sh
-sudo apt-get update && sudo apt-get install python python-dev python-virtualenv openjdk-7-jre-headless elasticsearch
-```
-####Arch
-Install all necessary packages
-`pacman -S elasticsearch python2 python2-virtualenv`
-
-###Install
-Create a virtual env and install libreant in it 
-```sh
-virtualenv -p /usr/bin/python2 --no-site-packages ve
-./ve/bin/python setup.py develop
-```
-###Run
-./ve/bin/webant
-
-Implementation
-==============
-
-Main building blocks are python, elasticsearch, flask.
+To install libreant please refer to the [official installation guide](http://libreant.readthedocs.org/en/latest/sysadmin.html#installation)

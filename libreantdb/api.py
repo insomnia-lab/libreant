@@ -209,9 +209,12 @@ class DB(object):
         '''
         Increment the download counter of a specific file
         '''
-        body = { 'script' : 'ctx._source._files[%i].download_count += 1' % fileIndex }
-        return self.es.update(index=self.index_name, id=id,
-                             doc_type=doc_type, body=body)
+        body = self.es.get(index=self.index_name, id=id, doc_type='book', _source_include='_files')['_source']
+
+        body['_files'][fileIndex]['download_count'] += 1
+
+        self.es.update(index=self.index_name, id=id,
+                             doc_type=doc_type, body={"doc":body})
     # End operations }}}
 
 # vim: set fdm=marker fdl=1:

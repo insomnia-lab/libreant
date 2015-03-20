@@ -2,4 +2,4 @@ recursive-include webant/static *
 recursive-include webant/templates *
 recursive-include webant/translations *.po
 include msgfmt.py
-include README.mdwn
+include README.rst

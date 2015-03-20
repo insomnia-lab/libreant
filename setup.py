@@ -85,7 +85,7 @@ def read(fname):
         return buf.read()
 
 setup(name='libreant',
-      version='0.1',
+      version='0.1.2',
       description='{e,}book archive focused on small grass root archives, distributed search, low assumptions',
       long_description=read('README.rst'),
       author='insomnialab',

@@ -87,7 +87,7 @@ def read(fname):
 setup(name='libreant',
       version='0.1',
       description='{e,}book archive focused on small grass root archives, distributed search, low assumptions',
-      long_description=read('README.mdwn'),
+      long_description=read('README.rst'),
       author='insomnialab',
       author_email='insomnialab@hacari.org',
       url='https://github.com/insomnia-lab/libreant',

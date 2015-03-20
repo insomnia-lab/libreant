@@ -94,3 +94,19 @@ def test_update_download_count():
         db.increment_download_count(id_, 0)
         book = db.get_book_by_id(id_)
         eq_(book['_source']['_files'][0]['download_count'], i)
+
+
+@with_setup(cleanall, cleanall)
+def test_update_download_count():
+    ''' download count shouldn't modify other fields '''
+    id_ = db.add_book(doc_type='book',
+                      body=dict(title='La fine', _language='it',
+                                _files=[dict(
+                                    download_count=4,
+                                    name='foo'
+                                )]))['_id']
+    prev = db.get_book_by_id(id_)
+    db.increment_download_count(id_, 0)
+    after = db.get_book_by_id(id_)
+    prev['_source']['_files'][0]['download_count'] += 1
+    eq_(prev['_source'], after['_source'])

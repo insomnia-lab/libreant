@@ -101,7 +101,7 @@ setup(name='libreant',
           'flask-script',
           'Flask',
           'opensearch',
-          'Fsdb'
+          'Fsdb==0.2.5'
       ],
       package_data = {
             # If any package contains *.mo include them:

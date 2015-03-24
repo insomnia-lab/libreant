@@ -15,6 +15,7 @@ from datetime import datetime
 from presets import PresetManager
 from constants import isoLangs
 from fsdb import Fsdb
+from fsdb.hashtools import calc_file_digest
 
 from libreantdb import DB
 from agherant import agherant
@@ -145,18 +146,18 @@ def create_app():
 
         files = []
         for upName,upFile in request.files.items():
-            tmpFile, tmpFilePath = tempfile.mkstemp()
+            tmpFileFd, tmpFilePath = tempfile.mkstemp()
             upFile.save(tmpFilePath)
             fileInfo = {}
             fileInfo['name'] = secure_filename(upFile.filename)
             fileInfo['size'] = os.path.getsize(tmpFilePath)
             fileInfo['mime'] = upFile.mimetype
             fileInfo['notes'] = request.form[upName+'_notes']
-            fileInfo['sha1'] = Fsdb.fileDigest(tmpFilePath, algorithm="sha1")
+            fileInfo['sha1'] = calc_file_digest(tmpFilePath, algorithm="sha1")
             fileInfo['download_count'] = 0
             fsdb_id = app.fsdb.add(tmpFilePath)
-            # close and delete tmpFile
-            os.close(tmpFile)
+            # close and delete tmpFileFd
+            os.close(tmpFileFd)
             os.remove(tmpFilePath)
 
             fileInfo['fsdb_id'] = fsdb_id
@@ -213,7 +214,7 @@ def create_app():
                 except:
                     app.logger.warn("Cannot increment download count",
                                     exc_info=1)
-                return send_file(app.fsdb.getFilePath(file['fsdb_id']),
+                return send_file(app.fsdb.get_file_path(file['fsdb_id']),
                                   mimetype=file['mime'],
                                   attachment_filename=file['name'],
                                   as_attachment=True)

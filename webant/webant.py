@@ -8,7 +8,7 @@ from utils import requestedFormat
 from flask_bootstrap import Bootstrap
 from elasticsearch import Elasticsearch, NotFoundError
 from elasticsearch import exceptions as es_exceptions
-from flask.ext.babel import Babel, gettext, get_locale
+from flask.ext.babel import Babel, gettext
 from babel.dates import format_timedelta
 from datetime import datetime
 import uuid
@@ -110,14 +110,14 @@ def create_app():
             src['_id'] = b['_id']
             src['_score'] = b['_score']
             books.append(src)
-        format = requestedFormat( request,
-                                  ['text/html',
-                                   'text/xml',
-                                   'application/rss+xml',
-                                   'opensearch'])
+        format = requestedFormat(request,
+                                 ['text/html',
+                                  'text/xml',
+                                  'application/rss+xml',
+                                  'opensearch'])
         if format == 'text/html':
             return render_template('search.html', books=books, query=query)
-        if format in ['opensearch', 'text/xml','application/rss+xml']:
+        if format in ['opensearch', 'text/xml', 'application/rss+xml']:
             return Response(render_template('opens.xml',
                                             books=books, query=query),
                             mimetype='text/xml')
@@ -126,9 +126,9 @@ def create_app():
     def upload():
         requiredFields = ['_language']
         optFields = ['_preset']
-        body= {}
+        body = {}
 
-        #TODO check also for preset consistency?
+        # TODO check also for preset consistency?
 
         for requiredField in requiredFields:
             if requiredField not in request.form:
@@ -141,12 +141,12 @@ def create_app():
             if optField in request.form:
                 body[optField] = request.form[optField]
 
-        for key,value in request.form.items():
+        for key, value in request.form.items():
             if key.startswith('field_') and value:
                 body[key[6:]] = value
 
         attachments = []
-        for upName,upFile in request.files.items():
+        for upName, upFile in request.files.items():
             tmpFileFd, tmpFilePath = tempfile.mkstemp()
             upFile.save(tmpFilePath)
             fileInfo = {}
@@ -154,7 +154,7 @@ def create_app():
             fileInfo['name'] = secure_filename(upFile.filename)
             fileInfo['size'] = os.path.getsize(tmpFilePath)
             fileInfo['mime'] = upFile.mimetype
-            fileInfo['notes'] = request.form[upName+'_notes']
+            fileInfo['notes'] = request.form[upName + '_notes']
             fileInfo['sha1'] = calc_file_digest(tmpFilePath, algorithm="sha1")
             fileInfo['download_count'] = 0
             fsdb_id = app.fsdb.add(tmpFilePath)
@@ -169,7 +169,7 @@ def create_app():
             body['_attachments'] = attachments
 
         addedItem = app.get_db().add_book(doc_type="book", body=body)
-        return redirect(url_for('view_book',bookid=addedItem['_id']))
+        return redirect(url_for('view_book', bookid=addedItem['_id']))
 
     @app.route('/add', methods=['GET'])
     def add():
@@ -193,9 +193,9 @@ def create_app():
     @app.route('/view/<bookid>')
     def view_book(bookid):
         try:
-             b = app.get_db().get_book_by_id(bookid)
-        except NotFoundError, e:
-             return renderErrorPage(message='no element found with id "{}"'.format(bookid), httpCode=404)
+            b = app.get_db().get_book_by_id(bookid)
+        except NotFoundError:
+            return renderErrorPage(message='no element found with id "{}"'.format(bookid), httpCode=404)
         similar = app.get_db().mlt(bookid)['hits']['hits'][:10]
         return render_template('details.html',
                                book=b['_source'], bookid=bookid,
@@ -205,7 +205,7 @@ def create_app():
     def download_attachment(volumeID, attachmentID):
         try:
             b = app.get_db().get_book_by_id(volumeID)
-        except NotFoundError, e:
+        except NotFoundError:
             return renderErrorPage(message='no volume found with id "{}"'.format(volumeID), httpCode=404)
         if '_attachments' not in b['_source']:
             return renderErrorPage(message='volume with id "{}" has no files attached'.format(volumeID), httpCode=404)
@@ -217,9 +217,9 @@ def create_app():
                     app.logger.warn("Cannot increment download count",
                                     exc_info=1)
                 return send_file(app.fsdb.get_file_path(attachment['fsdb_id']),
-                                  mimetype=attachment['mime'],
-                                  attachment_filename=attachment['name'],
-                                  as_attachment=True)
+                                 mimetype=attachment['mime'],
+                                 attachment_filename=attachment['name'],
+                                 as_attachment=True)
         # no file found with the given digest
         return renderErrorPage(message='no attachment found with id "{}" on volume "{}"'.format(attachmentID, volumeID), httpCode=404)
 
@@ -239,7 +239,7 @@ def create_app():
            according to the client locale
         '''
         try:
-            delta = datetime.fromtimestamp(timestamp/1000) - datetime.now()
+            delta = datetime.fromtimestamp(timestamp / 1000) - datetime.now()
             return format_timedelta(delta, granularity='second', add_direction=True, format='medium', locale=get_locale())
         except Exception:
             app.logger.exception("could not convert timestamp")
@@ -256,6 +256,7 @@ def create_app():
 
 def renderErrorPage(message, httpCode):
     return render_template('error.html', message=message, code=httpCode), httpCode
+
 
 def main():
     app = create_app()

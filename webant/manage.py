@@ -21,7 +21,7 @@ manager = Manager(app)
                 help='How many results to return. Defaults to all')
 def db_export(size):
     '''outputs an exportable version of the db'''
-    db = app.get_db()
+    db = app.archivant._db
     if int(size) < 0:
         size = len(db)
     for item in db.get_all_books(size=size)['hits']['hits']:
@@ -31,7 +31,7 @@ def db_export(size):
 @manager.command
 def db_item_export(item_id):
     '''exports a single item'''
-    db = app.get_db()
+    db = app.archivant._db
     book = db.get_book_by_id(item_id)
     print(json.dumps(book))
 
@@ -39,7 +39,7 @@ def db_item_export(item_id):
 @manager.command
 def db_search(query):
     '''query, just like you would do in a browser'''
-    db = app.get_db()
+    db = app.archivant._db
     res = db.user_search(query)['hits']['hits']
     for item in res:
         print(item['_id'])
@@ -53,7 +53,7 @@ def db_import(filename, language='it'):
         buf = sys.stdin
     else:
         buf = open(filename)
-    db = app.get_db()
+    db = app.archivant._db
     i = 0
     for line in buf:
         i += 1

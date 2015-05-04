@@ -6,7 +6,7 @@ from flask import Flask, render_template, request, abort, Response, redirect, ur
 from werkzeug import secure_filename
 from utils import requestedFormat
 from flask_bootstrap import Bootstrap
-from elasticsearch import Elasticsearch, NotFoundError
+from elasticsearch import NotFoundError
 from elasticsearch import exceptions as es_exceptions
 from flask.ext.babel import Babel, gettext
 from babel.dates import format_timedelta
@@ -15,10 +15,9 @@ import uuid
 
 from presets import PresetManager
 from constants import isoLangs
-from fsdb import Fsdb
 from fsdb.hashtools import calc_file_digest
 
-from libreantdb import DB
+from archivant import Archivant
 from agherant import agherant
 from webserver_utils import gevent_run
 import config_utils
@@ -36,27 +35,14 @@ class LibreantCoreApp(Flask):
         }
         defaults.update(conf)
         self.config.update(defaults)
-        self._db = None
+
         if not self.config['FSDB_PATH']:
             if not self.config['DEBUG']:
                 raise ValueError('FSDB_PATH cannot be empty')
             else:
-                fsdbPath = os.path.join(tempfile.gettempdir(), 'libreant_fsdb')
-                self.fsdb = Fsdb(fsdbPath)
-        else:
-            self.fsdb = Fsdb(self.config['FSDB_PATH'])
+                self.config['FSDB_PATH'] = os.path.join(tempfile.gettempdir(), 'libreant_fsdb')
+        self.archivant = Archivant(conf={k: self.config[k] for k in ('FSDB_PATH', 'ES_HOSTS', 'ES_INDEXNAME')})
         self.presetManager = PresetManager(self.config['PRESET_PATHS'])
-
-    def get_db(self):
-        if self._db is None:
-            db = DB(Elasticsearch(hosts=self.config['ES_HOSTS']),
-                    index_name=self.config['ES_INDEXNAME'])
-            db.setup_db()
-            # deferring assignment is meant to avoid that we _first_ cache the
-            # DB object, then the setup_db() fails. This will let us with a
-            # non-setupped DB
-            self._db = db
-        return self._db
 
 
 class LibreantViewApp(LibreantCoreApp):
@@ -79,7 +65,7 @@ def initLoggers(logLevel=logging.WARNING):
         '%(asctime)s [%(name)s] [%(levelname)s] %(message)s')
     streamHandler.setFormatter(formatter)
     loggers = map(logging.getLogger,
-                  ('webant', 'fsdb', 'presets', 'agherant', 'config_utils', 'libreantdb'))
+                  ('webant', 'fsdb', 'presets', 'agherant', 'config_utils', 'libreantdb', 'archivant'))
     for logger in loggers:
         logger.setLevel(logLevel)
         if not logger.handlers:
@@ -103,7 +89,7 @@ def create_app():
         query = request.args.get('q', None)
         if query is None:
             abort(400, "No query given")
-        res = app.get_db().user_search(query)['hits']['hits']
+        res = app.archivant._db.user_search(query)['hits']['hits']
         books = []
         for b in res:
             src = b['_source']
@@ -157,7 +143,7 @@ def create_app():
             fileInfo['notes'] = request.form[upName + '_notes']
             fileInfo['sha1'] = calc_file_digest(tmpFilePath, algorithm="sha1")
             fileInfo['download_count'] = 0
-            fsdb_id = app.fsdb.add(tmpFilePath)
+            fsdb_id = app.archivant._fsdb.add(tmpFilePath)
             # close and delete tmpFileFd
             os.close(tmpFileFd)
             os.remove(tmpFilePath)
@@ -168,7 +154,7 @@ def create_app():
         if len(attachments) > 0:
             body['_attachments'] = attachments
 
-        addedItem = app.get_db().add_book(doc_type="book", body=body)
+        addedItem = app.archivant._db.add_book(doc_type="book", body=body)
         return redirect(url_for('view_book', bookid=addedItem['_id']))
 
     @app.route('/add', methods=['GET'])
@@ -193,10 +179,10 @@ def create_app():
     @app.route('/view/<bookid>')
     def view_book(bookid):
         try:
-            b = app.get_db().get_book_by_id(bookid)
+            b = app.archivant._db.get_book_by_id(bookid)
         except NotFoundError:
             return renderErrorPage(message='no element found with id "{}"'.format(bookid), httpCode=404)
-        similar = app.get_db().mlt(bookid)['hits']['hits'][:10]
+        similar = app.archivant._db.mlt(bookid)['hits']['hits'][:10]
         return render_template('details.html',
                                book=b['_source'], bookid=bookid,
                                similar=similar)
@@ -204,7 +190,7 @@ def create_app():
     @app.route('/download/<volumeID>/<attachmentID>')
     def download_attachment(volumeID, attachmentID):
         try:
-            b = app.get_db().get_book_by_id(volumeID)
+            b = app.archivant._db.get_book_by_id(volumeID)
         except NotFoundError:
             return renderErrorPage(message='no volume found with id "{}"'.format(volumeID), httpCode=404)
         if '_attachments' not in b['_source']:
@@ -212,20 +198,20 @@ def create_app():
         for attachment in b['_source']['_attachments']:
             if attachment['id'] == attachmentID:
                 try:
-                    app.get_db().increment_download_count(volumeID, attachmentID)
+                    app.archivant._db.increment_download_count(volumeID, attachmentID)
                 except:
                     app.logger.warn("Cannot increment download count",
                                     exc_info=1)
-                return send_file(app.fsdb.get_file_path(attachment['fsdb_id']),
+                return send_file(app.archivant._fsdb.get_file_path(attachment['fsdb_id']),
                                  mimetype=attachment['mime'],
                                  attachment_filename=attachment['name'],
                                  as_attachment=True)
-        # no file found with the given digest
+        # no attachment found with the given id
         return renderErrorPage(message='no attachment found with id "{}" on volume "{}"'.format(attachmentID, volumeID), httpCode=404)
 
     @app.route('/recents')
     def recents():
-        res = app.get_db().get_last_inserted()['hits']['hits']
+        res = app.archivant._db.get_last_inserted()['hits']['hits']
         return render_template('recents.html', items=res)
 
     @app.babel.localeselector

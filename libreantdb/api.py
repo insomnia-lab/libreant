@@ -1,5 +1,7 @@
 from __future__ import print_function
 
+import logging
+log = logging.getLogger(__name__)
 
 def validate_book(body):
     '''
@@ -46,7 +48,12 @@ class DB(object):
         # book_validator can adjust the book, and raise if it's not valid
         self.book_validator = validate_book
 
-    def setup_db(self):
+    def setup_db(self, wait_for_ready=True):
+        ''' Create and configure index
+
+            If `wait_for_ready` is True, this function will block until
+            status for `self.index_name` will be `yellow`
+        '''
         maps = {
             'book': {  # this need to be the document type!
                 # special elasticsearch field
@@ -104,6 +111,10 @@ class DB(object):
             self.es.indices.create(index=self.index_name,
                                    body={'settings': settings,
                                          'mappings': maps})
+        if wait_for_ready:
+            log.debug('waiting for index "{}" to be ready'.format(self.index_name))
+            self.es.cluster.health(index=self.index_name, level='index', wait_for_status='yellow')
+            log.debug('index "{}" is now ready'.format(self.index_name))
     # End setup }}
 
     # Queries {{{2

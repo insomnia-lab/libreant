@@ -2,11 +2,11 @@
 This module will connect to your elasticsearch instance.
 An index will be reserved to the tests.
 '''
-from __future__ import print_function
 
 from nose.tools import eq_, with_setup, raises
 
-from . import db, api, cleanall
+from libreantdb import api
+from . import db, cleanall
 
 
 @with_setup(cleanall)

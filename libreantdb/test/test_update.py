@@ -2,7 +2,6 @@
 This module will connect to your elasticsearch instance.
 An index will be reserved to the tests.
 '''
-from __future__ import print_function
 
 from nose.tools import eq_, with_setup, ok_, raises
 
@@ -97,7 +96,7 @@ def test_update_download_count():
 
 
 @with_setup(cleanall, cleanall)
-def test_update_download_count():
+def test_update_download_count_no_other_mod():
     ''' download count shouldn't modify other fields '''
     id_ = db.add_book(doc_type='book',
                       body=dict(title='La fine', _language='it',

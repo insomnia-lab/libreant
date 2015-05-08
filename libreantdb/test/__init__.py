@@ -1,9 +1,6 @@
-import sys
-sys.path.append('..')
-sys.path.append('../..')
+from libreantdb import DB
 from elasticsearch import Elasticsearch
 
-from libreantdb import api, DB
 
 es = Elasticsearch()
 db = DB(es, index_name='test-book')

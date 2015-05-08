@@ -3,7 +3,6 @@ This module will connect to your elasticsearch instance.
 An index will be reserved to the tests.
 '''
 from __future__ import print_function
-from pprint import pprint
 
 from nose.tools import eq_, with_setup
 
@@ -33,9 +32,9 @@ def test_fts_it_plural_manual():
     query = 'donne'
     db.add_book(doc_type='book', body=dict(title=title, _language='it'))
     for phrase in title, query:
-        pprint(db.es.indices.analyze(index=db.index_name,
-                                     body=phrase,
-                                     analyzer='it_analyzer')['tokens'])
+        db.es.indices.analyze(index=db.index_name,
+                              body=phrase,
+                              analyzer='it_analyzer')['tokens']
     db.es.indices.refresh(index=db.index_name)
 
     res = db._search(db._get_search_field('_text_it', query))
@@ -50,9 +49,9 @@ def test_fts_it_plural():
     wrong_query = 'donato'
     db.add_book(doc_type='book', body=dict(title=title, _language='it'))
     for phrase in title, query:
-        pprint(db.es.indices.analyze(index=db.index_name,
-                                     body=phrase,
-                                     analyzer='it_analyzer')['tokens'])
+        db.es.indices.analyze(index=db.index_name,
+                              body=phrase,
+                              analyzer='it_analyzer')['tokens']
     db.es.indices.refresh(index=db.index_name)
 
     res = db.get_books_multilanguage(query)
@@ -69,9 +68,9 @@ def test_fts_en_manual():
     wrong_query = 'love'
     db.add_book(doc_type='book', body=dict(title=title, _language='en'))
     for phrase in title, query, wrong_query:
-        pprint(db.es.indices.analyze(index=db.index_name,
-                                     body=phrase,
-                                     analyzer='english')['tokens'])
+        db.es.indices.analyze(index=db.index_name,
+                              body=phrase,
+                              analyzer='english')['tokens']
     db.es.indices.refresh(index=db.index_name)
     res = db._search(db._get_search_field('_text_en', 'living'))
     eq_(res['hits']['total'], 1)
@@ -89,9 +88,9 @@ def test_fts_en_verbs():
     wrong_query = 'love'
     db.add_book(doc_type='book', body=dict(title=title, _language='en'))
     for phrase in title, query, wrong_query:
-        pprint(db.es.indices.analyze(index=db.index_name,
-                                     body=phrase,
-                                     analyzer='english')['tokens'])
+        db.es.indices.analyze(index=db.index_name,
+                              body=phrase,
+                              analyzer='english')['tokens']
     db.es.indices.refresh(index=db.index_name)
     res = db.get_books_multilanguage('living')
     eq_(res['hits']['total'], 1)
@@ -109,9 +108,9 @@ def test_fts_en_plural():
     wrong_query = 'buggy'
     db.add_book(doc_type='book', body=dict(title=title, _language='en'))
     for phrase in title, query, wrong_query:
-        pprint(db.es.indices.analyze(index=db.index_name,
-                                     body=phrase,
-                                     analyzer='english')['tokens'])
+        db.es.indices.analyze(index=db.index_name,
+                              body=phrase,
+                              analyzer='english')['tokens']
     db.es.indices.refresh(index=db.index_name)
     res = db.get_books_multilanguage('bugs')
     eq_(res['hits']['total'], 1)

@@ -188,6 +188,11 @@ class DB(object):
         book['body'] = validate_book(book['body'])
         return self.es.create(index=self.index_name, **book)
 
+    def delete_book(self, id):
+        self.es.delete(index=self.index_name,
+                       id=id,
+                       doc_type='book')
+
     def update_book(self, id, doc_type='book', body={}):
         '''
         Update a book. The "body" is merged with the current one.

@@ -7,8 +7,8 @@ Installation
 System dependencies
 ^^^^^^^^^^^^^^^^^^^^
 
-Debian
-~~~~~~~
+Debian wheezy / Ubuntu
+~~~~~~~~~~~~~~~~~~~~~~
 
 .. highlight:: bash
 
@@ -54,8 +54,8 @@ Execution
 Start elsticsearch
 ^^^^^^^^^^^^^^^^^^^
 
-Debian
-~~~~~~~
+Debian wheezy / Ubuntu
+~~~~~~~~~~~~~~~~
 
 Start elasticsearch service::
 

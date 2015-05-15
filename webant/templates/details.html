@@ -20,7 +20,7 @@ Libreant | {{ book['title'] if 'title' in book else bookid }}
     </header>
      {% if '_attachments' in book %}
         {% for file in  book['_attachments'] %}
-             <a class="btn btn-default" href="{{ url_for('download_book', bookid=bookid, fileid=file['sha1']) }}">
+             <a class="btn btn-default" href="{{ url_for('download_attachment', volumeID=bookid, attachmentID=file['id']) }}">
                 <div class="row" style="display: flex; align-items: center;">
                     <div class="col-xs-1">
                         <span class="glyphicon glyphicon glyphicon-download-alt" aria-hidden="true"></span>

@@ -11,6 +11,7 @@ from elasticsearch import exceptions as es_exceptions
 from flask.ext.babel import Babel, gettext, get_locale
 from babel.dates import format_timedelta
 from datetime import datetime
+import uuid
 
 from presets import PresetManager
 from constants import isoLangs
@@ -149,6 +150,7 @@ def create_app():
             tmpFileFd, tmpFilePath = tempfile.mkstemp()
             upFile.save(tmpFilePath)
             fileInfo = {}
+            fileInfo['id'] = uuid.uuid4().hex
             fileInfo['name'] = secure_filename(upFile.filename)
             fileInfo['size'] = os.path.getsize(tmpFilePath)
             fileInfo['mime'] = upFile.mimetype
@@ -199,27 +201,27 @@ def create_app():
                                book=b['_source'], bookid=bookid,
                                similar=similar)
 
-    @app.route('/download/<bookid>/<fileid>')
-    def download_book(bookid, fileid):
+    @app.route('/download/<volumeID>/<attachmentID>')
+    def download_attachment(volumeID, attachmentID):
         try:
-            b = app.get_db().get_book_by_id(bookid)
+            b = app.get_db().get_book_by_id(volumeID)
         except NotFoundError, e:
-            return renderErrorPage(message='no element found with id "{}"'.format(bookid), httpCode=404)
+            return renderErrorPage(message='no volume found with id "{}"'.format(volumeID), httpCode=404)
         if '_attachments' not in b['_source']:
-            return renderErrorPage(message='element with id "{}" has no files attached'.format(bookid), httpCode=404)
-        for i,file in enumerate(b['_source']['_attachments']):
-            if file['sha1'] == fileid:
+            return renderErrorPage(message='volume with id "{}" has no files attached'.format(volumeID), httpCode=404)
+        for attachment in b['_source']['_attachments']:
+            if attachment['id'] == attachmentID:
                 try:
-                    app.get_db().increment_download_count(bookid, i)
+                    app.get_db().increment_download_count(volumeID, attachmentID)
                 except:
                     app.logger.warn("Cannot increment download count",
                                     exc_info=1)
-                return send_file(app.fsdb.get_file_path(file['fsdb_id']),
-                                  mimetype=file['mime'],
-                                  attachment_filename=file['name'],
+                return send_file(app.fsdb.get_file_path(attachment['fsdb_id']),
+                                  mimetype=attachment['mime'],
+                                  attachment_filename=attachment['name'],
                                   as_attachment=True)
         # no file found with the given digest
-        return renderErrorPage(message='no file found with id "{}" on item "{}"'.format(fileid, bookid), httpCode=404)
+        return renderErrorPage(message='no attachment found with id "{}" on volume "{}"'.format(attachmentID, volumeID), httpCode=404)
 
     @app.route('/recents')
     def recents():

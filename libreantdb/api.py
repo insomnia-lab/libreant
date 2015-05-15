@@ -1,7 +1,8 @@
-from __future__ import print_function
+from elasticsearch import NotFoundError
 
 import logging
 log = logging.getLogger(__name__)
+
 
 def validate_book(body):
     '''
@@ -221,16 +222,22 @@ class DB(object):
                              doc_type=doc_type, body={'doc': book})
         return ret
 
-    def increment_download_count(self, id, fileIndex, doc_type='book'):
+    def increment_download_count(self, id, attachmentID, doc_type='book'):
         '''
         Increment the download counter of a specific file
         '''
         body = self.es.get(index=self.index_name, id=id, doc_type='book', _source_include='_attachments')['_source']
 
-        body['_attachments'][fileIndex]['download_count'] += 1
+        for attachment in body['_attachments']:
+            if attachment['id'] == attachmentID:
+                attachment['download_count'] += 1
+                self.es.update(index=self.index_name,
+                               id=id,
+                               doc_type=doc_type,
+                               body={"doc":{'_attachments': body['_attachments']}})
+                return
+        raise NotFoundError("No attachment could be found with id: {}".format(attachmentID))
 
-        self.es.update(index=self.index_name, id=id,
-                             doc_type=doc_type, body={"doc":body})
     # End operations }}}
 
 # vim: set fdm=marker fdl=1:

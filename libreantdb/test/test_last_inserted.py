@@ -1,5 +1,6 @@
-from nose.tools import eq_, with_setup, ok_
+from nose.tools import eq_, with_setup
 from . import db, cleanall
+
 
 @with_setup(cleanall, cleanall)
 def test_last():
@@ -8,7 +9,7 @@ def test_last():
     '''
     num = 4
     ids = []
-    for i in range(0,num):
+    for i in range(0, num):
         ids.append(db.add_book(doc_type='book',
                    body=dict(title='ma che ne so {}'.format(i), _language='it'))['_id'])
     db.es.indices.refresh(index=db.index_name)
@@ -16,6 +17,7 @@ def test_last():
     eq_(len(hits), num)
     for hit, id in zip(hits, reversed(ids)):
         eq_(hit['_id'], id)
+
 
 @with_setup(cleanall, cleanall)
 def test_has_timestamp():

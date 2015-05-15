@@ -1,8 +1,6 @@
-from __future__ import print_function
-
 from nose.tools import eq_, raises, assert_raises
 
-from .import api
+from libreantdb import api
 
 validate_book = api.validate_book
 collectStrings = api.collectStrings

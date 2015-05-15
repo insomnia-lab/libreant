@@ -2,10 +2,7 @@
 More like this
 '''
 
-from __future__ import print_function
-
 from nose.tools import eq_, with_setup
-
 from . import db, cleanall
 
 
@@ -75,7 +72,7 @@ def test_mlt_en_topic():
 
 
 @with_setup(cleanall, cleanall)
-def test_mlt_en_topic():
+def test_mlt_en_topic_2():
     '''MLT: There are two books; one about same topic, one totally different'''
     b = dict(title='On the origins of Africa',
              actors=['marco', 'giulio'],

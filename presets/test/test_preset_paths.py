@@ -12,11 +12,19 @@ from presets.presetManager import PresetManager
 
 
 minimalBody = { "id": "id_test",
-                    "properties": []
-                  }
+                "properties": [] }
 
-def json_tmp_file(**kwargs):
-    return NamedTemporaryFile(delete=False, suffix=".json", **kwargs)
+tmpDir = None
+
+def setUpModule():
+    global tmpDir
+    tmpDir = mkdtemp(prefix='libreant_presets_tests')
+
+def tearDownModule():
+    rmtree(tmpDir)
+
+def json_tmp_file():
+    return NamedTemporaryFile(delete=False, dir=tmpDir, suffix=".json")
 
 def test_sigle_file():
     ''' test single file loding'''
@@ -24,7 +32,6 @@ def test_sigle_file():
     file.write(json.dumps(minimalBody))
     file.close()
     p = PresetManager(file.name, strict=True)
-    os.unlink(file.name)
     assert minimalBody['id'] in p.presets
 
 
@@ -73,10 +80,10 @@ def test_folders():
     presetBodies = list()
     num = 5
     for i in range(num):
-        folders.append(mkdtemp())
+        folders.append(mkdtemp(dir=tmpDir))
         presetBodies.append(minimalBody.copy())
         presetBodies[i]['id'] = "id_" + str(i)
-        file = json_tmp_file(dir=folders[i])
+        file = NamedTemporaryFile(delete=False, dir=folders[i], suffix=".json")
         file.write(json.dumps(presetBodies[i]))
         file.close()
 

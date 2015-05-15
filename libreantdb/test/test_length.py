@@ -2,7 +2,6 @@
 This module will connect to your elasticsearch instance.
 An index will be reserved to the tests.
 '''
-from __future__ import print_function
 
 from nose.tools import eq_, with_setup
 

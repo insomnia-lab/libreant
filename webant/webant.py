@@ -144,7 +144,7 @@ def create_app():
             if key.startswith('field_') and value:
                 body[key[6:]] = value
 
-        files = []
+        attachments = []
         for upName,upFile in request.files.items():
             tmpFileFd, tmpFilePath = tempfile.mkstemp()
             upFile.save(tmpFilePath)
@@ -161,10 +161,10 @@ def create_app():
             os.remove(tmpFilePath)
 
             fileInfo['fsdb_id'] = fsdb_id
-            files.append(fileInfo)
+            attachments.append(fileInfo)
 
-        if len(files) > 0:
-            body['_files'] = files
+        if len(attachments) > 0:
+            body['_attachments'] = attachments
 
         addedItem = app.get_db().add_book(doc_type="book", body=body)
         return redirect(url_for('view_book',bookid=addedItem['_id']))
@@ -205,9 +205,9 @@ def create_app():
             b = app.get_db().get_book_by_id(bookid)
         except NotFoundError, e:
             return renderErrorPage(message='no element found with id "{}"'.format(bookid), httpCode=404)
-        if '_files' not in b['_source']:
+        if '_attachments' not in b['_source']:
             return renderErrorPage(message='element with id "{}" has no files attached'.format(bookid), httpCode=404)
-        for i,file in enumerate(b['_source']['_files']):
+        for i,file in enumerate(b['_source']['_attachments']):
             if file['sha1'] == fileid:
                 try:
                     app.get_db().increment_download_count(bookid, i)

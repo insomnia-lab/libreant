@@ -75,7 +75,7 @@ def test_download_count_mandatory():
     '''
     id_ = db.add_book(doc_type='book',
                       body=dict(title='La fine', _language='it',
-                                _files=[dict(
+                                _attachments=[dict(
                                     name='foo'
                                 )]))['_id']
     db.increment_download_count(id_, 0)
@@ -85,14 +85,14 @@ def test_download_count_mandatory():
 def test_update_download_count():
     id_ = db.add_book(doc_type='book',
                       body=dict(title='La fine', _language='it',
-                                _files=[dict(
+                                _attachments=[dict(
                                     download_count=0,
                                     name='foo'
                                 )]))['_id']
     for i in xrange(1, 5):
         db.increment_download_count(id_, 0)
         book = db.get_book_by_id(id_)
-        eq_(book['_source']['_files'][0]['download_count'], i)
+        eq_(book['_source']['_attachments'][0]['download_count'], i)
 
 
 @with_setup(cleanall, cleanall)
@@ -100,12 +100,12 @@ def test_update_download_count_no_other_mod():
     ''' download count shouldn't modify other fields '''
     id_ = db.add_book(doc_type='book',
                       body=dict(title='La fine', _language='it',
-                                _files=[dict(
+                                _attachments=[dict(
                                     download_count=4,
                                     name='foo'
                                 )]))['_id']
     prev = db.get_book_by_id(id_)
     db.increment_download_count(id_, 0)
     after = db.get_book_by_id(id_)
-    prev['_source']['_files'][0]['download_count'] += 1
+    prev['_source']['_attachments'][0]['download_count'] += 1
     eq_(prev['_source'], after['_source'])

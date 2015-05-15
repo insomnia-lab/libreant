@@ -18,8 +18,8 @@ Libreant | {{ book['title'] if 'title' in book else bookid }}
 		    <small>{{ book['actors'] | sort | join(',') }}</small>
 	    </h1>
     </header>
-     {% if '_files' in book %}
-        {% for file in  book['_files'] %}
+     {% if '_attachments' in book %}
+        {% for file in  book['_attachments'] %}
              <a class="btn btn-default" href="{{ url_for('download_book', bookid=bookid, fileid=file['sha1']) }}">
                 <div class="row" style="display: flex; align-items: center;">
                     <div class="col-xs-1">

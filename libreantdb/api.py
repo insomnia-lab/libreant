@@ -225,9 +225,9 @@ class DB(object):
         '''
         Increment the download counter of a specific file
         '''
-        body = self.es.get(index=self.index_name, id=id, doc_type='book', _source_include='_files')['_source']
+        body = self.es.get(index=self.index_name, id=id, doc_type='book', _source_include='_attachments')['_source']
 
-        body['_files'][fileIndex]['download_count'] += 1
+        body['_attachments'][fileIndex]['download_count'] += 1
 
         self.es.update(index=self.index_name, id=id,
                              doc_type=doc_type, body={"doc":body})

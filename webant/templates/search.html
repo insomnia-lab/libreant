@@ -71,8 +71,8 @@ Libreant | {%trans%}Search{%endtrans%}: {{ query }}
                     {% if 'actors' in b %}
                     <li><span class="glyphicon glyphicon-user"></span> {{ b['actors'] | join(',')}}</li>
                     {% endif %}
-                    {% if '_files' in b %}
-                    <li><span class="glyphicon glyphicon-file"></span> {{ b['_files'] | length }}</li>
+                    {% if '_attachments' in b %}
+                    <li><span class="glyphicon glyphicon-file"></span> {{ b['_attachments'] | length }}</li>
                     {% endif %}
                 </ul>
             </div>

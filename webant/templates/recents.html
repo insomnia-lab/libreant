@@ -71,7 +71,7 @@ header h1{
                     {% if 'actors' in b['_source'] %}
                     <li><span class="glyphicon glyphicon-user"></span> {{ b['_source']['actors'] | join(',')}}</li>
                     {% endif %}
-                    {% if '_attachments' in b['_source'] %}
+                    {% if (b['_source']['_attachments']|length) %}
                     <li><span class="glyphicon glyphicon-file"></span> {{ b['_source']['_attachments'] | length }}</li>
                     {% endif %}
                 </ul>

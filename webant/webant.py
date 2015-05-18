@@ -6,7 +6,6 @@ from flask import Flask, render_template, request, abort, Response, redirect, ur
 from werkzeug import secure_filename
 from utils import requestedFormat
 from flask_bootstrap import Bootstrap
-from elasticsearch import NotFoundError
 from elasticsearch import exceptions as es_exceptions
 from flask.ext.babel import Babel, gettext
 from babel.dates import format_timedelta
@@ -148,7 +147,7 @@ def create_app():
         # remove temp files
         for a in attachments:
             os.remove(a['file'])
-        return redirect(url_for('view_book', bookid=addedVolumeID))
+        return redirect(url_for('view_volume', volumeID=addedVolumeID))
 
     @app.route('/add', methods=['GET'])
     def add():
@@ -169,16 +168,15 @@ def create_app():
         return Response(render_template('opens_desc.xml'),
                         mimetype='text/xml')
 
-    @app.route('/view/<bookid>')
-    def view_book(bookid):
+    @app.route('/view/<volumeID>')
+    def view_volume(volumeID):
         try:
-            b = app.archivant._db.get_book_by_id(bookid)
-        except NotFoundError:
-            return renderErrorPage(message='no element found with id "{}"'.format(bookid), httpCode=404)
-        similar = app.archivant._db.mlt(bookid)['hits']['hits'][:10]
+            volume = app.archivant.get_volume(volumeID)
+        except NotFoundException:
+            return renderErrorPage(message='no volume found with id "{}"'.format(volumeID), httpCode=404)
+        similar = app.archivant._db.mlt(volume['id'])['hits']['hits'][:10]
         return render_template('details.html',
-                               book=b['_source'], bookid=bookid,
-                               similar=similar)
+                               volume=volume, similar=similar)
 
     @app.route('/download/<volumeID>/<attachmentID>')
     def download_attachment(volumeID, attachmentID):

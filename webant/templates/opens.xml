@@ -15,7 +15,7 @@
     {% for b in books %}
      <item>
        <title>{{b['title']}}</title>
-       <link>{{url_for('view_book', bookid=b['_id'], _external=True)}}</link>
+       <link>{{url_for('view_volume', volumeID=b['_id'], _external=True)}}</link>
        <description>{{b['title']}}</description>
        <relevance:score>{{b['_score']}}</relevance:score>
      </item>

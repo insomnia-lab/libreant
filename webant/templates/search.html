@@ -50,14 +50,14 @@ Libreant | {%trans%}Search{%endtrans%}: {{ query }}
 
     <div id="item-list">
         {% for b in books %}
-        <div class="item-div row dyn-href" href="{{url_for('view_book', bookid=b['_id'])}}">
+        <div class="item-div row dyn-href" href="{{url_for('view_volume', volumeID=b['_id'])}}">
             <div class="item-thumbnail hidden-xs col-sm-1 vcenter">
-                <a href="{{url_for('view_book', bookid=b['_id'])}}">
+                <a href="{{url_for('view_volume', volumeID=b['_id'])}}">
 			        <span class="glyphicon glyphicon-book"></span>
 		        </a>
             </div>
             <div class="item-main col-xs-12 col-sm-7 vcenter">
-                <a class="item-title" href="{{url_for('view_book', bookid=b['_id'])}}"
+                <a class="item-title" href="{{url_for('view_volume', volumeID=b['_id'])}}"
                     {% if 'title' in b %}
                         title="{{ b['title'] }}"> {{ b['title'] }}
                     {% else %}

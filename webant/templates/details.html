@@ -2,7 +2,7 @@
 {% import "bootstrap/fixes.html" as fixes %}
 
 {% block title %}
-Libreant | {{ book['title'] if 'title' in book else bookid }}
+Libreant | {{ volume['metadata']['title'] if 'title' in volume['metadata'] else volume['id'] }}
 {% endblock %}
 
 {% block navbar %}
@@ -14,20 +14,20 @@ Libreant | {{ book['title'] if 'title' in book else bookid }}
 
 <div class="container">
     <header class="page-header" style="margin-top:0px">
-	    <h1>{{ book['title'] if 'title' in book else bookid }}
-		    <small>{{ book['actors'] | sort | join(',') }}</small>
+	    <h1>{{ volume['metadata']['title'] if 'title' in volume['metadata'] else volume['id'] }}
+		    <small>{{ volume['metadata']['actors'] | sort | join(',') }}</small>
 	    </h1>
     </header>
-     {% if '_attachments' in book %}
-        {% for file in  book['_attachments'] %}
-             <a class="btn btn-default" href="{{ url_for('download_attachment', volumeID=bookid, attachmentID=file['id']) }}">
+     {% if (volume['attachments'] | length) > 0 %}
+        {% for attachment in volume['attachments'] %}
+             <a class="btn btn-default" href="{{ url_for('download_attachment', volumeID=volume['id'], attachmentID=attachment['id']) }}">
                 <div class="row" style="display: flex; align-items: center;">
                     <div class="col-xs-1">
                         <span class="glyphicon glyphicon glyphicon-download-alt" aria-hidden="true"></span>
                     </div>
                     <div class="col-xs-11">
-                        <strong>{{ file['name'] }}</strong>
-                        <p style="margin-bottom: 0px">{{ file['size'] | filesizeformat() }}</p>
+                        <strong>{{ attachment['metadata']['name'] }}</strong>
+                        <p style="margin-bottom: 0px">{{ attachment['metadata']['size'] | filesizeformat() }}</p>
                     </div>
                 </div>
              </a>
@@ -46,11 +46,11 @@ Libreant | {{ book['title'] if 'title' in book else bookid }}
 		        </tr>
 	        </thead>
 	        <tbody>
-	        {% for key in book %}
+	        {% for key in volume['metadata'] %}
                 {% if not key.startswith('_') %}
 	            <tr>
 		            <td>{{ key }}</td>
-		            <td>{{ book[key] }}</td>
+		            <td>{{ volume['metadata'][key] }}</td>
 	            </tr>
                 {% endif %}
 	        {% endfor %}
@@ -64,8 +64,8 @@ Libreant | {{ book['title'] if 'title' in book else bookid }}
 	        <tbody>
 		        {% for book in similar %}
 		        <tr>
-			        <td><a href="{{url_for('view_book',
-			        bookid=book['_id'])}}">
+			        <td><a href="{{url_for('view_volume',
+			        volumeID=book['_id'])}}">
 			        {{ book['_source']['title'] }}
 				        </a></td>
 			        <td>{{ book['_source']['actors'] | join(',') }}</td>

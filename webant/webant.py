@@ -11,11 +11,9 @@ from elasticsearch import exceptions as es_exceptions
 from flask.ext.babel import Babel, gettext
 from babel.dates import format_timedelta
 from datetime import datetime
-import uuid
 
 from presets import PresetManager
 from constants import isoLangs
-from fsdb.hashtools import calc_file_digest
 
 from archivant import Archivant
 from agherant import agherant
@@ -136,26 +134,20 @@ def create_app():
             tmpFileFd, tmpFilePath = tempfile.mkstemp()
             upFile.save(tmpFilePath)
             fileInfo = {}
-            fileInfo['id'] = uuid.uuid4().hex
+            fileInfo['file'] = tmpFilePath
             fileInfo['name'] = secure_filename(upFile.filename)
-            fileInfo['size'] = os.path.getsize(tmpFilePath)
             fileInfo['mime'] = upFile.mimetype
             fileInfo['notes'] = request.form[upName + '_notes']
-            fileInfo['sha1'] = calc_file_digest(tmpFilePath, algorithm="sha1")
-            fileInfo['download_count'] = 0
-            fsdb_id = app.archivant._fsdb.add(tmpFilePath)
-            # close and delete tmpFileFd
+            # close fileDescriptor
             os.close(tmpFileFd)
-            os.remove(tmpFilePath)
 
-            fileInfo['fsdb_id'] = fsdb_id
             attachments.append(fileInfo)
 
-        if len(attachments) > 0:
-            body['_attachments'] = attachments
-
-        addedItem = app.archivant._db.add_book(doc_type="book", body=body)
-        return redirect(url_for('view_book', bookid=addedItem['_id']))
+        addedVolumeID = app.archivant.insert_volume(body, attachments=attachments)
+        # remove temp files
+        for a in attachments:
+            os.remove(a['file'])
+        return redirect(url_for('view_book', bookid=addedVolumeID))
 
     @app.route('/add', methods=['GET'])
     def add():

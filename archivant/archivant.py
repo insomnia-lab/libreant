@@ -5,6 +5,7 @@ from uuid import uuid4
 from fsdb import Fsdb
 from fsdb.hashtools import calc_file_digest, calc_digest
 from copy import deepcopy
+from urlparse import urlparse
 
 from libreantdb import DB
 from exceptions import NotFoundException
@@ -112,6 +113,19 @@ class Archivant():
         log.debug("Requested volume with id:'{}'".format(volumeID))
         return Archivant.normalize_volume(self._req_raw_volume(volumeID))
 
+    def get_attachment(self, volumeID, attachmentID):
+        log.debug("Requested attachment '{}' of the volume '{}'".format(attachmentID, volumeID))
+        rawVolume = self._req_raw_volume(volumeID)
+        for rawAttachment in rawVolume['_source']['_attachments']:
+            if rawAttachment['id'] == attachmentID:
+                return Archivant.normalize_attachment(rawAttachment)
+        raise NotFoundException("could not found attachment '{}' of the volume '{}'".format(attachmentID, volumeID))
+
+    def get_file(self, volumeID, attachmentID):
+        log.debug("Requested file associated with attachment '{}' of the volume '{}'".format(attachmentID, volumeID))
+        attachment = self.get_attachment(volumeID, attachmentID)
+        return self._resolve_url(attachment['url'])
+
     def insert_volume(self, metadata, attachments=[]):
         '''Insert a new volume
 
@@ -194,3 +208,10 @@ class Archivant():
         addedVolume = self._db.add_book(body=volume)
         log.debug("added new volume: '{}'".format(addedVolume['_id']))
         return addedVolume['_id']
+
+    def _resolve_url(self, url):
+        parseResult = urlparse(url)
+        if parseResult.scheme == "fsdb":
+            return self._fsdb[os.path.basename(parseResult.path)]
+        else:
+            raise Exception("url scheme '{}' not supported".format(parseResult.scheme))

@@ -16,6 +16,7 @@ from presets import PresetManager
 from constants import isoLangs
 
 from archivant import Archivant
+from archivant.exceptions import NotFoundException
 from agherant import agherant
 from webserver_utils import gevent_run
 import config_utils
@@ -182,24 +183,16 @@ def create_app():
     @app.route('/download/<volumeID>/<attachmentID>')
     def download_attachment(volumeID, attachmentID):
         try:
-            b = app.archivant._db.get_book_by_id(volumeID)
-        except NotFoundError:
-            return renderErrorPage(message='no volume found with id "{}"'.format(volumeID), httpCode=404)
-        if '_attachments' not in b['_source']:
-            return renderErrorPage(message='volume with id "{}" has no files attached'.format(volumeID), httpCode=404)
-        for attachment in b['_source']['_attachments']:
-            if attachment['id'] == attachmentID:
-                try:
-                    app.archivant._db.increment_download_count(volumeID, attachmentID)
-                except:
-                    app.logger.warn("Cannot increment download count",
-                                    exc_info=1)
-                return send_file(app.archivant._fsdb.get_file_path(attachment['fsdb_id']),
-                                 mimetype=attachment['mime'],
-                                 attachment_filename=attachment['name'],
-                                 as_attachment=True)
-        # no attachment found with the given id
-        return renderErrorPage(message='no attachment found with id "{}" on volume "{}"'.format(attachmentID, volumeID), httpCode=404)
+            attachment = app.archivant.get_attachment(volumeID, attachmentID)
+            file = app.archivant.get_file(volumeID, attachmentID)
+            app.archivant._db.increment_download_count(volumeID, attachmentID)
+            return send_file(file,
+                             mimetype=attachment['metadata']['mime'],
+                             attachment_filename=attachment['metadata']['name'],
+                             as_attachment=True)
+        except NotFoundException:
+            # no attachment found with the given id
+            return renderErrorPage(message='no attachment found with id "{}" on volume "{}"'.format(attachmentID, volumeID), httpCode=404)
 
     @app.route('/recents')
     def recents():

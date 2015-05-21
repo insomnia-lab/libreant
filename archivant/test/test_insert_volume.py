@@ -6,7 +6,7 @@ import os
 from StringIO import StringIO
 
 
-class TestArchivantInsert(TestArchivant):
+class TestArchivantInsertVolume(TestArchivant):
 
     def test_insert_volume(self):
         volume_metadata = self.generate_volume_metadata()

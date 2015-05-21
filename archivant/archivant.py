@@ -161,53 +161,64 @@ class Archivant():
 
         attsData = []
         for index, a in enumerate(attachments):
-            attData = {}
-            # file is not optional
-            if 'file' not in a:
-                raise KeyError("`file` key not found in attachments array at index {}".format(index))
-
-            locator = a['file']
-            if isinstance(locator, basestring):
-                if not os.path.isfile(locator):
-                    raise ValueError("'{}' is not a regular file. attachments array at index {}".format(locator, index))
-                attData['name'] = a['name'] if 'name' in a else os.path.basename(locator)
-                attData['size'] = os.path.getsize(locator)
-                attData['sha1'] = calc_file_digest(locator, algorithm="sha1")
-
-            elif hasattr(locator, 'read') and hasattr(locator, 'seek'):
-                if 'name' in a and a['name']:
-                    attData['name'] = a['name']
-                elif hasattr(locator, 'name'):
-                    attData['name'] = locator.name
-                else:
-                    raise ValueError("Could not assign a name to the file. attachments array at index {}".format(index))
-
-                old_position = locator.tell()
-
-                locator.seek(0, os.SEEK_END)
-                attData['size'] = locator.tell() - old_position
-                locator.seek(old_position, os.SEEK_SET)
-
-                attData['sha1'] = calc_digest(locator, algorithm="sha1")
-                locator.seek(old_position, os.SEEK_SET)
-
-            else:
-                raise ValueError("unsupported file value type {} in attachments array at index {}".format(type(locator), index))
-
-            attData['id'] = uuid4().hex
-            attData['mime'] = a['mime'] if 'mime' in a else None
-            attData['notes'] = a['notes'] if 'notes' in a else ""
-            attData['download_count'] = 0
-            fsdb_id = self._fsdb.add(locator)
-            attData['url'] = "fsdb:///" + fsdb_id
-            attsData.append(attData)
-
+            try:
+                attData = self._assemble_attachment(a['file'], a)
+                attsData.append(attData)
+            except:
+                log.exception("Error while elaborating attachments array at index: {}".format(index))
+                raise
         volume['_attachments'] = attsData
 
         log.debug('constructed volume for insertion: {}'.format(volume))
         addedVolume = self._db.add_book(body=volume)
         log.debug("added new volume: '{}'".format(addedVolume['_id']))
         return addedVolume['_id']
+
+    def _assemble_attachment(self, file, metadata):
+        ''' store file and return a dict containing assembled metadata
+
+            param `file` must be a path or a File Object
+            param `metadata` must be a dict:
+                {
+                  "name"  : "nome_buffo.ext"         # name of the file (extension included) [optional if a path was given]
+                  "mime"  : "application/json"       # mime type of the file [optional]
+                  "notes" : "this file is awesome"   # notes about this file [optional]
+                }
+        '''
+        res = dict()
+
+        if isinstance(file, basestring) and os.path.isfile(file):
+            res['name'] = metadata['name'] if 'name' in metadata else os.path.basename(file)
+            res['size'] = os.path.getsize(file)
+            res['sha1'] = calc_file_digest(file, algorithm="sha1")
+
+        elif hasattr(file, 'read') and hasattr(file, 'seek'):
+            if 'name' in metadata and metadata['name']:
+                res['name'] = metadata['name']
+            elif hasattr(file, 'name'):
+                file['name'] = file.name
+            else:
+                raise ValueError("Could not assign a name to the file")
+
+            old_position = file.tell()
+
+            file.seek(0, os.SEEK_END)
+            res['size'] = file.tell() - old_position
+            file.seek(old_position, os.SEEK_SET)
+
+            res['sha1'] = calc_digest(file, algorithm="sha1")
+            file.seek(old_position, os.SEEK_SET)
+
+        else:
+            raise ValueError("Unsupported file value type: {}".format(type(file)))
+
+        res['id'] = uuid4().hex
+        res['mime'] = metadata['mime'] if 'mime' in metadata else None
+        res['notes'] = metadata['notes'] if 'notes' in metadata else ""
+        res['download_count'] = 0
+        fsdb_id = self._fsdb.add(file)
+        res['url'] = "fsdb:///" + fsdb_id
+        return res
 
     def _resolve_url(self, url):
         parseResult = urlparse(url)

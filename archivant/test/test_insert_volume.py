@@ -129,3 +129,9 @@ class TestArchivantInsert(TestArchivant):
         eq_(att_metadata['size'], s.len)
         eq_(att_metadata['sha1'], calc_digest(StringIO('unascrittaperprovare'),
                                                   algorithm='sha1'))
+
+    @raises(ValueError)
+    def test_insert_volume_with_wrong_file_type(self):
+        volume_metadata = self.generate_volume_metadata()
+        attachments = [{'file': "macheneso"}]
+        self.arc.insert_volume(volume_metadata, attachments=attachments)

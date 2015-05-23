@@ -139,6 +139,13 @@ class Archivant():
                 raise
         self._db.modify_book(volumeID, rawVolume['_source'], version=rawVolume['_version'])
 
+    def delete_volume(self, volumeID):
+        log.debug("Deleting volume: '{}'".format(volumeID))
+        try:
+            self._db.delete_book(volumeID)
+        except NotFoundError:
+            raise NotFoundException("could not found volume with id: '{}'".format(volumeID))
+
     def insert_attachments(self, volumeID, attachments):
         ''' add attachments to an already existing volume '''
         log.debug("adding new attachments to volume '{}': {}".format(volumeID, attachments))

@@ -29,3 +29,25 @@ class TestArchivantAttachmentOperations(TestArchivant):
             self.arc.insert_attachments(volumeID, attachments)
         added_attachments = (self.arc.get_volume(volumeID))['attachments']
         eq_(len(added_attachments), n)
+
+    def test_delete_attachment(self):
+        n = 3
+        volume_metadata = self.generate_volume_metadata()
+        attachments = self.generate_attachments(n)
+        volumeID = self.arc.insert_volume(volume_metadata, attachments=attachments)
+        added_attachments = (self.arc.get_volume(volumeID))['attachments']
+        self.arc.delete_attachments(volumeID, [added_attachments[n-1]['id']])
+        added_attachments = (self.arc.get_volume(volumeID))['attachments']
+        eq_(len(added_attachments), n-1)
+
+    def test_delete_attachments(self):
+        n = 5
+        volume_metadata = self.generate_volume_metadata()
+        attachments = self.generate_attachments(n)
+        volumeID = self.arc.insert_volume(volume_metadata, attachments=attachments)
+        added_attachments = (self.arc.get_volume(volumeID))['attachments']
+        self.arc.delete_attachments(volumeID, [added_attachments[n-1]['id'],
+                                               added_attachments[n-3]['id'],
+                                               added_attachments[0]['id']])
+        added_attachments = (self.arc.get_volume(volumeID))['attachments']
+        eq_(len(added_attachments), n-3)

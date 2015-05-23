@@ -126,6 +126,19 @@ class Archivant():
         attachment = self.get_attachment(volumeID, attachmentID)
         return self._resolve_url(attachment['url'])
 
+    def delete_attachments(self, volumeID, attachmentsID):
+        ''' delete attachments from a volume '''
+        log.debug("deleting attachments from volume '{}': {}".format(volumeID, attachmentsID))
+        rawVolume = self._req_raw_volume(volumeID)
+        insID = [a['id'] for a in rawVolume['_source']['_attachments']]
+        for index, id in enumerate(attachmentsID):
+            try:
+                rawVolume['_source']['_attachments'].pop(insID.index(id))
+            except:
+                log.exception("Error while elaborating attachmentsID array at index: {}".format(index))
+                raise
+        self._db.modify_book(volumeID, rawVolume['_source'], version=rawVolume['_version'])
+
     def insert_attachments(self, volumeID, attachments):
         ''' add attachments to an already existing volume '''
         log.debug("adding new attachments to volume '{}': {}".format(volumeID, attachments))

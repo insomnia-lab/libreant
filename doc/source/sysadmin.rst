@@ -7,8 +7,8 @@ Installation
 System dependencies
 ^^^^^^^^^^^^^^^^^^^^
 
-Debian wheezy / Ubuntu
-~~~~~~~~~~~~~~~~~~~~~~
+Debian wheezy / Debian jessie / Ubuntu
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. highlight:: bash
 
@@ -22,7 +22,7 @@ Add elasticsearch repos in /etc/apt/sources.list.d/elasticsearch.list::
 
 Install requirements::
     
-    sudo apt-get update && sudo apt-get install python2.7 python2.7-dev python-virtualenv openjdk-7-jre-headless elasticsearch
+    sudo apt-get update && sudo apt-get install python2.7 gcc python2.7-dev python-virtualenv openjdk-7-jre-headless elasticsearch
 
 .. note::
     
@@ -67,8 +67,8 @@ Start elasticsearch service::
         
         sudo update-rc.d elasticsearch defaults 95 10
 
-Arch
-~~~~~
+Arch / Debian jessie
+~~~~~~~~~~~~~~~~~~~~
 
 Start elasticsearch service::
     

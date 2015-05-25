@@ -282,6 +282,17 @@ class Archivant():
         res['url'] = "fsdb:///" + fsdb_id
         return res
 
+    def update_volume(self, volumeID, metadata):
+        '''update existing volume metadata
+           the given metadata will substitute the old one
+        '''
+        log.debug('updating volume metadata: {}'.format(volumeID))
+        rawVolume = self._req_raw_volume(volumeID)
+        normalized = self.normalize_volume(rawVolume)
+        normalized['metadata'] = metadata
+        _, newRawVolume = self.denormalize_volume(normalized)
+        self._db.modify_book(volumeID, newRawVolume)
+
     def _resolve_url(self, url):
         parseResult = urlparse(url)
         if parseResult.scheme == "fsdb":

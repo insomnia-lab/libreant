@@ -37,8 +37,8 @@ class TestArchivant():
     def generate_volume_metadata():
         return {'_language': 'en',
                 'key1': 'value1',
-                'key2': 'value2',
-                'key3': 'value3'}
+                'key2': {'key21':'value21','key22':'value22'},
+                'key3': [1,2,3]}
 
     @staticmethod
     def random_string(length):

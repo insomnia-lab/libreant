@@ -52,6 +52,8 @@ class Archivant():
     def normalize_volume(volume):
         '''convert volume metadata from es to archivant format
 
+           This function makes side effect on input volume
+
            output example:
            {
             'id': 'AU0paPZOMZchuDv1iDv8',
@@ -93,7 +95,10 @@ class Archivant():
 
     @staticmethod
     def normalize_attachment(attachment):
-        ''' Convert attachment metadata from es to archivant format '''
+        ''' Convert attachment metadata from es to archivant format
+
+            This function makes side effect on input attachment
+        '''
         res = dict()
         res['type'] = 'attachment'
         res['id'] = attachment['id']
@@ -101,6 +106,30 @@ class Archivant():
         res['url'] = attachment['url']
         del(attachment['url'])
         res['metadata'] = attachment
+        return res
+
+    @staticmethod
+    def denormalize_volume(volume):
+        '''convert volume metadata from archivant to es format'''
+        id = volume['id']
+        res = dict()
+        res.update(volume['metadata'])
+        denorm_attachments = list()
+        for a in volume['attachments']:
+            denorm_attachments.append(Archivant.denormalize_attachment(a))
+        res['_attachments'] = denorm_attachments
+        return id, res
+
+    @staticmethod
+    def denormalize_attachment(attachment):
+        '''convert attachment metadata from archivant to es format'''
+        res = dict()
+        ext = ['id', 'url']
+        for k in ext:
+            if k in attachment['metadata']:
+                raise ValueError("metadata section could not contain special key '{}'".format(k))
+            res[k] = attachment[k]
+        res.update(attachment['metadata'])
         return res
 
     def _req_raw_volume(self, volumeID):

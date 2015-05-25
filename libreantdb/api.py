@@ -227,6 +227,24 @@ class DB(object):
                             doc_type=doc_type, body=validated, version=book['_version'])
         return ret
 
+    def modify_book(self, id, body, doc_type='book', version=None):
+        ''' replace the entire book body
+
+            Instead of `update_book` this function
+            will overwrite the book content with param body
+
+            If param `version` is given, it will be checked that the
+            changes are applied upon that document version.
+            If the document version provided is different from the one actually found,
+            an `elasticsearch.ConflictError` will be raised
+        '''
+        validatedBody = validate_book(body)
+        params = dict(index=self.index_name, id=id, doc_type=doc_type, body=validatedBody)
+        if version:
+            params['version'] = version
+        ret = self.es.index(**params)
+        return ret
+
     def increment_download_count(self, id, attachmentID, doc_type='book'):
         '''
         Increment the download counter of a specific file

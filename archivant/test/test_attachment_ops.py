@@ -1,6 +1,7 @@
 from archivant.test import TestArchivant
+from archivant.exceptions import NotFoundException
 
-from nose.tools import eq_  # , raises, ok_
+from nose.tools import eq_, raises  # , ok_
 
 
 class TestArchivantAttachmentOperations(TestArchivant):
@@ -51,3 +52,26 @@ class TestArchivantAttachmentOperations(TestArchivant):
                                                added_attachments[0]['id']])
         added_attachments = (self.arc.get_volume(volumeID))['attachments']
         eq_(len(added_attachments), n-3)
+
+    @raises(NotFoundException)
+    def test_update_attachment_not_found(self):
+        volume_metadata = self.generate_volume_metadata()
+        volumeID = self.arc.insert_volume(volume_metadata)
+        self.arc.update_attachment(volumeID, 'unidchenonesiste', {})
+
+    @raises(ValueError)
+    def test_update_attachment_bad_field(self):
+        volume_metadata = self.generate_volume_metadata()
+        attachments = self.generate_attachments(1)
+        volumeID = self.arc.insert_volume(volume_metadata, attachments=attachments)
+        added_volume = self.arc.get_volume(volumeID)
+        self.arc.update_attachment(volumeID, added_volume['attachments'][0]['id'], {'12345': 'tantononlopossomodifica'})
+
+    def test_update_attachment(self):
+        volume_metadata = self.generate_volume_metadata()
+        attachments = self.generate_attachments(1)
+        volumeID = self.arc.insert_volume(volume_metadata, attachments=attachments)
+        added_volume = self.arc.get_volume(volumeID)
+        self.arc.update_attachment(volumeID, added_volume['attachments'][0]['id'], {'notes': 'new_notes'})
+        added_volume = self.arc.get_volume(volumeID)
+        eq_(added_volume['attachments'][0]['metadata']['notes'], 'new_notes')

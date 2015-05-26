@@ -293,6 +293,26 @@ class Archivant():
         _, newRawVolume = self.denormalize_volume(normalized)
         self._db.modify_book(volumeID, newRawVolume)
 
+    def update_attachment(self, volumeID, attachmentID, metadata):
+        '''update an existing attachment
+
+           the given metadata dict will be merged with the old one.
+           only the following fields could be updated:
+             [name, mime, notes, download_count]
+        '''
+        log.debug('updating metadata of attachment {} from volume {}'.format(attachmentID, volumeID))
+        modifiable_fields = ['name', 'mime', 'notes', 'download_count']
+        for k in metadata.keys():
+            if k not in modifiable_fields:
+                raise ValueError('Not modifiable field given: {}'.format(k))
+        rawVolume = self._req_raw_volume(volumeID)
+        for attachment in rawVolume['_source']['_attachments']:
+            if attachment['id'] == attachmentID:
+                attachment.update(metadata)
+                self._db.modify_book(volumeID, rawVolume['_source'], rawVolume['_version'])
+                return
+        raise NotFoundException('Could not found attachment with id {} in volume {}'.format(attachmentID, volumeID))
+
     def _resolve_url(self, url):
         parseResult = urlparse(url)
         if parseResult.scheme == "fsdb":

@@ -319,3 +319,9 @@ class Archivant():
             return self._fsdb[os.path.basename(parseResult.path)]
         else:
             raise Exception("url scheme '{}' not supported".format(parseResult.scheme))
+
+    def dangling_files(self):
+        '''iterate over fsdb files no more attached to any volume'''
+        for fid in self._fsdb:
+            if not self._db.file_is_attached('fsdb:///'+fid):
+                yield fid

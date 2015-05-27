@@ -6,7 +6,7 @@ import logging
 from flask.ext.script import Manager
 
 from webant import LibreantCoreApp, initLoggers
-import config_utils
+from utils import config_utils
 
 initLoggers()
 conf = {'DEBUG': True}

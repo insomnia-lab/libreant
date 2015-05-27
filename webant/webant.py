@@ -18,7 +18,7 @@ from archivant.exceptions import NotFoundException
 from agherant import agherant
 from api.blueprint_api import api
 from webserver_utils import gevent_run
-import config_utils
+from utils import config_utils
 
 
 class LibreantCoreApp(Flask):

@@ -7,7 +7,7 @@ from flask.ext.babel import Babel
 import agherant
 from webant import initLoggers
 from webserver_utils import gevent_run
-import config_utils
+from utils import config_utils
 
 
 def create_app():

@@ -325,3 +325,24 @@ class Archivant():
         for fid in self._fsdb:
             if not self._db.file_is_attached('fsdb:///'+fid):
                 yield fid
+
+    def shrink_local_fsdb(self, dangling=True, corrupted=True, dryrun=False):
+        '''shrink local fsdb by removing dangling and/or corrupted files
+
+           return number of deleted files
+        '''
+        log.debug('shrinking local fsdb [danglings={}, corrupted={}]'.format(dangling, corrupted))
+        count = 0
+        if dangling:
+            for fid in self.dangling_files():
+                log.info("shrinking: removing dangling  '{}'".format(fid))
+                if not dryrun:
+                    self._fsdb.remove(fid)
+                count += 1
+        if corrupted:
+            for fid in self._fsdb.corrupted():
+                log.info("shrinking: removing corrupted '{}'".format(fid))
+                if not dryrun:
+                    self._fsdb.remove(fid)
+                count += 1
+        return count

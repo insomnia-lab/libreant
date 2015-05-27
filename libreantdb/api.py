@@ -120,8 +120,7 @@ class DB(object):
 
     # Queries {{{2
     def __len__(self):
-        stats = self.es.indices.stats()
-        return stats['indices'][self.index_name]['total']['docs']['count']
+        return self.es.count(index=self.index_name)['count']
 
     def _search(self, body, size=30):
         return self.es.search(index=self.index_name, body=body, size=size)

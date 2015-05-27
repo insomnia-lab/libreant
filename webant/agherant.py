@@ -7,7 +7,7 @@ from flask import Blueprint, render_template, abort, request, Response, \
 from werkzeug.routing import BuildError
 import opensearch
 
-from utils import memoize, requestedFormat
+from util import memoize, requestedFormat
 
 agherant = Blueprint('agherant', __name__)
 Client = memoize(opensearch.Client)

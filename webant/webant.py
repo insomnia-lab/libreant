@@ -4,7 +4,6 @@ import os
 
 from flask import Flask, render_template, request, abort, Response, redirect, url_for, make_response
 from werkzeug import secure_filename
-from utils import requestedFormat, send_attachment_file
 from flask_bootstrap import Bootstrap
 from elasticsearch import exceptions as es_exceptions
 from flask.ext.babel import Babel, gettext
@@ -13,7 +12,7 @@ from datetime import datetime
 
 from presets import PresetManager
 from constants import isoLangs
-
+from util import requestedFormat, send_attachment_file
 from archivant import Archivant
 from archivant.exceptions import NotFoundException
 from agherant import agherant

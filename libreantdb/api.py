@@ -60,17 +60,15 @@ class DB(object):
                 # special elasticsearch field
                 # http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/mapping-timestamp-field.html
                 # initialized with element creation date, hidden by default in query result
-                "_timestamp" : { "enabled" : "true",
-                                 "store": "yes"},
+                "_timestamp": {"enabled": "true",
+                               "store": "yes"},
                 "properties": {
                     "_text_en": {
                         "type": "string",
-                        "analyzer": "english"
-                    },
+                        "analyzer": "english"},
                     "_text_it": {
                         "type": "string",
-                        "analyzer": "it_analyzer"
-                    }
+                        "analyzer": "it_analyzer"}
                 }
             }
         }
@@ -81,7 +79,7 @@ class DB(object):
         settings = {"analysis": {
             "filter": {
                 "italian_elision": {
-                    "type":         "elision",
+                    "type": "elision",
                     "articles": [
                         "c", "l", "all", "dall", "dell",
                         "nell", "sull", "coll", "pell",
@@ -97,7 +95,7 @@ class DB(object):
             "analyzer": {
                 "it_analyzer": {
                     "type": "custom",
-                    "tokenizer":  "standard",
+                    "tokenizer": "standard",
                     "filter": [
                         "italian_elision",
                         "lowercase",
@@ -120,8 +118,7 @@ class DB(object):
 
     # Queries {{{2
     def __len__(self):
-        stats = self.es.indices.stats()
-        return stats['indices'][self.index_name]['total']['docs']['count']
+        return self.es.count(index=self.index_name)['count']
 
     def _search(self, body, size=30):
         return self.es.search(index=self.index_name, body=body, size=size)
@@ -151,9 +148,9 @@ class DB(object):
         return self._search({}, size=size)
 
     def get_last_inserted(self, size=30):
-        query = { "fields": [ "_timestamp", "_source"],
-                  "query" : { "match_all" : {} },
-                  "sort" : [ {"_timestamp": "desc"} ] }
+        query = {"fields": ["_timestamp", "_source"],
+                 "query": {"match_all": {}},
+                 "sort": [{"_timestamp": "desc"}]}
         return self._search(body=query, size=size)
 
     def get_books_simplequery(self, query):
@@ -234,7 +231,7 @@ class DB(object):
                 self.es.update(index=self.index_name,
                                id=id,
                                doc_type=doc_type,
-                               body={"doc":{'_attachments': body['_attachments']}})
+                               body={"doc": {'_attachments': body['_attachments']}})
                 return
         raise NotFoundError("No attachment could be found with id: {}".format(attachmentID))
 

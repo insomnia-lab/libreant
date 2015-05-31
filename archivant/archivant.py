@@ -52,6 +52,8 @@ class Archivant():
     def normalize_volume(volume):
         '''convert volume metadata from es to archivant format
 
+           This function makes side effect on input volume
+
            output example:
            {
             'id': 'AU0paPZOMZchuDv1iDv8',
@@ -93,7 +95,10 @@ class Archivant():
 
     @staticmethod
     def normalize_attachment(attachment):
-        ''' Convert attachment metadata from es to archivant format '''
+        ''' Convert attachment metadata from es to archivant format
+
+            This function makes side effect on input attachment
+        '''
         res = dict()
         res['type'] = 'attachment'
         res['id'] = attachment['id']
@@ -101,6 +106,30 @@ class Archivant():
         res['url'] = attachment['url']
         del(attachment['url'])
         res['metadata'] = attachment
+        return res
+
+    @staticmethod
+    def denormalize_volume(volume):
+        '''convert volume metadata from archivant to es format'''
+        id = volume['id']
+        res = dict()
+        res.update(volume['metadata'])
+        denorm_attachments = list()
+        for a in volume['attachments']:
+            denorm_attachments.append(Archivant.denormalize_attachment(a))
+        res['_attachments'] = denorm_attachments
+        return id, res
+
+    @staticmethod
+    def denormalize_attachment(attachment):
+        '''convert attachment metadata from archivant to es format'''
+        res = dict()
+        ext = ['id', 'url']
+        for k in ext:
+            if k in attachment['metadata']:
+                raise ValueError("metadata section could not contain special key '{}'".format(k))
+            res[k] = attachment[k]
+        res.update(attachment['metadata'])
         return res
 
     def _req_raw_volume(self, volumeID):
@@ -125,6 +154,39 @@ class Archivant():
         log.debug("Requested file associated with attachment '{}' of the volume '{}'".format(attachmentID, volumeID))
         attachment = self.get_attachment(volumeID, attachmentID)
         return self._resolve_url(attachment['url'])
+
+    def delete_attachments(self, volumeID, attachmentsID):
+        ''' delete attachments from a volume '''
+        log.debug("deleting attachments from volume '{}': {}".format(volumeID, attachmentsID))
+        rawVolume = self._req_raw_volume(volumeID)
+        insID = [a['id'] for a in rawVolume['_source']['_attachments']]
+        for index, id in enumerate(attachmentsID):
+            try:
+                rawVolume['_source']['_attachments'].pop(insID.index(id))
+            except:
+                log.exception("Error while elaborating attachmentsID array at index: {}".format(index))
+                raise
+        self._db.modify_book(volumeID, rawVolume['_source'], version=rawVolume['_version'])
+
+    def delete_volume(self, volumeID):
+        log.debug("Deleting volume: '{}'".format(volumeID))
+        try:
+            self._db.delete_book(volumeID)
+        except NotFoundError:
+            raise NotFoundException("could not found volume with id: '{}'".format(volumeID))
+
+    def insert_attachments(self, volumeID, attachments):
+        ''' add attachments to an already existing volume '''
+        log.debug("adding new attachments to volume '{}': {}".format(volumeID, attachments))
+        rawVolume = self._req_raw_volume(volumeID)
+        for index, a in enumerate(attachments):
+            try:
+                rawAttachment = self._assemble_attachment(a['file'], a)
+                rawVolume['_source']['_attachments'].append(rawAttachment)
+            except:
+                log.exception("Error while elaborating attachments array at index: {}".format(index))
+                raise
+        self._db.modify_book(volumeID, rawVolume['_source'], version=rawVolume['_version'])
 
     def insert_volume(self, metadata, attachments=[]):
         '''Insert a new volume
@@ -161,53 +223,95 @@ class Archivant():
 
         attsData = []
         for index, a in enumerate(attachments):
-            attData = {}
-            # file is not optional
-            if 'file' not in a:
-                raise KeyError("`file` key not found in attachments array at index {}".format(index))
-
-            locator = a['file']
-            if isinstance(locator, basestring):
-                if not os.path.isfile(locator):
-                    raise ValueError("'{}' is not a regular file. attachments array at index {}".format(locator, index))
-                attData['name'] = a['name'] if 'name' in a else os.path.basename(locator)
-                attData['size'] = os.path.getsize(locator)
-                attData['sha1'] = calc_file_digest(locator, algorithm="sha1")
-
-            elif hasattr(locator, 'read') and hasattr(locator, 'seek'):
-                if 'name' in a and a['name']:
-                    attData['name'] = a['name']
-                elif hasattr(locator, 'name'):
-                    attData['name'] = locator.name
-                else:
-                    raise ValueError("Could not assign a name to the file. attachments array at index {}".format(index))
-
-                old_position = locator.tell()
-
-                locator.seek(0, os.SEEK_END)
-                attData['size'] = locator.tell() - old_position
-                locator.seek(old_position, os.SEEK_SET)
-
-                attData['sha1'] = calc_digest(locator, algorithm="sha1")
-                locator.seek(old_position, os.SEEK_SET)
-
-            else:
-                raise ValueError("unsupported file value type {} in attachments array at index {}".format(type(locator), index))
-
-            attData['id'] = uuid4().hex
-            attData['mime'] = a['mime'] if 'mime' in a else None
-            attData['notes'] = a['notes'] if 'notes' in a else ""
-            attData['download_count'] = 0
-            fsdb_id = self._fsdb.add(locator)
-            attData['url'] = "fsdb:///" + fsdb_id
-            attsData.append(attData)
-
+            try:
+                attData = self._assemble_attachment(a['file'], a)
+                attsData.append(attData)
+            except:
+                log.exception("Error while elaborating attachments array at index: {}".format(index))
+                raise
         volume['_attachments'] = attsData
 
         log.debug('constructed volume for insertion: {}'.format(volume))
         addedVolume = self._db.add_book(body=volume)
         log.debug("added new volume: '{}'".format(addedVolume['_id']))
         return addedVolume['_id']
+
+    def _assemble_attachment(self, file, metadata):
+        ''' store file and return a dict containing assembled metadata
+
+            param `file` must be a path or a File Object
+            param `metadata` must be a dict:
+                {
+                  "name"  : "nome_buffo.ext"         # name of the file (extension included) [optional if a path was given]
+                  "mime"  : "application/json"       # mime type of the file [optional]
+                  "notes" : "this file is awesome"   # notes about this file [optional]
+                }
+        '''
+        res = dict()
+
+        if isinstance(file, basestring) and os.path.isfile(file):
+            res['name'] = metadata['name'] if 'name' in metadata else os.path.basename(file)
+            res['size'] = os.path.getsize(file)
+            res['sha1'] = calc_file_digest(file, algorithm="sha1")
+
+        elif hasattr(file, 'read') and hasattr(file, 'seek'):
+            if 'name' in metadata and metadata['name']:
+                res['name'] = metadata['name']
+            elif hasattr(file, 'name'):
+                file['name'] = file.name
+            else:
+                raise ValueError("Could not assign a name to the file")
+
+            old_position = file.tell()
+
+            file.seek(0, os.SEEK_END)
+            res['size'] = file.tell() - old_position
+            file.seek(old_position, os.SEEK_SET)
+
+            res['sha1'] = calc_digest(file, algorithm="sha1")
+            file.seek(old_position, os.SEEK_SET)
+
+        else:
+            raise ValueError("Unsupported file value type: {}".format(type(file)))
+
+        res['id'] = uuid4().hex
+        res['mime'] = metadata['mime'] if 'mime' in metadata else None
+        res['notes'] = metadata['notes'] if 'notes' in metadata else ""
+        res['download_count'] = 0
+        fsdb_id = self._fsdb.add(file)
+        res['url'] = "fsdb:///" + fsdb_id
+        return res
+
+    def update_volume(self, volumeID, metadata):
+        '''update existing volume metadata
+           the given metadata will substitute the old one
+        '''
+        log.debug('updating volume metadata: {}'.format(volumeID))
+        rawVolume = self._req_raw_volume(volumeID)
+        normalized = self.normalize_volume(rawVolume)
+        normalized['metadata'] = metadata
+        _, newRawVolume = self.denormalize_volume(normalized)
+        self._db.modify_book(volumeID, newRawVolume)
+
+    def update_attachment(self, volumeID, attachmentID, metadata):
+        '''update an existing attachment
+
+           the given metadata dict will be merged with the old one.
+           only the following fields could be updated:
+             [name, mime, notes, download_count]
+        '''
+        log.debug('updating metadata of attachment {} from volume {}'.format(attachmentID, volumeID))
+        modifiable_fields = ['name', 'mime', 'notes', 'download_count']
+        for k in metadata.keys():
+            if k not in modifiable_fields:
+                raise ValueError('Not modifiable field given: {}'.format(k))
+        rawVolume = self._req_raw_volume(volumeID)
+        for attachment in rawVolume['_source']['_attachments']:
+            if attachment['id'] == attachmentID:
+                attachment.update(metadata)
+                self._db.modify_book(volumeID, rawVolume['_source'], rawVolume['_version'])
+                return
+        raise NotFoundException('Could not found attachment with id {} in volume {}'.format(attachmentID, volumeID))
 
     def _resolve_url(self, url):
         parseResult = urlparse(url)

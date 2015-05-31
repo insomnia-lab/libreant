@@ -16,6 +16,11 @@ def validate_book(body):
     if len(body['_language']) > 2:
         raise ValueError('invalid language: %s' % body['_language'])
 
+    # remove old _text_* fields
+    for k in body.keys():
+        if k.startswith('_text'):
+            del(body[k])
+
     allfields = collectStrings(body)
     body['_text_%s' % body['_language']] = ' '.join(allfields)
     return body
@@ -202,21 +207,39 @@ class DB(object):
                        id=id,
                        doc_type='book')
 
-    def update_book(self, id, doc_type='book', body={}):
-        '''
-        Update a book. The "body" is merged with the current one.
-        Yes, it is NOT overwritten.
+    def update_book(self, id, body, doc_type='book'):
+        ''' Update a book
+
+            The "body" is merged with the current one.
+            Yes, it is NOT overwritten.
+
+            In case of concurrency conflict
+            this function could raise `elasticsearch.ConflictError`
         '''
         # note that we are NOT overwriting all the _source, just merging
-        doc = {'doc': body}
-        ret = self.es.update(index=self.index_name, id=id,
-                             doc_type=doc_type, body=doc)
-        # text_* fields need to be "updated"; atomicity is provided by the
-        # idempotency of validate_book
-        book = self.get_book_by_id(ret['_id'])['_source']
-        book = validate_book(book)
-        ret = self.es.update(index=self.index_name, id=id,
-                             doc_type=doc_type, body={'doc': book})
+        book = self.get_book_by_id(id)
+        book['_source'].update(body)
+        validated = validate_book(book['_source'])
+        ret = self.es.index(index=self.index_name, id=id,
+                            doc_type=doc_type, body=validated, version=book['_version'])
+        return ret
+
+    def modify_book(self, id, body, doc_type='book', version=None):
+        ''' replace the entire book body
+
+            Instead of `update_book` this function
+            will overwrite the book content with param body
+
+            If param `version` is given, it will be checked that the
+            changes are applied upon that document version.
+            If the document version provided is different from the one actually found,
+            an `elasticsearch.ConflictError` will be raised
+        '''
+        validatedBody = validate_book(body)
+        params = dict(index=self.index_name, id=id, doc_type=doc_type, body=validatedBody)
+        if version:
+            params['version'] = version
+        ret = self.es.index(**params)
         return ret
 
     def increment_download_count(self, id, attachmentID, doc_type='book'):

@@ -12,6 +12,7 @@ from datetime import datetime
 
 from presets import PresetManager
 from constants import isoLangs
+from utils.loggers import initLoggers
 from util import requestedFormat, send_attachment_file
 from archivant import Archivant
 from archivant.exceptions import NotFoundException
@@ -56,19 +57,6 @@ class LibreantViewApp(LibreantCoreApp):
         self.register_blueprint(api, url_prefix='/api/v1')
         Bootstrap(self)
         self.babel = Babel(self)
-
-
-def initLoggers(logLevel=logging.WARNING):
-    streamHandler = logging.StreamHandler()
-    formatter = logging.Formatter(
-        '%(asctime)s [%(name)s] [%(levelname)s] %(message)s')
-    streamHandler.setFormatter(formatter)
-    loggers = map(logging.getLogger,
-                  ('webant', 'fsdb', 'presets', 'agherant', 'config_utils', 'libreantdb', 'archivant'))
-    for logger in loggers:
-        logger.setLevel(logLevel)
-        if not logger.handlers:
-            logger.addHandler(streamHandler)
 
 
 def create_app():

@@ -5,7 +5,7 @@ from flask_bootstrap import Bootstrap
 from flask.ext.babel import Babel
 
 import agherant
-from webant import initLoggers
+from utils.loggers import initLoggers
 from webserver_utils import gevent_run
 from utils import config_utils
 

@@ -78,7 +78,7 @@ class Archivant():
         res['type'] = 'volume'
         res['id'] = volume['_id']
         if '_score' in volume:
-            res['score'] = volume['score']
+            res['score'] = volume['_score']
 
         source = volume['_source']
         attachments = source['_attachments']

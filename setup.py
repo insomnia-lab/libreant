@@ -92,7 +92,7 @@ setup(name='libreant',
       author_email='insomnialab@hacari.org',
       url='https://github.com/insomnia-lab/libreant',
       license='AGPL',
-      packages=['libreantdb', 'webant', 'webant.api', 'presets', 'archivant', 'utils'],
+      packages=['libreantdb', 'webant', 'webant.api', 'presets', 'archivant', 'utils', 'cli'],
       install_requires=[
           'gevent',
           'elasticsearch',
@@ -101,7 +101,8 @@ setup(name='libreant',
           'flask-script',
           'Flask',
           'opensearch',
-          'Fsdb'
+          'Fsdb',
+          'click'
       ],
       package_data = {
           # If any package contains *.mo include them
@@ -118,8 +119,9 @@ setup(name='libreant',
                 'compile_translations': compile_translations},
       entry_points={'console_scripts': [
           'webant=webant.webant:main',
-          'libreant-manage=webant.manage:main',
-          'agherant=webant.agherant_standalone:main'
+          'agherant=webant.agherant_standalone:main',
+          'libreant-db=cli.libreant_db:libreant_db',
+          'libreant-manage=webant.manage:main'
       ]},
       classifiers=[
           "Framework :: Flask",

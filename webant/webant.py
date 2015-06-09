@@ -220,6 +220,14 @@ def create_app():
         app.logger.error("Error connecting to DB; check your configuration")
         return rsp
 
+    @app.errorhandler(404)
+    def not_found(error):
+        return renderErrorPage(message='Not Found', httpCode=404)
+
+    @app.errorhandler(500)
+    def internal_server_error(error):
+        return renderErrorPage(message='Internal Server Error', httpCode=500)
+
     return app
 
 

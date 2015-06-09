@@ -1,5 +1,4 @@
 import tempfile
-import logging
 import os
 
 from flask import Flask, render_template, request, abort, Response, redirect, url_for, make_response
@@ -12,14 +11,12 @@ from datetime import datetime
 
 from presets import PresetManager
 from constants import isoLangs
-from utils.loggers import initLoggers
 from util import requestedFormat, send_attachment_file
 from archivant import Archivant
 from archivant.exceptions import NotFoundException
 from agherant import agherant
 from api.blueprint_api import api
 from webserver_utils import gevent_run
-from utils import config_utils
 
 
 class LibreantCoreApp(Flask):
@@ -59,11 +56,7 @@ class LibreantViewApp(LibreantCoreApp):
         self.babel = Babel(self)
 
 
-def create_app():
-    initLoggers(logNames=["config_utils"])
-    defaults = {'DEBUG': True}
-    conf = config_utils.load_configs('WEBANT_', defaults=defaults)
-    initLoggers(logging.DEBUG if conf.get('DEBUG', False) else logging.WARNING)
+def create_app(conf):
     app = LibreantViewApp("webant", conf)
 
     @app.route('/')
@@ -217,8 +210,8 @@ def renderErrorPage(message, httpCode):
     return render_template('error.html', message=message, code=httpCode), httpCode
 
 
-def main():
-    app = create_app()
+def main(conf={}):
+    app = create_app(conf)
     gevent_run(app)
 
 if __name__ == '__main__':

@@ -10,8 +10,8 @@ from utils import config_utils
 
 initLoggers()
 conf = {'DEBUG': True}
-conf.update(config_utils.from_envvar_file('WEBANT_SETTINGS'))
-conf.update(config_utils.from_envvars(prefix='WEBANT_'))
+conf.update(config_utils.from_envvar_file('LIBREANT_SETTINGS'))
+conf.update(config_utils.from_envvars(prefix='LIBREANT_'))
 initLoggers(logging.DEBUG if conf.get('DEBUG', False) else logging.WARNING)
 app = LibreantCoreApp('webant', conf)
 manager = Manager(app)

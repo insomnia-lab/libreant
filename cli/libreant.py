@@ -19,7 +19,7 @@ from custom_types import StringList
 @click.option('--agherant-descriptions', type=StringList(), metavar="<url>..", help='list of description urls of nodes to aggregate')
 def libreant(settings, debug, port, address, fsdb_path, es_indexname, es_hosts, preset_paths, agherant_descriptions):
     initLoggers(logNames=['config_utils'])
-    conf = config_utils.load_configs('WEBANT_', path=settings)
+    conf = config_utils.load_configs('LIBREANT_', path=settings)
     cliConf = {}
     if debug:
         cliConf['DEBUG'] = True

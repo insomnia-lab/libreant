@@ -11,11 +11,10 @@ from utils import config_utils
 
 
 def create_app():
-    initLoggers()
-    conf = {'DEBUG': True,
-            'AGHERANT_DESCRIPTIONS': []}
-    conf.update(config_utils.from_envvar_file('WEBANT_SETTINGS'))
-    conf.update(config_utils.from_envvars(prefix='WEBANT_'))
+    initLoggers(logNames=['config_utils'])
+    defaults = {'DEBUG': True,
+                'AGHERANT_DESCRIPTIONS': []}
+    conf = config_utils.load_configs('WEBANT_', defaults=defaults)
     initLoggers(logging.DEBUG if conf.get('DEBUG', False) else logging.WARNING)
     app = Flask(__name__)
     app.config.update(conf)

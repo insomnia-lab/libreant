@@ -60,10 +60,9 @@ class LibreantViewApp(LibreantCoreApp):
 
 
 def create_app():
-    initLoggers()
-    conf = {'DEBUG': True}
-    conf.update(config_utils.from_envvar_file('WEBANT_SETTINGS'))
-    conf.update(config_utils.from_envvars(prefix='WEBANT_'))
+    initLoggers(logNames=["config_utils"])
+    defaults = {'DEBUG': True}
+    conf = config_utils.load_configs('WEBANT_', defaults=defaults)
     initLoggers(logging.DEBUG if conf.get('DEBUG', False) else logging.WARNING)
     app = LibreantViewApp("webant", conf)
 

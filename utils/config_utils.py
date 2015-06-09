@@ -6,22 +6,26 @@ from logging import getLogger
 log = getLogger('config_utils')
 
 
-def from_envvar_file(envvar, environ=None):
-    if environ is None:
-        environ = os.environ
-    if envvar not in environ:
-        return {}
-    fname = environ[envvar]
+def from_file(fname):
     if not os.path.exists(fname):
-        log.debug('config file does not exist')
+        log.warning('config file does not exist: "{}"'.format(fname))
         return {}
     try:
         with open(fname) as buf:
             conf = json.load(buf)
             return conf
     except Exception:
-        log.warning('Error loading config file from envvar', exc_info=1)
+        log.warning('Error loading config file', exc_info=1)
         return {}
+
+
+def from_envvar_file(envvar, environ=None):
+    if environ is None:
+        environ = os.environ
+    if envvar not in environ:
+        return {}
+    fname = environ[envvar]
+    return from_file(fname)
 
 
 def from_envvars(prefix=None, environ=None, envvars=None, as_json=True):
@@ -67,4 +71,25 @@ def from_envvars(prefix=None, environ=None, envvars=None, as_json=True):
         else:
             conf[name] = environ[env_name]
 
+    return conf
+
+
+def load_configs(envvar_prefix, defaults=None, path=None):
+    '''load configuration
+
+    the following steps will be undertake:
+     - if `defaults` is provided, defaults are loded.
+     - It will attempt to load configs from file:
+       if `path` is provided, it will be used, otherwise the path
+       will be taken from envvar `envvar_prefix`+"SETTINGS"
+     - all envvars starting with `envvar_prefix` will be loaded
+    '''
+    conf = {}
+    if defaults:
+        conf.update(defaults)
+    if path:
+        conf.update(from_file(path))
+    else:
+        conf.update(from_envvar_file(envvar_prefix + "SETTINGS"))
+    conf.update(from_envvars(prefix=envvar_prefix))
     return conf

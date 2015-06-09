@@ -5,6 +5,11 @@
 Libreant | {%trans%}Error{%endtrans%} {{ code }}
 {% endblock %}
 
+{% block navbar %}
+{% import 'navbar.html' as navbar %}
+{{navbar.navbar(search=True)}}
+{% endblock %}
+
 {% block content %}
 <div class="container">
     <br><br><br>

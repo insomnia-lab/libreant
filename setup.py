@@ -118,8 +118,8 @@ setup(name='libreant',
                 'develop': develop,
                 'compile_translations': compile_translations},
       entry_points={'console_scripts': [
-          'agherant=webant.agherant_standalone:main',
           'libreant=cli.libreant:libreant',
+          'agherant=cli.agherant:agherant',
           'libreant-db=cli.libreant_db:libreant_db',
           'libreant-manage=webant.manage:main'
       ]},

@@ -1,4 +1,5 @@
 from elasticsearch import NotFoundError
+from elasticsearch.helpers import scan
 
 import logging
 log = logging.getLogger(__name__)
@@ -151,6 +152,9 @@ class DB(object):
 
     def get_all_books(self, size=30):
         return self._search({}, size=size)
+
+    def iterate_all(self):
+        return scan(self.es, index=self.index_name)
 
     def get_last_inserted(self, size=30):
         query = {"fields": ["_timestamp", "_source"],

@@ -1,6 +1,8 @@
 import os
+
 from elasticsearch import Elasticsearch
 from elasticsearch import NotFoundError
+
 from uuid import uuid4
 from fsdb import Fsdb
 from fsdb.hashtools import calc_file_digest, calc_digest
@@ -79,7 +81,7 @@ class Archivant():
         res['type'] = 'volume'
         res['id'] = volume['_id']
         if '_score' in volume:
-            res['score'] = volume['score']
+            res['score'] = volume['_score']
 
         source = volume['_source']
         attachments = source['_attachments']
@@ -138,6 +140,11 @@ class Archivant():
             return self._db.get_book_by_id(volumeID)
         except NotFoundError:
             raise NotFoundException("could not found volume with id: '{}'".format(volumeID))
+
+    def get_all_volumes(self):
+        '''iterate over all stored volumes'''
+        for raw_volume in self._db.iterate_all():
+            yield self.normalize_volume(raw_volume)
 
     def get_volume(self, volumeID):
         log.debug("Requested volume with id:'{}'".format(volumeID))

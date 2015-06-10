@@ -190,6 +190,13 @@ class DB(object):
         '''
         return self.get_books_querystring(query)
 
+    def file_is_attached(self, url):
+        '''return true if at least one book has
+           file with the given url as attachment
+        '''
+        body = self._get_search_field('_attachments.url', url)
+        return self.es.count(index=self.index_name, body=body)['count'] > 0
+
     def autocomplete(self, fieldname, start):
         raise NotImplementedError()
     # End queries }}}

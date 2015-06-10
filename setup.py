@@ -120,8 +120,7 @@ setup(name='libreant',
       entry_points={'console_scripts': [
           'libreant=cli.libreant:libreant',
           'agherant=cli.agherant:agherant',
-          'libreant-db=cli.libreant_db:libreant_db',
-          'libreant-manage=webant.manage:main'
+          'libreant-db=cli.libreant_db:libreant_db'
       ]},
       classifiers=[
           "Framework :: Flask",

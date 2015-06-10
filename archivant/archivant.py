@@ -6,6 +6,7 @@ from fsdb import Fsdb
 from fsdb.hashtools import calc_file_digest, calc_digest
 from copy import deepcopy
 from urlparse import urlparse
+from json import dumps
 
 from libreantdb import DB
 from exceptions import NotFoundException
@@ -33,7 +34,7 @@ class Archivant():
         }
         defaults.update(conf)
         self._config = defaults
-        log.debug('initializing with this config: ' + str(self._config))
+        log.debug('initializing with this config: ' + dumps(self._config))
 
         # initialize fsdb
         if not self._config['FSDB_PATH']:

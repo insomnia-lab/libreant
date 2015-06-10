@@ -1,16 +1,16 @@
 ========
 LibreAnt
 ========
-.. image:: https://pypip.in/license/libreant/badge.svg?style=flat
-    :target: https://pypi.python.org/pypi/libreant/
+.. image:: https://img.shields.io/pypi/l/libreant.svg
+    :target: https://pypi.python.org/pypi/libreant
     :alt: License
 
-.. image:: https://pypip.in/status/libreant/badge.svg?style=flat
-    :target: https://pypi.python.org/pypi/libreant/
+.. image:: https://img.shields.io/pypi/status/libreant.svg
+    :target: https://pypi.python.org/pypi/libreant
     :alt: Development
 
-.. image:: https://pypip.in/version/libreant/badge.svg?style=flat
-    :target: https://pypi.python.org/pypi/libreant/
+.. image:: https://img.shields.io/pypi/v/libreant.svg
+    :target: https://pypi.python.org/pypi/libreant
     :alt: Latest Version
 
 .. image:: https://readthedocs.org/projects/libreant/badge/?version=latest

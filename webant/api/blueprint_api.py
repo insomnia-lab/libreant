@@ -1,6 +1,7 @@
 from flask import Blueprint, current_app, jsonify
-from archivant.exceptions import NotFoundException
 
+from archivant.exceptions import NotFoundException
+from webant.utils import send_attachment_file
 
 class ApiError(Exception):
     def __init__(self, message, http_code, err_code=None, details=None):
@@ -61,3 +62,10 @@ def get_attachment(volumeID, attachmentID):
     except NotFoundException, e:
         raise ApiError("attachment not found", 404, details=str(e))
     return jsonify({'data': att})
+
+@api.route('/volumes/<volumeID>/attachments/<attachmentID>/file', methods=['GET'])
+def get_file(volumeID, attachmentID):
+    try:
+        return send_attachment_file(current_app.archivant, volumeID, attachmentID)
+    except NotFoundException, e:
+        raise ApiError("file not found", 404, details=str(e))

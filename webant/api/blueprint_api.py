@@ -1,7 +1,9 @@
-from flask import Blueprint, current_app, jsonify
+from flask import Blueprint, current_app, jsonify, request, url_for
 
+from archivant.archivant import Archivant
 from archivant.exceptions import NotFoundException
 from webant.utils import send_attachment_file
+
 
 class ApiError(Exception):
     def __init__(self, message, http_code, err_code=None, details=None):
@@ -38,6 +40,31 @@ def exceptionHandler(e):
     current_app.logger.exception(e)
     return apiErrorHandler(ApiError("internal server error", 500))
 
+
+@api.route('/volumes/')
+def get_volumes():
+    q = request.args.get('q', "*:*")
+    try:
+        from_ = int(request.args.get('from', 0))
+    except ValueError, e:
+        raise ApiError("Bad Request", 400, details="could not covert 'from' parameter to number")
+    try:
+        size = int(request.args.get('size', 10))
+    except ValueError, e:
+        raise ApiError("Bad Request", 400, details="could not covert 'size' parameter to number")
+    if size > current_app.config.get('MAX_RESULTS_PER_PAGE', 50):
+        raise ApiError("Request Entity Too Large", 413, details="'size' parameter is too high")
+
+    q_res = current_app.archivant._db.get_books_querystring(query=q, from_=from_, size=size)
+    volumes = map(Archivant.normalize_volume, q_res['hits']['hits'])
+    next_args = "?q={}&from={}&size={}".format(q, from_ + size, size)
+    prev_args = "?q={}&from={}&size={}".format(q, from_ - size if ((from_ - size) > -1) else 0, size)
+    base_url = url_for('.get_volumes', _external=True)
+    res = {'link_prev': base_url + prev_args,
+           'link_next': base_url + next_args,
+           'total': q_res['hits']['total'],
+           'data': volumes}
+    return jsonify(res)
 
 @api.route('/volumes/<volumeID>', methods=['GET'])
 def get_volume(volumeID):

@@ -126,8 +126,8 @@ class DB(object):
     def __len__(self):
         return self.es.count(index=self.index_name)['count']
 
-    def _search(self, body, size=30):
-        return self.es.search(index=self.index_name, body=body, size=size)
+    def _search(self, body, **kargs):
+        return self.es.search(index=self.index_name, body=body, **kargs)
 
     def _get_search_field(self, field, value):
         return {'query':
@@ -179,9 +179,9 @@ class DB(object):
     def get_book_by_id(self, id):
         return self.es.get(index=self.index_name, id=id)
 
-    def get_books_querystring(self, query):
+    def get_books_querystring(self, query, **kargs):
         q = {'query': query, 'fields': ['_text_*']}
-        return self._search({'query': dict(query_string=q)})
+        return self._search({'query': dict(query_string=q)}, **kargs)
 
     def user_search(self, query):
         '''

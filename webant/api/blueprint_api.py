@@ -36,3 +36,28 @@ def apiNotFound(invalid_path):
 def exceptionHandler(e):
     current_app.logger.exception(e)
     return apiErrorHandler(ApiError("internal server error", 500))
+
+
+@api.route('/volumes/<volumeID>', methods=['GET'])
+def get_volume(volumeID):
+    try:
+        volume = current_app.archivant.get_volume(volumeID)
+    except NotFoundException, e:
+        raise ApiError("volume not found", 404, details=str(e))
+    return jsonify({'data': volume})
+
+@api.route('/volumes/<volumeID>/attachments/', methods=['GET'])
+def get_attachments(volumeID):
+    try:
+        atts = current_app.archivant.get_volume(volumeID)['attachments']
+    except NotFoundException, e:
+        raise ApiError("volume not found", 404, details=str(e))
+    return jsonify({'data': atts})
+
+@api.route('/volumes/<volumeID>/attachments/<attachmentID>', methods=['GET'])
+def get_attachment(volumeID, attachmentID):
+    try:
+        att = current_app.archivant.get_attachment(volumeID, attachmentID)
+    except NotFoundException, e:
+        raise ApiError("attachment not found", 404, details=str(e))
+    return jsonify({'data': att})

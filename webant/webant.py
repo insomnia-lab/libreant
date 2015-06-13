@@ -2,9 +2,9 @@ import tempfile
 import logging
 import os
 
-from flask import Flask, render_template, request, abort, Response, redirect, url_for, send_file, make_response
+from flask import Flask, render_template, request, abort, Response, redirect, url_for, make_response
 from werkzeug import secure_filename
-from utils import requestedFormat
+from utils import requestedFormat, send_attachment_file
 from flask_bootstrap import Bootstrap
 from elasticsearch import exceptions as es_exceptions
 from flask.ext.babel import Babel, gettext
@@ -183,13 +183,7 @@ def create_app():
     @app.route('/download/<volumeID>/<attachmentID>')
     def download_attachment(volumeID, attachmentID):
         try:
-            attachment = app.archivant.get_attachment(volumeID, attachmentID)
-            file = app.archivant.get_file(volumeID, attachmentID)
-            app.archivant._db.increment_download_count(volumeID, attachmentID)
-            return send_file(file,
-                             mimetype=attachment['metadata']['mime'],
-                             attachment_filename=attachment['metadata']['name'],
-                             as_attachment=True)
+            return send_attachment_file(app.archivant, volumeID, attachmentID)
         except NotFoundException:
             # no attachment found with the given id
             return renderErrorPage(message='no attachment found with id "{}" on volume "{}"'.format(attachmentID, volumeID), httpCode=404)

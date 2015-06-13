@@ -17,6 +17,7 @@ from constants import isoLangs
 from archivant import Archivant
 from archivant.exceptions import NotFoundException
 from agherant import agherant
+from api.blueprint_api import api
 from webserver_utils import gevent_run
 import config_utils
 
@@ -53,6 +54,7 @@ class LibreantViewApp(LibreantCoreApp):
         super(LibreantViewApp, self).__init__(import_name, defaults)
         if self.config['AGHERANT_DESCRIPTIONS']:
             self.register_blueprint(agherant, url_prefix='/agherant')
+        self.register_blueprint(api, url_prefix='/api/v1')
         Bootstrap(self)
         self.babel = Babel(self)
 

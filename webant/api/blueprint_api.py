@@ -16,6 +16,10 @@ class ApiError(Exception):
     def __str__(self):
         return "http_code: {}, err_code: {}, message: '{}', details: '{}'".format(self.http_code, self.err_code, self.message, self.details)
 
+def make_success_response(message, http_code=200):
+    response = jsonify({'code': http_code, 'message': message})
+    response.status_code = http_code
+    return response
 
 api = Blueprint('api', __name__)
 
@@ -74,6 +78,14 @@ def get_volume(volumeID):
         raise ApiError("volume not found", 404, details=str(e))
     return jsonify({'data': volume})
 
+@api.route('/volumes/<volumeID>', methods=['DELETE'])
+def delete_volume(volumeID):
+    try:
+        current_app.archivant.delete_volume(volumeID)
+    except NotFoundException, e:
+        raise ApiError("volume not found", 404, details=str(e))
+    return make_success_response("volume has been successfully deleted")
+
 @api.route('/volumes/<volumeID>/attachments/', methods=['GET'])
 def get_attachments(volumeID):
     try:
@@ -89,6 +101,14 @@ def get_attachment(volumeID, attachmentID):
     except NotFoundException, e:
         raise ApiError("attachment not found", 404, details=str(e))
     return jsonify({'data': att})
+
+@api.route('/volumes/<volumeID>/attachments/<attachmentID>', methods=['DELETE'])
+def delete_attachment(volumeID, attachmentID):
+    try:
+        current_app.archivant.delete_attachments(volumeID, [attachmentID])
+    except NotFoundException, e:
+        raise ApiError("attachment not found", 404, details=str(e))
+    return make_success_response("attachment has been successfully deleted")
 
 @api.route('/volumes/<volumeID>/attachments/<attachmentID>/file', methods=['GET'])
 def get_file(volumeID, attachmentID):

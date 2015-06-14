@@ -168,12 +168,12 @@ class Archivant():
         log.debug("deleting attachments from volume '{}': {}".format(volumeID, attachmentsID))
         rawVolume = self._req_raw_volume(volumeID)
         insID = [a['id'] for a in rawVolume['_source']['_attachments']]
+        # check that all requested file are present
+        for id in attachmentsID:
+            if id not in insID:
+                raise NotFoundException("could not found attachment '{}' of the volume '{}'".format(id, volumeID))
         for index, id in enumerate(attachmentsID):
-            try:
-                rawVolume['_source']['_attachments'].pop(insID.index(id))
-            except:
-                log.exception("Error while elaborating attachmentsID array at index: {}".format(index))
-                raise
+            rawVolume['_source']['_attachments'].pop(insID.index(id))
         self._db.modify_book(volumeID, rawVolume['_source'], version=rawVolume['_version'])
 
     def delete_volume(self, volumeID):

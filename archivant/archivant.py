@@ -186,6 +186,8 @@ class Archivant():
     def insert_attachments(self, volumeID, attachments):
         ''' add attachments to an already existing volume '''
         log.debug("adding new attachments to volume '{}': {}".format(volumeID, attachments))
+        if not attachments:
+           return
         rawVolume = self._req_raw_volume(volumeID)
         for index, a in enumerate(attachments):
             try:

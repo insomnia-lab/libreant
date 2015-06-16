@@ -85,6 +85,19 @@ def add_volume():
     response.headers['Location'] = link_self
     return response
 
+
+@api.route('/volumes/<volumeID>', methods=['PUT'])
+def update_volume(volumeID):
+    metadata = receive_volume_metadata()
+    try:
+        current_app.archivant.update_volume(volumeID, metadata)
+    except NotFoundException, e:
+        raise ApiError("volume not found", 404, details=str(e))
+    except ValueError, e:
+        raise ApiError("malformed metadata", 400, details=str(e))
+    return make_success_response("volume successfully updated", 201)
+
+
 @api.route('/volumes/<volumeID>', methods=['GET'])
 def get_volume(volumeID):
     try:

@@ -1,6 +1,9 @@
 import json
+import tempfile
+import os
 
 from flask import Blueprint, current_app, jsonify, request, url_for
+from werkzeug import secure_filename
 
 from archivant.archivant import Archivant
 from archivant.exceptions import NotFoundException
@@ -122,6 +125,36 @@ def get_attachments(volumeID):
         raise ApiError("volume not found", 404, details=str(e))
     return jsonify({'data': atts})
 
+
+@api.route('/volumes/<volumeID>/attachments/', methods=['POST'])
+def add_attachments(volumeID):
+    metadata = receive_metadata(optional=True)
+    if 'file' not in request.files:
+        raise ApiError("malformed request", 400, details="file not found under 'file' key")
+    upFile = request.files['file']
+    tmpFileFd, tmpFilePath = tempfile.mkstemp()
+    upFile.save(tmpFilePath)
+    fileInfo = {}
+    fileInfo['file'] = tmpFilePath
+    fileInfo['name'] = secure_filename(upFile.filename)
+    fileInfo['mime'] = upFile.mimetype
+    fileInfo['notes'] = metadata.get('notes', '')
+    # close fileDescriptor
+    os.close(tmpFileFd)
+    try:
+        attachmentID = current_app.archivant.insert_attachments(volumeID, attachments=[fileInfo])[0]
+    except NotFoundException, e:
+        raise ApiError("volume not found", 404, details=str(e))
+    finally:
+        # remove temp files
+        os.remove(fileInfo['file'])
+    link_self = url_for('.get_attachment', volumeID=volumeID, attachmentID=attachmentID, _external=True)
+    response = jsonify({'data': {'id': attachmentID, 'link_self': link_self}})
+    response.status_code = 201
+    response.headers['Location'] = link_self
+    return response
+
+
 @api.route('/volumes/<volumeID>/attachments/<attachmentID>', methods=['GET'])
 def get_attachment(volumeID, attachmentID):
     try:
@@ -157,7 +190,7 @@ def receive_volume_metadata():
 
 
 def receive_metadata(optional=False):
-    if optional and 'metdata' not in request.values['metadata']:
+    if optional and 'metdata' not in request.values:
         return {}
     try:
         metadata = json.loads(request.values['metadata'])

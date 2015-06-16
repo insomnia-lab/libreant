@@ -1,5 +1,5 @@
 import os
-
+from numbers import Integral
 from elasticsearch import Elasticsearch
 from elasticsearch import NotFoundError
 
@@ -318,6 +318,14 @@ class Archivant():
         for k in metadata.keys():
             if k not in modifiable_fields:
                 raise ValueError('Not modifiable field given: {}'.format(k))
+        if 'name' in metadata and not isinstance(metadata['name'], basestring):
+            raise ValueError("'name' must be a string")
+        if 'mime' in metadata and not isinstance(metadata['mime'], basestring):
+            raise ValueError("'mime' must be a string")
+        if 'notes' in metadata and not isinstance(metadata['notes'], basestring):
+            raise ValueError("'notes' must be a string")
+        if 'download_count' in metadata and not isinstance(metadata['download_count'], Integral):
+            raise ValueError("'download_count' must be a number")
         rawVolume = self._req_raw_volume(volumeID)
         for attachment in rawVolume['_source']['_attachments']:
             if attachment['id'] == attachmentID:

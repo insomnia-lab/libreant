@@ -171,6 +171,17 @@ def delete_attachment(volumeID, attachmentID):
         raise ApiError("attachment not found", 404, details=str(e))
     return make_success_response("attachment has been successfully deleted")
 
+
+@api.route('/volumes/<volumeID>/attachments/<attachmentID>', methods=['PUT'])
+def update_attachment(volumeID, attachmentID):
+    metadata = receive_metadata()
+    try:
+        current_app.archivant.update_attachment(volumeID, attachmentID, metadata)
+    except ValueError, e:
+        raise ApiError("malformed request", 400, details=str(e))
+    return make_success_response("attachment has been successfully updated")
+
+
 @api.route('/volumes/<volumeID>/attachments/<attachmentID>/file', methods=['GET'])
 def get_file(volumeID, attachmentID):
     try:

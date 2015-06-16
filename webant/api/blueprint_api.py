@@ -1,3 +1,5 @@
+import json
+
 from flask import Blueprint, current_app, jsonify, request, url_for
 
 from archivant.archivant import Archivant
@@ -70,6 +72,19 @@ def get_volumes():
            'data': volumes}
     return jsonify(res)
 
+@api.route('/volumes/', methods=['POST'])
+def add_volume():
+    metadata = receive_volume_metadata()
+    try:
+        volumeID = current_app.archivant.insert_volume(metadata)
+    except ValueError, e:
+        raise ApiError("malformed metadata", 400, details=str(e))
+    link_self = url_for('.get_volume', volumeID=volumeID, _external=True)
+    response = jsonify({'data': {'id': volumeID, 'link_self': link_self}})
+    response.status_code = 201
+    response.headers['Location'] = link_self
+    return response
+
 @api.route('/volumes/<volumeID>', methods=['GET'])
 def get_volume(volumeID):
     try:
@@ -116,3 +131,27 @@ def get_file(volumeID, attachmentID):
         return send_attachment_file(current_app.archivant, volumeID, attachmentID)
     except NotFoundException, e:
         raise ApiError("file not found", 404, details=str(e))
+
+
+def receive_volume_metadata():
+    metadata = receive_metadata()
+    # TODO check also for preset consistency?
+    requiredFields = ['_language']
+    for requiredField in requiredFields:
+        if requiredField not in metadata:
+            raise ApiError("malformed metadata", 400, details="Required field '{}' is missing in metadata".format(requiredField))
+    return metadata
+
+
+def receive_metadata(optional=False):
+    if optional and 'metdata' not in request.values['metadata']:
+        return {}
+    try:
+        metadata = json.loads(request.values['metadata'])
+    except KeyError:
+        raise ApiError("malformed request", 400, details="missing 'metadata' in request")
+    except Exception, e:
+        raise ApiError("malformed metadata", 400, details=str(e))
+    if not isinstance(metadata, dict):
+        raise ApiError("malformed metadata", 400, details="metadata value should be a json object")
+    return metadata

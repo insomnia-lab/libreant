@@ -10,17 +10,22 @@ class TestArchivantAttachmentOperations(TestArchivant):
         volume_metadata = self.generate_volume_metadata()
         volumeID = self.arc.insert_volume(volume_metadata)
         attachments = self.generate_attachments(1)
-        self.arc.insert_attachments(volumeID, attachments)
+        attsID = self.arc.insert_attachments(volumeID, attachments)
+        eq_(len(attsID), 1)
         added_attachments = self.arc.get_volume(volumeID)['attachments']
         eq_(len(added_attachments), 1)
+        eq_(added_attachments[0]['id'], attsID[0])
 
     def test_insert_attachments(self, n=4):
         volume_metadata = self.generate_volume_metadata()
         volumeID = self.arc.insert_volume(volume_metadata)
         attachments = self.generate_attachments(n)
-        self.arc.insert_attachments(volumeID, attachments)
+        attsID = self.arc.insert_attachments(volumeID, attachments)
+        eq_(len(attsID), 4)
         added_attachments = self.arc.get_volume(volumeID)['attachments']
-        eq_(len(added_attachments), n)
+        addedAttsID = [a['id'] for a in added_attachments]
+        eq_(len(addedAttsID), n)
+        eq_(len(set(attsID).symmetric_difference(addedAttsID)), 0)
 
     def test_insert_attachments_burst(self, n=4):
         volume_metadata = self.generate_volume_metadata()

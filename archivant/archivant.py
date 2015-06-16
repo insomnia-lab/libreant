@@ -189,14 +189,17 @@ class Archivant():
         if not attachments:
            return
         rawVolume = self._req_raw_volume(volumeID)
+        attsID = list()
         for index, a in enumerate(attachments):
             try:
                 rawAttachment = self._assemble_attachment(a['file'], a)
                 rawVolume['_source']['_attachments'].append(rawAttachment)
+                attsID.append(rawAttachment['id'])
             except:
                 log.exception("Error while elaborating attachments array at index: {}".format(index))
                 raise
         self._db.modify_book(volumeID, rawVolume['_source'], version=rawVolume['_version'])
+        return attsID
 
     def insert_volume(self, metadata, attachments=[]):
         '''Insert a new volume

@@ -1,4 +1,9 @@
+import json
+import tempfile
+import os
+
 from flask import Blueprint, current_app, jsonify, request, url_for
+from werkzeug import secure_filename
 
 from archivant.archivant import Archivant
 from archivant.exceptions import NotFoundException
@@ -70,6 +75,32 @@ def get_volumes():
            'data': volumes}
     return jsonify(res)
 
+@api.route('/volumes/', methods=['POST'])
+def add_volume():
+    metadata = receive_volume_metadata()
+    try:
+        volumeID = current_app.archivant.insert_volume(metadata)
+    except ValueError, e:
+        raise ApiError("malformed metadata", 400, details=str(e))
+    link_self = url_for('.get_volume', volumeID=volumeID, _external=True)
+    response = jsonify({'data': {'id': volumeID, 'link_self': link_self}})
+    response.status_code = 201
+    response.headers['Location'] = link_self
+    return response
+
+
+@api.route('/volumes/<volumeID>', methods=['PUT'])
+def update_volume(volumeID):
+    metadata = receive_volume_metadata()
+    try:
+        current_app.archivant.update_volume(volumeID, metadata)
+    except NotFoundException, e:
+        raise ApiError("volume not found", 404, details=str(e))
+    except ValueError, e:
+        raise ApiError("malformed metadata", 400, details=str(e))
+    return make_success_response("volume successfully updated", 201)
+
+
 @api.route('/volumes/<volumeID>', methods=['GET'])
 def get_volume(volumeID):
     try:
@@ -94,6 +125,36 @@ def get_attachments(volumeID):
         raise ApiError("volume not found", 404, details=str(e))
     return jsonify({'data': atts})
 
+
+@api.route('/volumes/<volumeID>/attachments/', methods=['POST'])
+def add_attachments(volumeID):
+    metadata = receive_metadata(optional=True)
+    if 'file' not in request.files:
+        raise ApiError("malformed request", 400, details="file not found under 'file' key")
+    upFile = request.files['file']
+    tmpFileFd, tmpFilePath = tempfile.mkstemp()
+    upFile.save(tmpFilePath)
+    fileInfo = {}
+    fileInfo['file'] = tmpFilePath
+    fileInfo['name'] = secure_filename(upFile.filename)
+    fileInfo['mime'] = upFile.mimetype
+    fileInfo['notes'] = metadata.get('notes', '')
+    # close fileDescriptor
+    os.close(tmpFileFd)
+    try:
+        attachmentID = current_app.archivant.insert_attachments(volumeID, attachments=[fileInfo])[0]
+    except NotFoundException, e:
+        raise ApiError("volume not found", 404, details=str(e))
+    finally:
+        # remove temp files
+        os.remove(fileInfo['file'])
+    link_self = url_for('.get_attachment', volumeID=volumeID, attachmentID=attachmentID, _external=True)
+    response = jsonify({'data': {'id': attachmentID, 'link_self': link_self}})
+    response.status_code = 201
+    response.headers['Location'] = link_self
+    return response
+
+
 @api.route('/volumes/<volumeID>/attachments/<attachmentID>', methods=['GET'])
 def get_attachment(volumeID, attachmentID):
     try:
@@ -110,9 +171,44 @@ def delete_attachment(volumeID, attachmentID):
         raise ApiError("attachment not found", 404, details=str(e))
     return make_success_response("attachment has been successfully deleted")
 
+
+@api.route('/volumes/<volumeID>/attachments/<attachmentID>', methods=['PUT'])
+def update_attachment(volumeID, attachmentID):
+    metadata = receive_metadata()
+    try:
+        current_app.archivant.update_attachment(volumeID, attachmentID, metadata)
+    except ValueError, e:
+        raise ApiError("malformed request", 400, details=str(e))
+    return make_success_response("attachment has been successfully updated")
+
+
 @api.route('/volumes/<volumeID>/attachments/<attachmentID>/file', methods=['GET'])
 def get_file(volumeID, attachmentID):
     try:
         return send_attachment_file(current_app.archivant, volumeID, attachmentID)
     except NotFoundException, e:
         raise ApiError("file not found", 404, details=str(e))
+
+
+def receive_volume_metadata():
+    metadata = receive_metadata()
+    # TODO check also for preset consistency?
+    requiredFields = ['_language']
+    for requiredField in requiredFields:
+        if requiredField not in metadata:
+            raise ApiError("malformed metadata", 400, details="Required field '{}' is missing in metadata".format(requiredField))
+    return metadata
+
+
+def receive_metadata(optional=False):
+    if optional and 'metdata' not in request.values:
+        return {}
+    try:
+        metadata = json.loads(request.values['metadata'])
+    except KeyError:
+        raise ApiError("malformed request", 400, details="missing 'metadata' in request")
+    except Exception, e:
+        raise ApiError("malformed metadata", 400, details=str(e))
+    if not isinstance(metadata, dict):
+        raise ApiError("malformed metadata", 400, details="metadata value should be a json object")
+    return metadata

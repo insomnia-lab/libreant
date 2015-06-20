@@ -10,7 +10,7 @@ import os
 
 from nose.tools import eq_, raises
 
-from webant.config_utils import from_envvars, from_envvar_file
+from utils.config_utils import from_envvars, from_envvar_file
 
 
 @raises(RuntimeError)

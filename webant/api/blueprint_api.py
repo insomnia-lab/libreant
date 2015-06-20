@@ -7,7 +7,7 @@ from werkzeug import secure_filename
 
 from archivant.archivant import Archivant
 from archivant.exceptions import NotFoundException
-from webant.utils import send_attachment_file
+from webant.util import send_attachment_file
 
 
 class ApiError(Exception):

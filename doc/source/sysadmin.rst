@@ -55,7 +55,7 @@ Start elsticsearch
 ^^^^^^^^^^^^^^^^^^^
 
 Debian wheezy / Ubuntu
-~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~
 
 Start elasticsearch service::
 

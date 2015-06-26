@@ -84,16 +84,18 @@ def read(fname):
     with open(os.path.join(os.path.dirname(__file__), fname)) as buf:
         return buf.read()
 
-setup(name='libreant',
-      version='0.1.3',
-      description='{e,}book archive focused on small grass root archives, distributed search, low assumptions',
-      long_description=read('README.rst'),
-      author='insomnialab',
-      author_email='insomnialab@hacari.org',
-      url='https://github.com/insomnia-lab/libreant',
-      license='AGPL',
-      packages=['libreantdb', 'webant', 'webant.api', 'presets', 'archivant', 'utils', 'cli'],
-      install_requires=[
+
+conf = dict(
+        name='libreant',
+        version='0.1.3',
+        description='{e,}book archive focused on small grass root archives, distributed search, low assumptions',
+        long_description=read('README.rst'),
+        author='insomnialab',
+        author_email='insomnialab@hacari.org',
+        url='https://github.com/insomnia-lab/libreant',
+        license='AGPL',
+        packages=['libreantdb', 'webant', 'webant.api', 'presets', 'archivant', 'utils', 'cli'],
+        install_requires=[
           'gevent',
           'elasticsearch',
           'flask-bootstrap',
@@ -103,29 +105,33 @@ setup(name='libreant',
           'opensearch',
           'Fsdb',
           'click'
-      ],
-      package_data = {
+        ],
+        package_data = {
           # If any package contains *.mo include them
           # important! leave all the stars!
           'webant': ['translations/*/*/*.mo']
-      },
-      include_package_data=True,
-      tests_require=['nose', 'coverage'],
-      zip_safe=False,
-      cmdclass={'build': build,
+        },
+        include_package_data=True,
+        tests_require=['nose', 'coverage'],
+        zip_safe=False,
+        cmdclass={'build': build,
                 'test': NoseTestCommand,
                 'install_lib': install_lib,
                 'develop': develop,
                 'compile_translations': compile_translations},
-      entry_points={'console_scripts': [
+        entry_points={'console_scripts': [
           'libreant=cli.libreant:libreant',
           'agherant=cli.agherant:agherant',
           'libreant-db=cli.libreant_db:libreant_db'
-      ]},
-      classifiers=[
+        ]},
+        classifiers=[
           "Framework :: Flask",
           "License :: OSI Approved :: GNU Affero General Public License v3",
           "Operating System :: POSIX :: Linux",
           "Programming Language :: Python :: 2",
           "Development Status :: 4 - Beta"
-      ])
+        ])
+
+
+if __name__ == '__main__':
+    setup(**conf)

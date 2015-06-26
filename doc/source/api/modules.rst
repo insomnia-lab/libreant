@@ -5,4 +5,3 @@ API
    :maxdepth: 4
 
    libreantdb
-   webant

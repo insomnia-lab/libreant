@@ -46,7 +46,33 @@ def collectStrings(leftovers):
 
 class DB(object):
     '''
-    this class contains every query method and every operation on the index
+    This class contains every query method and every operation on the index
+
+    The following elasticsearch body response example provides the typical structure of a single document.
+
+    .. code-block:: ruby
+
+        {
+          "_index" : "libreant",
+          "_type" : "book",
+          "_id" : "AU4RleAfD1zQdqx6OQ8Y",
+          "_version" : 1,
+          "found" : true,
+          "_source": {"_language": "en",
+                      "_text_en": "marco belletti pdf file latex manual",
+                      "author": "marco belletti",
+                      "type": "pdf file",
+                      "title": "latex manual",
+                      "_attachments": [{"sha1": "dc8dc34b3e0fec2377e5cf9ea7e4780d87ff18c5",
+                                        "name": "LaTeX_Wikibook.pdf",
+                                        "url": "fsdb:///dc8dc34b3e0fec2377e5cf9ea7e4780d87ff18c5",
+                                        "notes": "A n example bookLatex wikibook",
+                                        "mime": "application/pdf",
+                                        "download_count": 7,
+                                        "id": "17fd3d898a834e2689340cc8aacdebb4",
+                                        "size": 23909451}]
+                     }
+        }
     '''
     # Setup {{{2
     def __init__(self, es, index_name):

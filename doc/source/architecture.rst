@@ -33,8 +33,8 @@ How to set up an aggregator
 
 1. Install Libreant. Follow the instructions on :ref:`dev-installation`.
 
-2. Launch Libreant setting the ``LIBREANT_AGHERANT_DESCRIPTIONS`` environment variable.
-   Its value should be a list of URLs encoded in JSON. Each URL represents the Opensearch 
+2. Launch Libreant setting the ``AGHERANT_DESCRIPTIONS`` configuration parameters.
+   Its value should be a list of URLs. Each URL represents the Opensearch
    description. For Libreant it's located in ``/description.xml``, so a typical URL looks
    like::
  
@@ -42,11 +42,16 @@ How to set up an aggregator
 
    and a typical invocation looks like::
 
-       LIBREANT_AGHERANT_DESCRIPTIONS='["http://your.doma.in/description.xml","http://other.node/description.xml"]' webant
+       libreant --agherant-descriptions "http://your.doma.in/description.xml http://other.node/description.xml"
    
    If you want to aggregate the same libreant instance that you are running, there's a shortcut: just use ``SELF``. Here's an example::
 
-       LIBREANT_AGHERANT_DESCRIPTIONS='["SELF","http://other.node/description.xml"]' webant
+       libreant --agherant-descriptions "SELF http://other.node/description.xml"
+
+   .. note::
+
+       Through `agherant` command line program, it's possible to run an aggregator without launching the whole libreant software
+
 
 .. _Opensearch: http://www.opensearch.org/Home
 .. _description: http://www.opensearch.org/Specifications/OpenSearch/1.1#OpenSearch_description_document

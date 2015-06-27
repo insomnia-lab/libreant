@@ -81,9 +81,9 @@ Start elasticsearch service::
         sudo systemctl enable elasticsearch
 
 
-Start webant
-^^^^^^^^^^^^^
-To execute webant::
+Start libreant
+^^^^^^^^^^^^^^
+To execute libreant::
 
-    ./ve/bin/webant
+    ./ve/bin/libreant
 

@@ -1,5 +1,6 @@
 import click
 import logging
+import json
 
 from conf import config_utils
 from conf.defaults import get_def_conf, get_help
@@ -18,7 +19,8 @@ from custom_types import StringList
 @click.option('--es-hosts', type=StringList(), metavar="<host>..", help=get_help('ES_HOSTS'))
 @click.option('--preset-paths', type=StringList(), metavar="<path>..", help=get_help('PRESET_PATHS'))
 @click.option('--agherant-descriptions', type=StringList(), metavar="<url>..", help=get_help('AGHERANT_DESCRIPTIONS'))
-def libreant(settings, debug, port, address, fsdb_path, es_indexname, es_hosts, preset_paths, agherant_descriptions):
+@click.option('--dump-settings', is_flag=True, help='dump current settings and exit')
+def libreant(settings, debug, port, address, fsdb_path, es_indexname, es_hosts, preset_paths, agherant_descriptions, dump_settings):
     initLoggers(logNames=['config_utils'])
     conf = config_utils.load_configs('LIBREANT_', defaults=get_def_conf(), path=settings)
     cliConf = {}
@@ -39,6 +41,11 @@ def libreant(settings, debug, port, address, fsdb_path, es_indexname, es_hosts, 
     if agherant_descriptions:
         cliConf['AGHERANT_DESCRIPTIONS'] = agherant_descriptions
     conf.update(cliConf)
+
+    if dump_settings:
+        click.echo(json.dumps(conf, indent=3))
+        exit(0)
+
     initLoggers(logging.DEBUG if conf.get('DEBUG', False) else logging.WARNING)
     try:
         main(conf)

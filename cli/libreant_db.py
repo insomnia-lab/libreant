@@ -4,7 +4,7 @@ import json
 
 from archivant import Archivant
 from archivant.exceptions import NotFoundException
-from utils import config_utils
+from conf import config_utils
 from utils.loggers import initLoggers
 from custom_types import StringList
 

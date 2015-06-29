@@ -10,7 +10,7 @@ import os
 
 from nose.tools import eq_, raises
 
-from utils.config_utils import from_envvars, from_envvar_file
+from conf.config_utils import from_envvars, from_envvar_file
 
 
 @raises(RuntimeError)

@@ -1,7 +1,7 @@
 import click
 import logging
 
-from utils import config_utils
+from conf import config_utils
 from utils.loggers import initLoggers
 from webant.agherant_standalone import main
 from custom_types import StringList

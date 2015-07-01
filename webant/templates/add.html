@@ -100,7 +100,7 @@ Libreant | {%trans%}Add new{%endtrans%} {{ preset.id if preset else "item"}}
         
             <br>
 
-            {% if not preset or preset.allow_upload %}
+            {% if file_upload and ( not preset or preset.allow_upload ) %}
             <div id="files-div">
                 <div id="files-array"></div>
                 

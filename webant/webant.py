@@ -136,8 +136,8 @@ def create_app(conf):
                 preset = app.presetManager.presets[reqPreset]
         else:
             preset = None
-
-        return render_template('add.html', preset=preset, availablePresets=app.presetManager.presets, isoLangs=isoLangs)
+        file_upload = app.archivant.is_file_op_supported()
+        return render_template('add.html', file_upload=file_upload, preset=preset, availablePresets=app.presetManager.presets, isoLangs=isoLangs)
 
     @app.route('/description.xml')
     def description():

@@ -1,7 +1,9 @@
 import click
 import logging
+import json
 
-from utils import config_utils
+from conf import config_utils
+from conf.defaults import get_def_conf, get_help
 from utils.loggers import initLoggers
 from webant.webant import main
 from custom_types import StringList
@@ -9,17 +11,18 @@ from custom_types import StringList
 @click.command(help="launch libreant daemon")
 @click.version_option()
 @click.option('-s', '--settings', type=click.Path(exists=True, readable=True), metavar="<path>", help='file from wich load settings')
-@click.option('-d', '--debug', is_flag=True, help='operate in debug mode')
-@click.option('-p', '--port', type=click.IntRange(min=1, max=65535), metavar="<port>", help='port on which daemon will listen')
-@click.option('--address', type=click.STRING, metavar="<address>", help='address on which daemon will listen')
-@click.option('--fsdb-path', type=click.Path(), metavar="<path>", help='path used for storing binary file')
-@click.option('--es-indexname', type=click.STRING, metavar="<name>", help='index name to use for elasticsearch')
-@click.option('--es-hosts', type=StringList(), metavar="<host>..", help='list of elasticsearch nodes to connect to')
-@click.option('--preset-paths', type=StringList(), metavar="<path>..", help='list of paths where to look for presets')
-@click.option('--agherant-descriptions', type=StringList(), metavar="<url>..", help='list of description urls of nodes to aggregate')
-def libreant(settings, debug, port, address, fsdb_path, es_indexname, es_hosts, preset_paths, agherant_descriptions):
+@click.option('-d', '--debug', is_flag=True, help=get_help('DEBUG'))
+@click.option('-p', '--port', type=click.IntRange(min=1, max=65535), metavar="<port>", help=get_help('PORT'))
+@click.option('--address', type=click.STRING, metavar="<address>", help=get_help('ADDRESS'))
+@click.option('--fsdb-path', type=click.Path(), metavar="<path>", help=get_help('FSDB_PATH'))
+@click.option('--es-indexname', type=click.STRING, metavar="<name>", help=get_help('ES_INDEXNAME'))
+@click.option('--es-hosts', type=StringList(), metavar="<host>..", help=get_help('ES_HOSTS'))
+@click.option('--preset-paths', type=StringList(), metavar="<path>..", help=get_help('PRESET_PATHS'))
+@click.option('--agherant-descriptions', type=StringList(), metavar="<url>..", help=get_help('AGHERANT_DESCRIPTIONS'))
+@click.option('--dump-settings', is_flag=True, help='dump current settings and exit')
+def libreant(settings, debug, port, address, fsdb_path, es_indexname, es_hosts, preset_paths, agherant_descriptions, dump_settings):
     initLoggers(logNames=['config_utils'])
-    conf = config_utils.load_configs('LIBREANT_', path=settings)
+    conf = config_utils.load_configs('LIBREANT_', defaults=get_def_conf(), path=settings)
     cliConf = {}
     if debug:
         cliConf['DEBUG'] = True
@@ -38,6 +41,11 @@ def libreant(settings, debug, port, address, fsdb_path, es_indexname, es_hosts, 
     if agherant_descriptions:
         cliConf['AGHERANT_DESCRIPTIONS'] = agherant_descriptions
     conf.update(cliConf)
+
+    if dump_settings:
+        click.echo(json.dumps(conf, indent=3))
+        exit(0)
+
     initLoggers(logging.DEBUG if conf.get('DEBUG', False) else logging.WARNING)
     try:
         main(conf)

@@ -4,7 +4,8 @@ import json
 
 from archivant import Archivant
 from archivant.exceptions import NotFoundException
-from utils import config_utils
+from conf import config_utils
+from conf.defaults import get_def_conf, get_help
 from utils.loggers import initLoggers
 from custom_types import StringList
 
@@ -15,15 +16,15 @@ arc = None
 
 @click.group(name="libreant-db", help="command line program to manage libreant database")
 @click.version_option()
-@click.option('-d', '--debug', is_flag=True, help='operate in debug mode')
 @click.option('-s', '--settings', type=click.Path(exists=True, readable=True), help='file from wich load settings')
-@click.option('--fsdb-path', type=click.Path(), metavar="<path>", help='path used for storing binary file')
-@click.option('--es-indexname', type=StringList(), metavar="<name>", help='index name to use for elasticsearch')
-@click.option('--es-hosts', type=StringList(), metavar="<host>..", help='list of elasticsearch nodes to connect to')
+@click.option('-d', '--debug', is_flag=True, help=get_help('DEBUG'))
+@click.option('--fsdb-path', type=click.Path(), metavar="<path>", help=get_help('FSDB_PATH'))
+@click.option('--es-indexname', type=click.STRING, metavar="<name>", help=get_help('ES_INDEXNAME'))
+@click.option('--es-hosts', type=StringList(), metavar="<host>..", help=get_help('ES_HOSTS'))
 def libreant_db(debug, settings, fsdb_path, es_indexname, es_hosts):
     initLoggers(logNames=['config_utils'])
     global conf
-    conf = config_utils.load_configs('LIBREANT_', path=settings)
+    conf = config_utils.load_configs('LIBREANT_', defaults=get_def_conf(), path=settings)
     cliConf = {}
     if debug:
         cliConf['DEBUG'] = True

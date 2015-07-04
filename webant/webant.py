@@ -175,6 +175,9 @@ def create_app(conf):
 
     @app.babel.localeselector
     def get_locale():
+        if 'lang' in request.values:
+            if request.values['lang'] in app.available_translations:
+                return request.values['lang']
         return request.accept_languages.best_match(app.available_translations)
 
     @app.template_filter('timepassedformat')

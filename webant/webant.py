@@ -54,6 +54,7 @@ class LibreantViewApp(LibreantCoreApp):
         self.register_blueprint(api, url_prefix='/api/v1')
         Bootstrap(self)
         self.babel = Babel(self)
+        self.available_translations = [l.language for l in self.babel.list_translations()]
 
 
 def create_app(conf):
@@ -174,7 +175,7 @@ def create_app(conf):
 
     @app.babel.localeselector
     def get_locale():
-        return request.accept_languages.best_match(['en', 'it', 'sq'])
+        return request.accept_languages.best_match(app.available_translations)
 
     @app.template_filter('timepassedformat')
     def timepassedformat_filter(timestamp):

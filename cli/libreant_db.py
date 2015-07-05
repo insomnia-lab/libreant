@@ -63,6 +63,16 @@ def export_volume(volumeid, pretty):
     click.echo(ouput)
 
 
+@libreant_db.command(name="remove", help="remove a volume")
+@click.argument('volumeid')
+def delete_volume(volumeid):
+    try:
+        volume = arc.delete_volume(volumeid)
+    except NotFoundException as e:
+        click.secho(str(e), fg="yellow", err=True)
+        exit(4)
+
+
 @libreant_db.command(help="search volumes by query")
 @click.argument('query')
 @click.option('-p', '--pretty', is_flag=True, help='format the output on multiple lines')

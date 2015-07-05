@@ -51,7 +51,7 @@ class LibreantViewApp(LibreantCoreApp):
         self.babel = Babel(self)
 
 
-def create_app(conf):
+def create_app(conf={}):
     app = LibreantViewApp("webant", conf)
 
     @app.route('/')

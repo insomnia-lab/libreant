@@ -24,7 +24,7 @@ def search():
                               'text/xml',
                               'application/rss+xml',
                               'opensearch'])
-    if format == 'text/html':
+    if (not format) or (format is 'text/html'):
         return render_template('os_search.html', books=books, query=query)
     if format in ['opensearch', 'text/xml', 'application/rss+xml']:
         return Response(render_template('os_opens.xml', books=books,

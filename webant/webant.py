@@ -51,7 +51,7 @@ class LibreantViewApp(LibreantCoreApp):
         self.babel = Babel(self)
 
 
-def create_app(conf):
+def create_app(conf={}):
     app = LibreantViewApp("webant", conf)
 
     @app.route('/')
@@ -72,15 +72,15 @@ def create_app(conf):
             books.append(src)
         format = requestedFormat(request,
                                  ['text/html',
-                                  'text/xml',
-                                  'application/rss+xml',
-                                  'opensearch'])
-        if format == 'text/html':
+                                  'text/xml', 'application/rss+xml', 'opensearch'])
+        if (not format) or (format is 'text/html'):
             return render_template('search.html', books=books, query=query)
-        if format in ['opensearch', 'text/xml', 'application/rss+xml']:
+        elif format in ['opensearch', 'text/xml', 'application/rss+xml']:
             return Response(render_template('opens.xml',
                                             books=books, query=query),
                             mimetype='text/xml')
+        else:
+            abort(500)
 
     @app.route('/add', methods=['POST'])
     def upload():

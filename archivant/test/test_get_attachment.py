@@ -1,9 +1,7 @@
-from archivant.test import TestArchivant
-from fsdb.hashtools import calc_file_digest
+from archivant.test.class_template import TestArchivant
 from StringIO import StringIO
 
-from nose.tools import raises, ok_, eq_
-import os
+from nose.tools import eq_
 
 
 class TestArchivantGetAttachment(TestArchivant):

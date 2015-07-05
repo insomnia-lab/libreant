@@ -1,4 +1,4 @@
-from archivant.test import TestArchivant
+from archivant.test.class_template import TestArchivant
 from archivant.exceptions import NotFoundException
 
 from nose.tools import eq_, raises  # , ok_
@@ -42,9 +42,9 @@ class TestArchivantAttachmentOperations(TestArchivant):
         attachments = self.generate_attachments(n)
         volumeID = self.arc.insert_volume(volume_metadata, attachments=attachments)
         added_attachments = (self.arc.get_volume(volumeID))['attachments']
-        self.arc.delete_attachments(volumeID, [added_attachments[n-1]['id']])
+        self.arc.delete_attachments(volumeID, [added_attachments[n - 1]['id']])
         added_attachments = (self.arc.get_volume(volumeID))['attachments']
-        eq_(len(added_attachments), n-1)
+        eq_(len(added_attachments), n - 1)
 
     def test_delete_attachments(self):
         n = 5
@@ -52,11 +52,11 @@ class TestArchivantAttachmentOperations(TestArchivant):
         attachments = self.generate_attachments(n)
         volumeID = self.arc.insert_volume(volume_metadata, attachments=attachments)
         added_attachments = (self.arc.get_volume(volumeID))['attachments']
-        self.arc.delete_attachments(volumeID, [added_attachments[n-1]['id'],
-                                               added_attachments[n-3]['id'],
+        self.arc.delete_attachments(volumeID, [added_attachments[n - 1]['id'],
+                                               added_attachments[n - 3]['id'],
                                                added_attachments[0]['id']])
         added_attachments = (self.arc.get_volume(volumeID))['attachments']
-        eq_(len(added_attachments), n-3)
+        eq_(len(added_attachments), n - 3)
 
     @raises(NotFoundException)
     def test_update_attachment_not_found(self):

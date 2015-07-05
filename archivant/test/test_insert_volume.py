@@ -1,4 +1,4 @@
-from archivant.test import TestArchivant
+from archivant.test.class_template import TestArchivant
 from fsdb.hashtools import calc_file_digest, calc_digest
 
 from nose.tools import raises, ok_, eq_
@@ -10,11 +10,11 @@ class TestArchivantInsertVolume(TestArchivant):
 
     def test_insert_volume(self):
         volume_metadata = self.generate_volume_metadata()
-        id = self.arc.insert_volume(volume_metadata)
+        self.arc.insert_volume(volume_metadata)
 
     @raises(KeyError)
     def test_insert_volume_without_language(self):
-        id = self.arc.insert_volume({'key0': 'value0'})
+        self.arc.insert_volume({'key0': 'value0'})
 
     def test_insert_volume_check_metadata(self):
         volume_metadata = self.generate_volume_metadata()
@@ -96,7 +96,7 @@ class TestArchivantInsertVolume(TestArchivant):
         s = StringIO('unascrittaperprovare')
         volume_metadata = self.generate_volume_metadata()
         attachments = [{'file': s}]
-        id = self.arc.insert_volume(volume_metadata, attachments=attachments)
+        self.arc.insert_volume(volume_metadata, attachments=attachments)
 
     def test_insert_volume_with_readable(self):
         s = StringIO('unascrittaperprovare')
@@ -128,7 +128,7 @@ class TestArchivantInsertVolume(TestArchivant):
         eq_(att_metadata['name'], 'I_love.json')
         eq_(att_metadata['size'], s.len)
         eq_(att_metadata['sha1'], calc_digest(StringIO('unascrittaperprovare'),
-                                                  algorithm='sha1'))
+                                              algorithm='sha1'))
 
     @raises(ValueError)
     def test_insert_volume_with_wrong_file_type(self):

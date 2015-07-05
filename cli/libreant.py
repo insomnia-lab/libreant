@@ -8,6 +8,7 @@ from utils.loggers import initLoggers
 from webant.webant import main
 from custom_types import StringList
 
+
 @click.command(help="launch libreant daemon")
 @click.version_option()
 @click.option('-s', '--settings', type=click.Path(exists=True, readable=True), metavar="<path>", help='file from wich load settings')

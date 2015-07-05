@@ -1,61 +1,167 @@
-# Italian translations for PROJECT.
-# Copyright (C) 2014 ORGANIZATION
-# This file is distributed under the same license as the PROJECT project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2014.
+# Italian translations for Libreant.
+# This file is distributed under the same license as the Libreant project.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: PROJECT VERSION\n"
-"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-11-27 20:09-0600\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: it <LL@li.org>\n"
-"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"POT-Creation-Date: 2015-07-04 18:11-0500\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 1.3\n"
 
-#: /home/libreant/libreant/webant/templates/details.html:14
-msgid "Download"
+#: /home/libreant/libreant/webant/webant.py:101
+msgid "Required field '%(mField)s' is missing"
+msgstr "Un campo obbligatorio risulta mancante: '%(mField)'"
+
+#: /home/libreant/libreant/webant/webant.py:140
+msgid "preset not found"
+msgstr "il preset non è stato trovato"
+
+#: /home/libreant/libreant/webant/templates/add.html:5
+#: /home/libreant/libreant/webant/templates/add.html:33
+msgid "Add new"
+msgstr "Aggiungi"
+
+#: /home/libreant/libreant/webant/templates/add.html:26
+#: /home/libreant/libreant/webant/templates/error.html:5
+#: /home/libreant/libreant/webant/templates/error.html:18
+msgid "Error"
+msgstr "Errore"
+
+#: /home/libreant/libreant/webant/templates/add.html:26
+msgid "Could not load the page because your browser does not support javascript"
+msgstr "Non è possible caricare la pagina perchè il tuo browser non supporta javascript"
+
+#: /home/libreant/libreant/webant/templates/add.html:56
+msgid "Language"
+msgstr "Lingua"
+
+#: /home/libreant/libreant/webant/templates/add.html:58
+msgid "Select a language"
+msgstr "Seleziona una lingua"
+
+#: /home/libreant/libreant/webant/templates/add.html:65
+#: /home/libreant/libreant/webant/templates/add.html:91
+#: /home/libreant/libreant/webant/templates/add.html:153
+msgid "Description"
+msgstr "Descrizione"
+
+#: /home/libreant/libreant/webant/templates/add.html:66
+#: /home/libreant/libreant/webant/templates/add.html:92
+#: /home/libreant/libreant/webant/templates/add.html:154
+msgid "Field description"
+msgstr "Descrizione del campo"
+
+#: /home/libreant/libreant/webant/templates/add.html:67
+msgid "This is the language that you are using to fill this form."
+msgstr "Questa dovrebbe essere la lingua usata per compilare questo form."
+
+#: /home/libreant/libreant/webant/templates/add.html:80
+msgid "Select a value"
+msgstr "Seleziona un valore"
+
+#: /home/libreant/libreant/webant/templates/add.html:131
+msgid "Reset"
+msgstr "Reset"
+
+#: /home/libreant/libreant/webant/templates/add.html:132
+msgid "Add"
+msgstr "Aggiungi"
+
+#: /home/libreant/libreant/webant/templates/add.html:148
+msgid "Choose file"
+msgstr "Scegli file"
+
+#: /home/libreant/libreant/webant/templates/add.html:155
+msgid "Here you can insert specific info about this file."
+msgstr "Qui puoi inserire informazioni specifiche riguardanti questo file"
+
+#: /home/libreant/libreant/webant/templates/add.html:165
+msgid "custom key"
+msgstr "chiave"
+
+#: /home/libreant/libreant/webant/templates/add.html:168
+msgid "custom value"
+msgstr "valore"
+
+#: /home/libreant/libreant/webant/templates/add.html:174
+msgid "close"
+msgstr "chiudi"
+
+#: /home/libreant/libreant/webant/templates/add.html:175
+msgid ""
+"With these additional fields you can add more information to your "
+"item.<br>\\\n"
+"            In the form on the left you need to enter a keyword that "
+"identifies the\\\n"
+"            attribute that you go to put in the form on the right.<br>\\\n"
+"            For example, you can add information about the type of cover "
+"of a book\\\n"
+"            in this way: \"key: cover\", \"value: rigid\"."
 msgstr ""
 
-#: /home/libreant/libreant/webant/templates/details.html:25
+#: /home/libreant/libreant/webant/templates/details.html:40
 msgid "Details"
 msgstr "Dettagli"
 
-#: /home/libreant/libreant/webant/templates/details.html:29
+#: /home/libreant/libreant/webant/templates/details.html:44
 msgid "Field"
 msgstr "Campo"
 
-#: /home/libreant/libreant/webant/templates/details.html:30
+#: /home/libreant/libreant/webant/templates/details.html:45
 msgid "Value"
 msgstr "Valore"
 
-#: /home/libreant/libreant/webant/templates/details.html:44
+#: /home/libreant/libreant/webant/templates/details.html:62
 msgid "Similar books"
 msgstr "Libri simili"
 
-#: /home/libreant/libreant/webant/templates/index.html:6
+#: /home/libreant/libreant/webant/templates/index.html:16
 msgid "What do you want to read today?"
 msgstr "Cosa vorresti leggere oggi?"
 
-#: /home/libreant/libreant/webant/templates/index.html:10
-msgid "Search"
-msgstr "Cerca"
+#: /home/libreant/libreant/webant/templates/navbar.html:17
+msgid "Add item"
+msgstr "Aggiungi"
 
-#: /home/libreant/libreant/webant/templates/search.html:12
+#: /home/libreant/libreant/webant/templates/navbar.html:19
+msgid "All items"
+msgstr "Tutti"
+
+#: /home/libreant/libreant/webant/templates/navbar.html:21
+msgid "Recently added"
+msgstr "Recenti"
+
+#: /home/libreant/libreant/webant/templates/os_search.html:12
 msgid "Search results"
 msgstr "Risultati"
 
-#: /home/libreant/libreant/webant/templates/search.html:13
+#: /home/libreant/libreant/webant/templates/os_search.html:13
+#: /home/libreant/libreant/webant/templates/search.html:37
 #, python-format
 msgid "%(num)s result was found for"
 msgid_plural "%(num)s results were found for"
 msgstr[0] "é stato trovato un solo risultato per"
 msgstr[1] "Sono stati trovati %(num)s risultati per"
 
-#: /home/libreant/libreant/webant/templates/search.html:18
+#: /home/libreant/libreant/webant/templates/os_search.html:18
+#: /home/libreant/libreant/webant/templates/search.html:45
 msgid "Sorry, no books matching your query"
 msgstr "Spiacenti, non è stato trovato nessun elemento che soddisfi la tua richiesta"
+
+#: /home/libreant/libreant/webant/templates/recents.html:5
+msgid "Recents"
+msgstr "Recenti"
+
+#: /home/libreant/libreant/webant/templates/recents.html:32
+msgid "Recently added items"
+msgstr "Elementi aggiunti di recente"
+
+#: /home/libreant/libreant/webant/templates/recents.html:40
+msgid "No items added since now"
+msgstr "Non è ancora stato aggiunto nessun elemento"
+
+#: /home/libreant/libreant/webant/templates/search.html:6
+#: /home/libreant/libreant/webant/templates/searchbar.html:9
+msgid "Search"
+msgstr "Cerca"

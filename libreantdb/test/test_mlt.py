@@ -85,7 +85,7 @@ def test_mlt_en_topic_2():
     b = dict(title='Computer networks',
              actors=['switch', 'router'],
              _language='en')
-    book_id3 = db.add_book(doc_type='book', body=b)['_id']
+    db.add_book(doc_type='book', body=b)['_id']
     assert book_id1 != book_id2
     db.es.indices.refresh(index=db.index_name)
     res = db.mlt(book_id1)['hits']

@@ -3,7 +3,7 @@ This module will connect to your elasticsearch instance.
 An index will be reserved to the tests.
 '''
 
-from nose.tools import ok_, eq_, with_setup
+from nose.tools import eq_, with_setup
 
 from . import db, cleanall
 

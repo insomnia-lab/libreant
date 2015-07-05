@@ -11,7 +11,7 @@ from . import db, cleanall
 @with_setup(cleanall, cleanall)
 def test_last_inserted():
     '''Simple fts, without stemming or anything fancy'''
-    first = db.add_book(body={'order': 'first', '_language': 'it'})
+    db.add_book(body={'order': 'first', '_language': 'it'})
     second = db.add_book(body={'order': 'second', '_language': 'it'})
     db.es.indices.refresh(index=db.index_name)
     res = db.get_last_inserted(1)

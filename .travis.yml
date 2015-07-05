@@ -7,10 +7,12 @@ services:
   - elasticsearch
 
 install:
-    - python setup.py install
+  - "pip install flake8"
+  - "python setup.py install"
 
 before_script:
   - sleep 10 # wait for elasticsearch
 
 script:
+  - 'flake8'
   - python setup.py test

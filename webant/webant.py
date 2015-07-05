@@ -13,7 +13,7 @@ from presets import PresetManager
 from constants import isoLangs
 from util import requestedFormat, send_attachment_file
 from archivant import Archivant
-from archivant.exceptions import NotFoundException
+from archivant.exceptions import NotFoundException, FileOpNotSupported
 from agherant import agherant
 from api.blueprint_api import api
 from webserver_utils import gevent_run
@@ -32,11 +32,6 @@ class LibreantCoreApp(Flask):
         defaults.update(conf)
         self.config.update(defaults)
 
-        if not self.config['FSDB_PATH']:
-            if not self.config['DEBUG']:
-                raise ValueError('FSDB_PATH cannot be empty')
-            else:
-                self.config['FSDB_PATH'] = os.path.join(tempfile.gettempdir(), 'libreant_fsdb')
         self.archivant = Archivant(conf={k: self.config[k] for k in ('FSDB_PATH', 'ES_HOSTS', 'ES_INDEXNAME')})
         self.presetManager = PresetManager(self.config['PRESET_PATHS'])
 
@@ -141,8 +136,8 @@ def create_app(conf):
                 preset = app.presetManager.presets[reqPreset]
         else:
             preset = None
-
-        return render_template('add.html', preset=preset, availablePresets=app.presetManager.presets, isoLangs=isoLangs)
+        file_upload = app.archivant.is_file_op_supported()
+        return render_template('add.html', file_upload=file_upload, preset=preset, availablePresets=app.presetManager.presets, isoLangs=isoLangs)
 
     @app.route('/description.xml')
     def description():
@@ -199,6 +194,7 @@ def create_app(conf):
     def not_found(error):
         return renderErrorPage(message='Not Found', httpCode=404)
 
+    @app.errorhandler(FileOpNotSupported)
     @app.errorhandler(500)
     def internal_server_error(error):
         return renderErrorPage(message='Internal Server Error', httpCode=500)

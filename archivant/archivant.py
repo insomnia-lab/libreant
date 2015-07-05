@@ -2,7 +2,6 @@ import os
 from numbers import Integral
 from elasticsearch import Elasticsearch
 from elasticsearch import NotFoundError
-
 from uuid import uuid4
 from fsdb import Fsdb
 from fsdb.hashtools import calc_file_digest, calc_digest
@@ -11,7 +10,7 @@ from urlparse import urlparse
 from json import dumps
 
 from libreantdb import DB
-from exceptions import NotFoundException
+from exceptions import NotFoundException, FileOpNotSupported
 
 from logging import getLogger
 log = getLogger('archivant')
@@ -26,22 +25,27 @@ class Archivant():
         A 'volume' represents a physical/digital object stored within archivant.
         Volumes are structured as described in `Archivant.normalize_volume`,
         these have metadata and a list of attachments.
+
+        If you won't configure the FSDB_PATH parameter, fsdb will not be initialized
+        and archivant will start in metadata-only mode.
+        In metdata-only mode all file related functions will raise FileOpNotSupported.
     '''
 
     def __init__(self, conf={}):
         defaults = {
-            'FSDB_PATH': "",
+            'FSDB_PATH': None,
             'ES_HOSTS': None,
-            'ES_INDEXNAME': ''
+            'ES_INDEXNAME': None
         }
         defaults.update(conf)
         self._config = defaults
         log.debug('initializing with this config: ' + dumps(self._config))
 
         # initialize fsdb
-        if not self._config['FSDB_PATH']:
-            raise ValueError('FSDB_PATH cannot be empty')
-        self._fsdb = Fsdb(self._config['FSDB_PATH'])
+        if self._config['FSDB_PATH']:
+            self.__fsdb = Fsdb(self._config['FSDB_PATH'])
+        else:
+            log.warning('It has not been set any value for FSDB_PATH, file operations will not be supported')
 
         # initialize elasticsearch
         if not self._config['ES_INDEXNAME']:
@@ -50,6 +54,21 @@ class Archivant():
                 index_name=self._config['ES_INDEXNAME'])
         db.setup_db()
         self._db = db
+
+    @property
+    def _fsdb(self):
+        try:
+            return self.__fsdb
+        except AttributeError:
+            raise FileOpNotSupported("FSDB_PATH paramenter has not been set")
+
+    def is_file_op_supported(self):
+        try:
+            self._fsdb
+        except FileOpNotSupported:
+            return False
+        else:
+            return True
 
     @staticmethod
     def normalize_volume(volume):

@@ -1,4 +1,5 @@
 from archivant import Archivant
+from archivant.exceptions import FileOpNotSupported
 from tempfile import mkdtemp
 from shutil import rmtree
 from elasticsearch import Elasticsearch
@@ -27,10 +28,11 @@ def test_instantiation_ok():
     cleanup(esIndex=TEST_ES_INDEX, tmpDir=tmpDir)
 
 
-@raises(ValueError)
+@raises(FileOpNotSupported)
 def test_instantiation_no_fsdb():
     conf = {'ES_INDEXNAME': TEST_ES_INDEX}
     arc = Archivant(conf)
+    arc._fsdb
 
 
 @raises(ValueError)

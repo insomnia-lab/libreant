@@ -1,6 +1,7 @@
 import functools
 from flask import send_file
 
+
 def memoize(obj):
     '''decorator to memoize things'''
     cache = obj.cache = {}
@@ -12,6 +13,7 @@ def memoize(obj):
             cache[key] = obj(*args, **kwargs)
         return cache[key]
     return memoizer
+
 
 def requestedFormat(request,acceptedFormat):
         """Return the response format requested by client
@@ -36,6 +38,7 @@ def requestedFormat(request,acceptedFormat):
             return fieldFormat
         else:
             return request.accept_mimetypes.best_match(acceptedFormat)
+
 
 def send_attachment_file(archivant, volumeID, attachmentID):
     f = archivant.get_file(volumeID, attachmentID)

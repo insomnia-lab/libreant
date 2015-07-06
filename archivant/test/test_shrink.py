@@ -1,6 +1,6 @@
-from archivant.test import TestArchivant
+from archivant.test.class_template import TestArchivant
 
-from nose.tools import raises, ok_, eq_
+from nose.tools import eq_
 
 
 class TestArchivantShrink(TestArchivant):
@@ -14,7 +14,7 @@ class TestArchivantShrink(TestArchivant):
         n = 3
         volume_metadata = self.generate_volume_metadata()
         attachments = self.generate_attachments(n)
-        id = self.arc.insert_volume(volume_metadata, attachments=attachments)
+        self.arc.insert_volume(volume_metadata, attachments=attachments)
         self.arc._db.es.indices.refresh()
         eq_(len([fid for fid in self.arc.dangling_files()]), 0)
 

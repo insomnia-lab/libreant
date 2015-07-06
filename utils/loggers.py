@@ -1,6 +1,8 @@
 import logging
 
+
 LOG_NAMES = ['webant', 'fsdb', 'presets', 'agherant', 'config_utils', 'libreantdb', 'archivant']
+
 
 def initLoggers(logLevel=logging.WARNING, logNames=LOG_NAMES):
     streamHandler = logging.StreamHandler()

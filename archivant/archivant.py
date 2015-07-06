@@ -206,7 +206,7 @@ class Archivant():
         ''' add attachments to an already existing volume '''
         log.debug("adding new attachments to volume '{}': {}".format(volumeID, attachments))
         if not attachments:
-           return
+            return
         rawVolume = self._req_raw_volume(volumeID)
         attsID = list()
         for index, a in enumerate(attachments):
@@ -363,7 +363,7 @@ class Archivant():
     def dangling_files(self):
         '''iterate over fsdb files no more attached to any volume'''
         for fid in self._fsdb:
-            if not self._db.file_is_attached('fsdb:///'+fid):
+            if not self._db.file_is_attached('fsdb:///' + fid):
                 yield fid
 
     def shrink_local_fsdb(self, dangling=True, corrupted=True, dryrun=False):

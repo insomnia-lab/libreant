@@ -7,24 +7,26 @@ from tempfile import NamedTemporaryFile, mkdtemp
 from shutil import rmtree
 from presets.presetManager import PresetException
 import json
-import os
 from presets.presetManager import PresetManager
 
 
 minimalBody = { "id": "id_test",
                 "properties": [] }
-
 tmpDir = None
+
 
 def setUpModule():
     global tmpDir
     tmpDir = mkdtemp(prefix='libreant_presets_tests')
 
+
 def tearDownModule():
     rmtree(tmpDir)
 
+
 def json_tmp_file():
     return NamedTemporaryFile(delete=False, dir=tmpDir, suffix=".json")
+
 
 def test_sigle_file():
     ''' test single file loding'''
@@ -59,7 +61,7 @@ def test_duplicate_id():
     f2 = json_tmp_file()
     f2.write(json.dumps(minimalBody))
     f2.close()
-    p = PresetManager([f1.name,f2.name], strict=True)
+    PresetManager([f1.name,f2.name], strict=True)
 
 
 def test_empty_path():
@@ -71,7 +73,7 @@ def test_empty_path():
 @raises(PresetException)
 def test_not_existent():
     ''' if preset file do not exists we expect an exception '''
-    p = PresetManager("notexistent", strict=True)
+    PresetManager("notexistent", strict=True)
 
 
 def test_folders():
@@ -92,10 +94,11 @@ def test_folders():
         assert presetBodies[i]['id'] in p.presets
         rmtree(folders[i], ignore_errors=True)
 
+
 @raises(PresetException)
 def test_wrong_json_format():
     ''' if preset has a bad json format we expect an exception'''
     f = json_tmp_file()
     f.write("{{{{}")
     f.close()
-    p = PresetManager(f.name, strict=True)
+    PresetManager(f.name, strict=True)

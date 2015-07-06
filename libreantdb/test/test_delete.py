@@ -19,7 +19,7 @@ def test_delete_id():
 
 @with_setup(cleanall, cleanall)
 def test_delete_one_of_two():
-    id1 = db.add_book(body=dict(title='Un libro', _language='it'))['_id']
+    db.add_book(body=dict(title='Un libro', _language='it'))['_id']
     id2 = db.add_book(body=dict(title='Un libro', _language='it'))['_id']
     db.es.indices.refresh(index=db.index_name)
     eq_(len(db), 2)

@@ -21,6 +21,7 @@ def test_update_book_simple():
     res = db.get_books_simplequery('mondo')
     eq_(res['hits']['total'], 1)
 
+
 @with_setup(cleanall, cleanall)
 def test_update_book_merge():
     '''Update a book, merging'''
@@ -32,6 +33,7 @@ def test_update_book_merge():
     eq_(res['hits']['total'], 1)
     res = db.get_books_simplequery('mondo')
     eq_(res['hits']['total'], 1)
+
 
 @with_setup(cleanall, cleanall)
 def test_update_book_language():
@@ -45,6 +47,7 @@ def test_update_book_language():
     res = db.get_books_simplequery('mondo')
     eq_(res['hits']['total'], 1)
 
+
 @with_setup(cleanall, cleanall)
 def test_update_book_merge_fts_correct():
     '''Update a book, merging. FTS fields should still be correct'''
@@ -57,6 +60,7 @@ def test_update_book_merge_fts_correct():
     ok_('mondo' in src['_text_it'])
     ok_('fine' in src['_text_it'])
 
+
 @with_setup(cleanall, cleanall)
 def test_modify_book():
     id = db.add_book(body=dict(title='La fine', _language='it'))['_id']
@@ -67,6 +71,7 @@ def test_modify_book():
     mod_book = db.get_book_by_id(id)['_source']
     ok_('title' not in mod_book)
     eq_(mod_book['author'], 'author_one')
+
 
 @with_setup(cleanall, cleanall)
 def test_modify_book_fts_correct():
@@ -79,6 +84,7 @@ def test_modify_book_fts_correct():
     ok_('fine' not in mod_book['_text_it'])
     ok_('Niser' in mod_book['_text_it'])
 
+
 @with_setup(cleanall, cleanall)
 def test_modify_book_version_check():
     id = db.add_book(body=dict(title='La fine', _language='it'))['_id']
@@ -89,6 +95,7 @@ def test_modify_book_version_check():
     mod_book = db.get_book_by_id(id)['_source']
     ok_('title' not in mod_book)
     eq_(mod_book['author'], 'author_one')
+
 
 @raises(ConflictError)
 @with_setup(cleanall, cleanall)

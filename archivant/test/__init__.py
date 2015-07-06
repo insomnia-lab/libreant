@@ -1,1 +1,0 @@
-from class_template import TestArchivant

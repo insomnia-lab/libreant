@@ -67,7 +67,7 @@ def export_volume(volumeid, pretty):
 @click.argument('volumeid')
 def delete_volume(volumeid):
     try:
-        volume = arc.delete_volume(volumeid)
+        arc.delete_volume(volumeid)
     except NotFoundException as e:
         click.secho(str(e), fg="yellow", err=True)
         exit(4)

@@ -24,7 +24,7 @@ def test_instantiation_ok():
     tmpDir = mkdtemp(prefix=FSDB_PATH_PREFIX)
     conf = {'ES_INDEXNAME': TEST_ES_INDEX,
             'FSDB_PATH': tmpDir}
-    arc = Archivant(conf)
+    Archivant(conf)
     cleanup(esIndex=TEST_ES_INDEX, tmpDir=tmpDir)
 
 
@@ -40,7 +40,7 @@ def test_instantiation_no_indexname():
     tmpDir = mkdtemp(prefix=FSDB_PATH_PREFIX)
     conf = {'FSDB_PATH': tmpDir}
     try:
-        arc = Archivant(conf)
+        Archivant(conf)
     finally:
         cleanup(tmpDir=tmpDir)
 
@@ -52,6 +52,6 @@ def test_instantiation_hosts_error():
             'ES_HOSTS': "",
             'FSDB_PATH': tmpDir}
     try:
-        arc = Archivant(conf)
+        Archivant(conf)
     finally:
         cleanup(tmpDir=tmpDir)

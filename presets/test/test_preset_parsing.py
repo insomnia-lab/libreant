@@ -8,6 +8,7 @@ from presets.presetManager import PresetMissingFieldException
 from presets.presetManager import PresetFieldTypeException
 from presets.presetManager import PresetException
 
+
 def test_creation():
     preset = {
         "id": "id_test",
@@ -23,7 +24,7 @@ def test_field_id_missing():
     preset = {
         "properties": []
     }
-    p = Preset(preset)
+    Preset(preset)
 
 
 @raises(PresetException)
@@ -33,7 +34,7 @@ def test_field_id_empty():
         "id": "",
         "properties": []
     }
-    p = Preset(preset)
+    Preset(preset)
 
 
 @raises(PresetFieldTypeException)
@@ -43,7 +44,7 @@ def test_field_id_type():
         "id": {},
         "properties": []
     }
-    p = Preset(preset)
+    Preset(preset)
 
 
 def test_field_allowUpload():
@@ -78,7 +79,7 @@ def test_field_allowUpload_type():
         "properties": [],
         "allow_upload": "test"
     }
-    p = Preset(preset)
+    Preset(preset)
 
 
 @raises(PresetMissingFieldException)
@@ -87,7 +88,7 @@ def test_field_properties_missing():
     preset = {
         "id": "id_test"
     }
-    p = Preset(preset)
+    Preset(preset)
 
 
 @raises(PresetFieldTypeException)
@@ -97,7 +98,7 @@ def test_field_properties_type():
         "id": "id_test",
         "properties": "asd"
     }
-    p = Preset(preset)
+    Preset(preset)
 
 
 def test_properties_empty():
@@ -115,7 +116,7 @@ def test_id_empty():
         "id": "",
         "properties": []
     }
-    p = Preset(preset)
+    Preset(preset)
 
 
 @raises(PresetException)
@@ -124,7 +125,7 @@ def test_properties_id_empty():
         "id": "id_test",
         "properties": [{"id": ""}]
     }
-    p = Preset(preset)
+    Preset(preset)
 
 
 @raises(PresetException)
@@ -134,7 +135,7 @@ def test_properties_duplicate_id():
         "properties": [ {"id": "1_p"},
                         {"id": "1_p"} ]
     }
-    p = Preset(preset)
+    Preset(preset)
 
 
 def test_properties_num():
@@ -181,13 +182,13 @@ def test_properties_defaults():
 
 @raises(PresetException)
 def test_properties_type():
-    ''' test type value not valid '''   
+    '''test type value not valid'''
     preset = {
         "id" : "id_test",
         "properties": [{ "id": "prop_test",
                          "type" : "### non_esiste ###" }]
     }
-    p = Preset(preset)
+    Preset(preset)
 
 
 @raises(PresetMissingFieldException)
@@ -198,7 +199,7 @@ def test_properties_type_enum_missing_values():
                          "type" : "enum"
                         }]
     }
-    p = Preset(preset)
+    Preset(preset)
 
 
 @raises(PresetFieldTypeException)
@@ -210,7 +211,7 @@ def test_properties_type_enum_values_type():
                          "values": "errorrrre"
                         }]
     }
-    p = Preset(preset)
+    Preset(preset)
 
 
 def test_properties_type_enum_values():

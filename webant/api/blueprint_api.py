@@ -21,12 +21,15 @@ class ApiError(Exception):
     def __str__(self):
         return "http_code: {}, err_code: {}, message: '{}', details: '{}'".format(self.http_code, self.err_code, self.message, self.details)
 
+
 def make_success_response(message, http_code=200):
     response = jsonify({'code': http_code, 'message': message})
     response.status_code = http_code
     return response
 
+
 api = Blueprint('api', __name__)
+
 
 @api.errorhandler(ApiError)
 def apiErrorHandler(apiErr):
@@ -39,10 +42,12 @@ def apiErrorHandler(apiErr):
     response.status_code = apiErr.http_code
     return response
 
+
 # workaround for "https://github.com/mitsuhiko/flask/issues/1498"
 @api.route("/<path:invalid_path>", methods=['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTIONS'])
 def apiNotFound(invalid_path):
     raise ApiError("invalid URI", 404)
+
 
 @api.errorhandler(Exception)
 def exceptionHandler(e):
@@ -55,11 +60,11 @@ def get_volumes():
     q = request.args.get('q', "*:*")
     try:
         from_ = int(request.args.get('from', 0))
-    except ValueError, e:
+    except ValueError:
         raise ApiError("Bad Request", 400, details="could not covert 'from' parameter to number")
     try:
         size = int(request.args.get('size', 10))
-    except ValueError, e:
+    except ValueError:
         raise ApiError("Bad Request", 400, details="could not covert 'size' parameter to number")
     if size > current_app.config.get('MAX_RESULTS_PER_PAGE', 50):
         raise ApiError("Request Entity Too Large", 413, details="'size' parameter is too high")
@@ -74,6 +79,7 @@ def get_volumes():
            'total': q_res['hits']['total'],
            'data': volumes}
     return jsonify(res)
+
 
 @api.route('/volumes/', methods=['POST'])
 def add_volume():
@@ -109,6 +115,7 @@ def get_volume(volumeID):
         raise ApiError("volume not found", 404, details=str(e))
     return jsonify({'data': volume})
 
+
 @api.route('/volumes/<volumeID>', methods=['DELETE'])
 def delete_volume(volumeID):
     try:
@@ -116,6 +123,7 @@ def delete_volume(volumeID):
     except NotFoundException, e:
         raise ApiError("volume not found", 404, details=str(e))
     return make_success_response("volume has been successfully deleted")
+
 
 @api.route('/volumes/<volumeID>/attachments/', methods=['GET'])
 def get_attachments(volumeID):
@@ -162,6 +170,7 @@ def get_attachment(volumeID, attachmentID):
     except NotFoundException, e:
         raise ApiError("attachment not found", 404, details=str(e))
     return jsonify({'data': att})
+
 
 @api.route('/volumes/<volumeID>/attachments/<attachmentID>', methods=['DELETE'])
 def delete_attachment(volumeID, attachmentID):

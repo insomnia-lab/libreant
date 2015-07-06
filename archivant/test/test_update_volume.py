@@ -1,10 +1,7 @@
-from archivant.test import TestArchivant
-from fsdb.hashtools import calc_file_digest, calc_digest
+from archivant.test.class_template import TestArchivant
 
-from nose.tools import raises, ok_, eq_
-import os
+from nose.tools import eq_
 from copy import deepcopy
-from StringIO import StringIO
 
 
 class TestArchivantUpdateVolume(TestArchivant):
@@ -17,7 +14,7 @@ class TestArchivantUpdateVolume(TestArchivant):
         rawVolume = self.arc._req_raw_volume(id)
         normalized = self.arc.normalize_volume(deepcopy(rawVolume))
         denom_id, denormalized = self.arc.denormalize_volume(normalized)
-        del(rawVolume['_source']['_text_'+rawVolume['_source']['_language']])
+        del(rawVolume['_source']['_text_' + rawVolume['_source']['_language']])
         eq_(denom_id, id)
         eq_(denormalized, rawVolume['_source'])
 

@@ -1,4 +1,4 @@
-from archivant.test import TestArchivant
+from archivant.test.class_template import TestArchivant
 from archivant.exceptions import NotFoundException
 
 from nose.tools import raises  # , ok_, eq_

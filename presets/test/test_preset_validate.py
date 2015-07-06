@@ -2,11 +2,11 @@
 Collection of tests to verify presets validation
 '''
 
-from nose.tools import eq_, raises
+from nose.tools import raises
 from presets.presetManager import Preset
 from presets.presetManager import PresetMissingFieldException
-from presets.presetManager import PresetFieldTypeException
 from presets.presetManager import PresetException
+
 
 def test_validate_empty():
     ''' preset without empty must validate empty data'''
@@ -17,6 +17,7 @@ def test_validate_empty():
     data = {}
     p = Preset(preset)
     p.validate(data)
+
 
 # string type tests
 
@@ -32,6 +33,7 @@ def test_validate_string_not_required_missing():
     p = Preset(preset)
     p.validate(data)
 
+
 def test_validate_string_not_required():
     ''' if string property are not required we can insert it anyway'''
     preset = {
@@ -43,6 +45,7 @@ def test_validate_string_not_required():
     data = { "prop_test_string" : "any_text_I_want" }
     p = Preset(preset)
     p.validate(data)
+
 
 @raises(PresetMissingFieldException)
 def test_validate_string_required_missing():
@@ -59,6 +62,7 @@ def test_validate_string_required_missing():
     p = Preset(preset)
     p.validate(data)
 
+
 # enum type tests
 
 def test_validate_enum_not_required_missing():
@@ -74,6 +78,7 @@ def test_validate_enum_not_required_missing():
     p = Preset(preset)
     p.validate(data)
 
+
 def test_validate_enum_not_required():
     ''' if enum property is not required we can insert it anyway'''
     preset = {
@@ -86,6 +91,7 @@ def test_validate_enum_not_required():
     data = { "prop_test_enum": "alfa" }
     p = Preset(preset)
     p.validate(data)
+
 
 @raises(PresetMissingFieldException)
 def test_validate_enum_required_missing():
@@ -103,6 +109,7 @@ def test_validate_enum_required_missing():
     p = Preset(preset)
     p.validate(data)
 
+
 @raises(PresetException)
 def test_validate_enum_not_required_wrong():
     ''' if property of type enum is not required
@@ -118,6 +125,7 @@ def test_validate_enum_not_required_wrong():
     data = {"prop_test_enum": "alfas"}
     p = Preset(preset)
     p.validate(data)
+
 
 @raises(PresetException)
 def test_validate_enum_required_wrong():

@@ -50,10 +50,16 @@ class Archivant():
         # initialize elasticsearch
         if not self._config['ES_INDEXNAME']:
             raise ValueError('ES_INDEXNAME cannot be empty')
-        db = DB(Elasticsearch(hosts=self._config['ES_HOSTS']),
-                index_name=self._config['ES_INDEXNAME'])
-        db.setup_db()
-        self._db = db
+        self.__db = None
+
+    @property
+    def _db(self):
+        if self.__db is None:
+            db = DB(Elasticsearch(hosts=self._config['ES_HOSTS']),
+                    index_name=self._config['ES_INDEXNAME'])
+            db.setup_db()
+            self.__db = db
+        return self.__db
 
     @property
     def _fsdb(self):

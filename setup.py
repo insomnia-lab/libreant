@@ -99,6 +99,7 @@ conf = dict(
                   'webant.api',
                   'presets',
                   'archivant',
+                  'users',
                   'utils',
                   'cli',
                   'conf'],
@@ -111,7 +112,9 @@ conf = dict(
           'Flask',
           'opensearch',
           'Fsdb',
-          'click'
+          'click',
+          'peewee',
+          'passlib'
         ],
         package_data = {
           # If any package contains *.mo include them

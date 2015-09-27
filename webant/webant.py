@@ -17,6 +17,7 @@ from archivant.exceptions import NotFoundException, FileOpNotSupported
 from agherant import agherant
 from api.blueprint_api import api
 from webserver_utils import gevent_run
+import users
 
 
 class LibreantCoreApp(Flask):
@@ -27,13 +28,21 @@ class LibreantCoreApp(Flask):
             'FSDB_PATH': "",
             'SECRET_KEY': 'really insecure, please change me!',
             'ES_HOSTS': None,
-            'ES_INDEXNAME': 'libreant'
+            'ES_INDEXNAME': 'libreant',
+            'USERS_DATABASE': "",
+            'PWD_ROUNDS': None,
+            'PWD_SALT_SIZE': None
         }
         defaults.update(conf)
         self.config.update(defaults)
 
         self.archivant = Archivant(conf={k: self.config[k] for k in ('FSDB_PATH', 'ES_HOSTS', 'ES_INDEXNAME')})
         self.presetManager = PresetManager(self.config['PRESET_PATHS'])
+
+        self.usersDB = users.init_db(self.config['USERS_DATABASE'],
+                                     pwd_salt_size=self.config['PWD_SALT_SIZE'],
+                                     pwd_rounds=self.config['PWD_ROUNDS'])
+        users.populate_with_defaults()
 
 
 class LibreantViewApp(LibreantCoreApp):

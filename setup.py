@@ -114,7 +114,7 @@ conf = dict(
           'Fsdb',
           'click',
           'peewee',
-          'passlib'
+          'passlib >=1.6, <1.7' # version 1.7 will drop python2 suport
         ],
         package_data = {
           # If any package contains *.mo include them

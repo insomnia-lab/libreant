@@ -18,7 +18,7 @@ Download and install the Public Signing Key for elasticsearch repo::
 
 Add elasticsearch repos in /etc/apt/sources.list.d/elasticsearch.list::
 
-    echo "deb http://packages.elasticsearch.org/elasticsearch/1.4/debian stable main" | sudo tee /etc/apt/sources.list.d/elasticsearch.list
+    echo "deb http://packages.elasticsearch.org/elasticsearch/1.7/debian stable main" | sudo tee /etc/apt/sources.list.d/elasticsearch.list
 
 Install requirements::
     

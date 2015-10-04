@@ -210,7 +210,7 @@ def receive_volume_metadata():
 
 
 def receive_metadata(optional=False):
-    if optional and 'metdata' not in request.values:
+    if optional and 'metadata' not in request.values:
         return {}
     try:
         metadata = json.loads(request.values['metadata'])

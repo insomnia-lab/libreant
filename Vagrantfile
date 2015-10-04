@@ -14,7 +14,7 @@ end
 
 $script = <<SCRIPT
 wget -qO - https://packages.elasticsearch.org/GPG-KEY-elasticsearch | apt-key add -
-echo "deb http://packages.elasticsearch.org/elasticsearch/1.4/debian stable main" >> /etc/apt/sources.list
+echo "deb http://packages.elasticsearch.org/elasticsearch/1.7/debian stable main" >> /etc/apt/sources.list
 apt-get update && apt-get install -y python python-dev python-virtualenv openjdk-7-jre-headless elasticsearch
 update-rc.d elasticsearch defaults
 service elasticsearch start

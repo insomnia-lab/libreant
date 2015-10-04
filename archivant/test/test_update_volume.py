@@ -22,8 +22,6 @@ class TestArchivantUpdateVolume(TestArchivant):
         volume_metadata = {'_language': 'en',
                            'old_1': 'old_value_1'}
         id = self.arc.insert_volume(volume_metadata)
-        from pprint import pprint
-        pprint(volume_metadata)
         volume_metadata['new_1'] = 'new_value_1'
         self.arc.update_volume(id, volume_metadata)
         vol_metadata = (self.arc.get_volume(id))['metadata']

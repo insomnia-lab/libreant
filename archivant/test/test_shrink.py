@@ -15,7 +15,7 @@ class TestArchivantShrink(TestArchivant):
         volume_metadata = self.generate_volume_metadata()
         attachments = self.generate_attachments(n)
         self.arc.insert_volume(volume_metadata, attachments=attachments)
-        self.arc._db.es.indices.refresh()
+        self.refresh_index()
         eq_(len([fid for fid in self.arc.dangling_files()]), 0)
 
     def test_dangling_files(self):
@@ -24,7 +24,7 @@ class TestArchivantShrink(TestArchivant):
         attachments = self.generate_attachments(n)
         id = self.arc.insert_volume(volume_metadata, attachments=attachments)
         self.arc.delete_volume(id)
-        self.arc._db.es.indices.refresh()
+        self.refresh_index()
         eq_(len([fid for fid in self.arc.dangling_files()]), n)
 
     def test_shrink_dangling(self):
@@ -33,7 +33,7 @@ class TestArchivantShrink(TestArchivant):
         attachments = self.generate_attachments(n)
         id = self.arc.insert_volume(volume_metadata, attachments=attachments)
         self.arc.delete_volume(id)
-        self.arc._db.es.indices.refresh()
+        self.refresh_index()
         eq_(self.arc.shrink_local_fsdb(dangling=True), n)
         eq_(len(self.arc._fsdb), 0)
 
@@ -43,6 +43,6 @@ class TestArchivantShrink(TestArchivant):
         attachments = self.generate_attachments(n)
         id = self.arc.insert_volume(volume_metadata, attachments=attachments)
         self.arc.delete_volume(id)
-        self.arc._db.es.indices.refresh()
+        self.refresh_index()
         eq_(self.arc.shrink_local_fsdb(dangling=True, dryrun=True), n)
         eq_(len(self.arc._fsdb), n)

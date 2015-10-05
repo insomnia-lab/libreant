@@ -27,11 +27,14 @@ class TestArchivant():
         self.arc = Archivant(conf)
 
     def tearDown(self):
-        self.es.delete_by_query(index=self.TEST_ES_INDEX,
-                                body={'query': {'match_all': {}}})
+        self.arc._db.es.delete_by_query(index=self.TEST_ES_INDEX,
+                                        body={'query': {'match_all': {}}})
         rmtree(self.tmpDir)
         self.tmpDir = None
         self.arc = None
+
+    def refresh_index(self):
+        self.arc._db.es.indices.refresh(index=self.TEST_ES_INDEX)
 
     @staticmethod
     def generate_volume_metadata():

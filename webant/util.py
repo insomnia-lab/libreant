@@ -48,3 +48,49 @@ def send_attachment_file(archivant, volumeID, attachmentID):
                      mimetype=attachment['metadata']['mime'],
                      attachment_filename=attachment['metadata']['name'],
                      as_attachment=True)
+
+
+def routes_collector(gatherer):
+    """Decorator utility to collect flask routes in a dictionary.
+
+    This function together with :func:`add_routes` provides an
+    easy way to split flask routes declaration in multiple modules.
+
+    :param gatherer: dict in which will be collected routes
+
+    The decorator provided by this function should be used as the
+    `original flask decorator <http://flask.pocoo.org/docs/latest/api/#flask.Flask.route>`_
+    example::
+
+       routes = []
+       route = routes_collector(routes)
+
+       @route('/volumes/', methods=['GET', 'POST'])
+       def volumes():
+           return 'page body'
+
+    After you've collected your routes you can use :func:`add_routes` to register
+    them onto the main blueprint/flask_app.
+    """
+    def hatFunc(rule, **options):
+        def decorator(f):
+            rule_dict = {'rule':rule, 'view_func':f}
+            rule_dict.update(options)
+            gatherer.append(rule_dict)
+        return decorator
+    return hatFunc
+
+
+def add_routes(fapp, routes, prefix=""):
+    """Batch routes registering
+
+    Register routes to a blueprint/flask_app previously collected
+    with :func:`routes_collector`.
+
+    :param fapp: bluprint or flask_app to whom attach new routes.
+    :param routes: dict of routes collected by :func:`routes_collector`
+    :param prefix: url prefix under which register all routes
+    """
+    for r in routes:
+        r['rule'] = prefix + r['rule']
+        fapp.add_url_rule(**r)

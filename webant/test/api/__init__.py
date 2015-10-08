@@ -18,8 +18,12 @@ class WebantTestApiCase(WebantTestCase):
         return loads(res.data)['data']['id']
 
     def add_group(self, groupData):
-        res =self.wtc.post(self.GRP_URI, data=groupData).data
-        return loads(res)['data']['id']
+        res = self.wtc.post(self.GRP_URI,
+                          data=dumps(groupData),
+                          content_type="application/json")
+        if not res.status_code == 201:
+            raise ApiClientError(res)
+        return loads(res.data)['data']['id']
 
 
 class ApiClientError(Exception):

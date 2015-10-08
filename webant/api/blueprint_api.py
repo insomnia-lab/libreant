@@ -1,10 +1,13 @@
 from flask import Blueprint, current_app, jsonify
 from webant.util import add_routes
-from archivant_api import routes
 from util import ApiError
+from archivant_api import routes as archivantRoutes
+from users_api import routes as usersRoutes
+
 
 api = Blueprint('api', __name__)
-add_routes(api, routes)
+add_routes(api, archivantRoutes)
+add_routes(api, usersRoutes)
 
 
 @api.errorhandler(ApiError)

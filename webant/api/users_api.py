@@ -2,6 +2,7 @@ from webant.util import routes_collector
 from util import ApiError, make_success_response, on_json_load_error
 from flask import request, url_for, jsonify#, current_app, jsonify
 import users.api
+from users import Action, Capability
 
 routes = []
 route = routes_collector(routes)
@@ -141,6 +142,101 @@ def get_users_in_group(groupID):
 def get_groups_of_user(userID):
     try:
         groups = [{'id': g.id} for g in users.api.get_groups_of_user(userID)]
+    except users.api.NotFoundException, e:
+        raise ApiError("Not found", 404, details=str(e))
+    return jsonify({'data': groups})
+
+
+@route('/capabilities/<int:capID>', methods=['GET'])
+def get_capability(capID):
+    try:
+        cap = users.api.get_capability(capID)
+    except users.api.NotFoundException, e:
+        raise ApiError("Not found", 404, details=str(e))
+    return jsonify({'data':
+                      {'id': cap.id,
+                       'domain': Capability.regToSim(cap.domain),
+                       'actions': Action.bitmask_to_list(cap.action)}})
+
+
+@route('/capabilities/<int:capID>', methods=['DELETE'])
+def delete_capability(capID):
+    try:
+        users.api.delete_capability(capID)
+    except users.api.NotFoundException, e:
+        raise ApiError("Not found", 404, details=str(e))
+    return make_success_response("capability has been successfully deleted")
+
+
+@route('/capabilities/', methods=['POST'])
+def add_capability():
+    request.on_json_loading_failed = on_json_load_error
+    capData = request.json
+    if not capData:
+        raise ApiError("Unsupported media type", 415)
+    domain = capData.get('domain', None)
+    if not domain:
+        raise ApiError("Bad Request", 400, details="missing 'domain' parameter")
+    actions = capData.get('actions', None)
+    if not actions:
+        raise ApiError("Bad Request", 400, details="missing 'actions' parameter")
+    try:
+        cap = users.api.add_capability(domain=domain, action=Action.list_to_bitmask(actions))
+    except users.api.ConflictException, e:
+        raise ApiError("Conflict", 409, details=str(e))
+    link_self = url_for('.get_capability', capID=cap.id, _external=True)
+    response = jsonify({'data': {'id': cap.id, 'link_self': link_self}})
+    response.status_code = 201
+    response.headers['Location'] = link_self
+    return response
+
+
+@route('/capabilities/<int:capID>', methods=['PATCH'])
+def update_capability(capID):
+    request.on_json_loading_failed = on_json_load_error
+    if not request.json:
+        raise ApiError("Unsupported media type", 415)
+    updates = request.json
+    if 'actions' in updates:
+        updates['action'] = Action.list_to_bitmask(updates.pop('actions'))
+    try:
+        users.api.update_capability(capID, updates)
+    except users.api.NotFoundException, e:
+        raise ApiError("Not found", 404, details=str(e))
+    return make_success_response("capability has been successfully updated")
+
+
+@route('/groups/<int:groupID>/capabilities/<int:capID>', methods=['PUT'])
+def add_capability_to_group(groupID, capID):
+    try:
+        users.api.add_capability_to_group(capID, groupID)
+    except users.api.NotFoundException, e:
+        raise ApiError("Not found", 404, details=str(e))
+    return make_success_response("capability has been successfully added to group")
+
+
+@route('/groups/<int:groupID>/capabilities/<int:capID>', methods=['DELETE'])
+def delete_capability_from_group(groupID, capID):
+    try:
+        users.api.remove_capability_from_group(capID, groupID)
+    except users.api.NotFoundException, e:
+        raise ApiError("Not found", 404, details=str(e))
+    return make_success_response("capability has been successfully removed from group")
+
+
+@route('/groups/<int:groupID>/capabilities/', methods=['GET'])
+def get_capabilities_of_group(groupID):
+    try:
+        caps = [{'id': cap.id} for cap in users.api.get_capabilities_of_group(groupID)]
+    except users.api.NotFoundException, e:
+        raise ApiError("Not found", 404, details=str(e))
+    return jsonify({'data': caps})
+
+
+@route('/capabilities/<int:capID>/groups/', methods=['GET'])
+def get_groups_with_capability(capID):
+    try:
+        groups = [{'id': g.id} for g in users.api.get_groups_with_capability(capID)]
     except users.api.NotFoundException, e:
         raise ApiError("Not found", 404, details=str(e))
     return jsonify({'data': groups})

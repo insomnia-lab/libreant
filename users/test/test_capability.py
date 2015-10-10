@@ -1,14 +1,14 @@
 from . import TestBaseClass
 from nose.tools import eq_
-from users import User, Group, GroupToCapability, Capability
+from users import User, Group, GroupToCapability, Capability, Action
 
 
 class TestCapability(TestBaseClass):
 
     def populate(self):
         with self.udb.atomic():
-            cap1 = Capability.create(domain='res1', action=Capability.R)
-            cap2 = Capability.create(domain='res2', action=Capability.U)
+            cap1 = Capability.create(domain='res1', action=Action.READ)
+            cap2 = Capability.create(domain='res2', action=Action.UPDATE)
             grp1 = Group.create(name='grp2')
             grp2 = Group.create(name='grp1')
             usr = User.create(name='usr')
@@ -18,11 +18,11 @@ class TestCapability(TestBaseClass):
         return usr, [cap1, cap2]
 
     def test_capability_creation(self):
-        Capability.create(domain='res', action=Capability.C)
+        Capability.create(domain='res', action=Action.CREATE)
         eq_(Capability.select().count(), 1)
 
     def test_assign_capability_to_group(self):
-        cap = Capability.create(domain='res', action=Capability.D)
+        cap = Capability.create(domain='res', action=Action.DELETE)
         anons = Group.create(name='anons')
         anons.capabilities.add(cap)
         anons.save()
@@ -45,11 +45,11 @@ class TestCapability(TestBaseClass):
 
     def test_action_matching(self):
         cap = Capability.create(domain='s',
-                                action=(Capability.C | Capability.R | Capability.U))
-        self.assertTrue(cap.match_action(Capability.C))
-        self.assertTrue(cap.match_action(Capability.R | Capability.R))
-        self.assertFalse(cap.match_action(Capability.D))
-        self.assertFalse(cap.match_action(Capability.R | Capability.D))
+                                action=(Action.CREATE | Action.READ | Action.UPDATE))
+        self.assertTrue(cap.match_action(Action.UPDATE))
+        self.assertTrue(cap.match_action(Action.READ | Action.READ))
+        self.assertFalse(cap.match_action(Action.DELETE))
+        self.assertFalse(cap.match_action(Action.READ | Action.DELETE))
         self.assertFalse(cap.match_action(123123))
 
     def test_domain_matching_true(self):
@@ -72,9 +72,8 @@ class TestCapability(TestBaseClass):
 
     def test_capability_matching(self):
         res = Capability.simToReg('/volumes/*/attachemnts/*')
-        cap = Capability.create(domain=res,
-                                action=Capability.R)
-        cap.match('volumes/1/attachments/3', Capability.R)
+        cap = Capability.create(domain=res, action=Action.READ)
+        cap.match('volumes/1/attachments/3', Action.READ)
 
     def test_simplified_to_reg_conversion(self):
         self.assertEqual(Capability.regToSim(Capability.simToReg('/volumes/*/attachments')), 'volumes/*/attachments')
@@ -83,28 +82,31 @@ class TestCapability(TestBaseClass):
 
     def test_user_can(self):
         cap1 = Capability.create(domain=Capability.simToReg('volumes/*'),
-                                 action=Capability.C | Capability.R)
+                                 action=Action.CREATE | Action.READ)
         cap2 = Capability.create(domain=Capability.simToReg('volumes/123'),
-                                 action=Capability.U)
+                                 action=Action.UPDATE)
         grp1 = Group.create(name='grp2')
         grp2 = Group.create(name='grp1')
         usr = User.create(name='usr')
         grp1.capabilities.add(cap1)
         grp2.capabilities.add(cap2)
         usr.groups.add([grp1, grp2])
-        self.assertTrue(usr.can('volumes/61273', action=Capability.C))
-        self.assertTrue(usr.can('volumes/123', Capability.C | Capability.R))
-        self.assertFalse(usr.can('volumes/82828', Capability.D))
-        self.assertFalse(usr.can('volumes/123', Capability.D))
+        self.assertTrue(usr.can('volumes/61273', action=Action.CREATE))
+        self.assertTrue(usr.can('volumes/123', Action.CREATE | Action.READ))
+        self.assertFalse(usr.can('volumes/82828', Action.DELETE))
+        self.assertFalse(usr.can('volumes/123', Action.DELETE))
 
     def test_group_can(self):
         cap1 = Capability.create(domain=Capability.simToReg('volumes/*'),
-                                 action=Capability.C | Capability.R)
+                                 action=Action.CREATE | Action.READ)
         cap2 = Capability.create(domain=Capability.simToReg('users/123'),
-                                 action=Capability.C | Capability.D)
+                                 action=Action.CREATE | Action.DELETE)
         grp = Group.create(name='grp2')
         grp.capabilities.add([cap1, cap2])
-        self.assertTrue(grp.can('volumes/123', Capability.C | Capability.R))
-        self.assertFalse(grp.can('volumes/82828', Capability.D))
-        self.assertTrue(grp.can('users/123', Capability.D))
-        self.assertFalse(grp.can('users/123', Capability.U))
+        self.assertTrue(grp.can('volumes/123', Action.CREATE | Action.READ))
+        self.assertFalse(grp.can('volumes/82828', Action.DELETE))
+        self.assertTrue(grp.can('users/123', Action.DELETE))
+        self.assertFalse(grp.can('users/123', Action.UPDATE))
+
+    def test_bitmask(self):
+        self.assertEqual(Action.bitmask_to_list(Action.list_to_bitmask(Action.ACTIONS)), Action.ACTIONS)

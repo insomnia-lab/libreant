@@ -8,6 +8,7 @@ class WebantTestApiCase(WebantTestCase):
 
     GRP_URI = API_PREFIX + '/groups/'
     USR_URI = API_PREFIX + '/users/'
+    CAP_URI = API_PREFIX + '/capabilities/'
 
     def add_user(self, userData):
         res = self.wtc.post(self.API_PREFIX + '/users/',
@@ -21,6 +22,14 @@ class WebantTestApiCase(WebantTestCase):
         res = self.wtc.post(self.GRP_URI,
                           data=dumps(groupData),
                           content_type="application/json")
+        if not res.status_code == 201:
+            raise ApiClientError(res)
+        return loads(res.data)['data']['id']
+
+    def add_capability(self, capData):
+        res = self.wtc.post(self.CAP_URI,
+                            data=dumps(capData),
+                            content_type="application/json")
         if not res.status_code == 201:
             raise ApiClientError(res)
         return loads(res.data)['data']['id']

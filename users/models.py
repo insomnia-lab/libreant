@@ -31,17 +31,8 @@ class Capability(BaseModel):
         to easily manipulate domain regular expressions.
     :attr:`action` is a bitmask representing
         the actions involved in the capability
-        you can compose the bitmask by using the following class
-        constants:
-        * CREATE (C)
-        * READ (R)
-        * UPDATE (U)
-        * DELETE (D)
+        you can use :class:`Action` class to compose the bitmask
     """
-    CREATE = C = 2**3
-    READ = R = 2**2
-    UPDATE = U = 2**1
-    DELETE = D = 2**0
 
     domain = CharField()
     action = IntegerField()
@@ -74,6 +65,49 @@ class Capability(BaseModel):
         """Check if the given :param:`domain` and :param:`act` are allowed
         by this capability"""
         return self.match_domain(dom) and self.match_action(act)
+
+
+class Action():
+    """Actions utiliy class
+
+    You can use this class attributes to compose the actions bitmask::
+        bitmask = Action.CREATE | Action.DELETE
+
+    The following actions are supported:
+     - CREATE
+     - READ
+     - UPDATE
+     - DELETE
+    """
+
+    # the index of the action in the list correspond to the its position in the bitmask
+    ACTIONS = ['CREATE', 'READ', 'UPDATE', 'DELETE']
+
+    @classmethod
+    def bitmask_to_list(cls, bitmask):
+        '''convert an actions bitmask into a list of action strings'''
+        res = []
+        for a in cls.ACTIONS:
+            aBit = cls.action_bitmask(a)
+            if ((bitmask & aBit) == aBit):
+                res.append(a)
+        return res
+
+    @classmethod
+    def list_to_bitmask(cls, actions):
+        '''convert list of actions into the corresponding bitmask'''
+        bitmask = 0
+        for a in actions:
+            bitmask |= cls.action_bitmask(a)
+        return bitmask
+
+    @classmethod
+    def action_bitmask(cls, action):
+        '''return the bitmask associated withe the given action name'''
+        return 2**cls.ACTIONS.index(action.upper())
+
+for i, act in enumerate(Action.ACTIONS):
+    setattr(Action, act.upper(), 2**i)
 
 
 class Group(BaseModel):

@@ -2,7 +2,7 @@ from peewee import SqliteDatabase
 from playhouse import db_url
 from passlib.context import CryptContext
 from models import db_proxy,\
-    User, Group, UserToGroup, GroupToCapability, Capability
+    User, Group, UserToGroup, GroupToCapability, Capability, Action
 
 
 class SqliteFKDatabase(SqliteDatabase):
@@ -61,10 +61,10 @@ def populate_with_defaults():
     admin = User.create(name='admin', password='admin')
     admins = Group.create(name='admins')
     starCap = Capability.create(domain='.+',
-                                action=(Capability.CREATE |
-                                        Capability.READ |
-                                        Capability.UPDATE |
-                                        Capability.DELETE))
+                                action=(Action.CREATE |
+                                        Action.READ |
+                                        Action.UPDATE |
+                                        Action.DELETE))
     admins.capabilities.add(starCap)
     admin.groups.add(admins)
     admin.save()

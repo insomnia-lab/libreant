@@ -1,7 +1,7 @@
 import tempfile
 import os
 
-from flask import Flask, render_template, request, abort, Response, redirect, url_for, make_response
+from flask import Flask, render_template, request, abort, Response, redirect, url_for
 from werkzeug import secure_filename
 from flask_bootstrap import Bootstrap
 from elasticsearch import exceptions as es_exceptions
@@ -199,9 +199,8 @@ def create_app(conf={}):
 
     @app.errorhandler(es_exceptions.ConnectionError)
     def handle_elasticsearch_down(error):
-        rsp = make_response('DB connection error', 503)
-        app.logger.error("Error connecting to DB; check your configuration")
-        return rsp
+        app.logger.exception("Error connecting to DB; check your configuration")
+        return renderErrorPage(message='DB connection error', httpCode=503)
 
     @app.errorhandler(404)
     def not_found(error):

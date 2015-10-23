@@ -56,18 +56,22 @@ def populate_with_defaults():
 
     If the admin user already exists the function will simply return
     '''
-    if User.select().where(User.name == 'admin').exists():
-        return
-    admin = User.create(name='admin', password='admin')
-    admins = Group.create(name='admins')
-    starCap = Capability.create(domain='.+',
-                                action=(Action.CREATE |
-                                        Action.READ |
-                                        Action.UPDATE |
-                                        Action.DELETE))
-    admins.capabilities.add(starCap)
-    admin.groups.add(admins)
-    admin.save()
+    if not User.select().where(User.name == 'admin').exists():
+        admin = User.create(name='admin', password='admin')
+        admins = Group.create(name='admins')
+        starCap = Capability.create(domain='.+',
+                                    action=(Action.CREATE |
+                                            Action.READ |
+                                            Action.UPDATE |
+                                            Action.DELETE))
+        admins.capabilities.add(starCap)
+        admin.groups.add(admins)
+        admin.save()
+    if not User.select().where(User.name == 'anonymous').exists():
+        anon = User.create(name='anonymous', password='')
+        anons = Group.create(name='anonymous')
+        anon.groups.add(anons)
+        anon.save()
 
 
 def init_db(dbURL, pwd_salt_size=None, pwd_rounds=None):

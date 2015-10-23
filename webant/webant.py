@@ -1,7 +1,7 @@
 import tempfile
 import os
 
-from flask import Flask, render_template, request, abort, Response, redirect, url_for
+from flask import Flask, render_template, request, Response, redirect, url_for
 from werkzeug import secure_filename
 from flask_bootstrap import Bootstrap
 from elasticsearch import exceptions as es_exceptions
@@ -72,7 +72,7 @@ def create_app(conf={}):
     def search():
         query = request.args.get('q', None)
         if query is None:
-            abort(400, "No query given")
+            return renderErrorPage(message='No query given', httpCode=400)
         res = app.archivant._db.user_search(query)['hits']['hits']
         books = []
         for b in res:
@@ -90,7 +90,7 @@ def create_app(conf={}):
                                             books=books, query=query),
                             mimetype='text/xml')
         else:
-            abort(500)
+            return renderErrorPage(message='Unknown format requested', httpCode=400)
 
     @app.route('/add', methods=['POST'])
     def upload():

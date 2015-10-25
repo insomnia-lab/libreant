@@ -19,6 +19,7 @@ from agherant import agherant
 from api.blueprint_api import api
 from webserver_utils import gevent_run
 import users
+import util
 
 
 class LibreantCoreApp(Flask):
@@ -75,6 +76,12 @@ class LibreantViewApp(LibreantCoreApp):
         Bootstrap(self)
         self.babel = Babel(self)
         self.available_translations = [l.language for l in self.babel.list_translations()]
+        if self.users_enabled:
+            self.autht = util.AuthtFromSession()
+            self.authz = util.AuthzFromSession(authenticator=self.autht)
+        else:
+            self.autht = util.TransparentAutht()
+            self.authz = util.TransparentAuthz()
 
 
 def create_app(conf={}):

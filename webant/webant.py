@@ -20,6 +20,7 @@ from api.blueprint_api import api
 from webserver_utils import gevent_run
 import users
 import util
+from authbone.authorization import CapabilityMissingException
 
 
 class LibreantCoreApp(Flask):
@@ -116,6 +117,7 @@ def create_app(conf={}):
             return renderErrorPage(message='Unknown format requested', httpCode=400)
 
     @app.route('/add', methods=['POST'])
+    @app.authz.requires_capability(('/volumes', users.Action.CREATE))
     def upload():
         requiredFields = ['_language']
         optFields = ['_preset']
@@ -159,6 +161,7 @@ def create_app(conf={}):
         return redirect(url_for('view_volume', volumeID=addedVolumeID))
 
     @app.route('/add', methods=['GET'])
+    @app.authz.requires_capability(('/volumes', users.Action.CREATE))
     def add():
         reqPreset = request.args.get('preset', None)
 
@@ -274,6 +277,10 @@ def create_app(conf={}):
     @app.errorhandler(500)
     def internal_server_error(error):
         return renderErrorPage(message='Internal Server Error', httpCode=500)
+
+    @app.errorhandler(CapabilityMissingException)
+    def not_authenticated_handler(error):
+        return renderErrorPage(message='Authorization Required', httpCode=401)
 
     return app
 

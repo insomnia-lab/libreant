@@ -105,7 +105,7 @@ conf = dict(
                   'conf'],
         install_requires=[
           'gevent',
-          'elasticsearch',
+          'elasticsearch >=1, <2',
           'flask-bootstrap',
           'Flask-Babel',
           'flask-script',

@@ -13,6 +13,10 @@ class ApiError(Exception):
         return "http_code: {}, err_code: {}, message: '{}', details: '{}'".format(self.http_code, self.err_code, self.message, self.details)
 
 
+def on_json_load_error(e):
+    raise ApiError("Bad request", 400, details=str(e))
+
+
 def make_success_response(message, http_code=200):
     response = jsonify({'code': http_code, 'message': message})
     response.status_code = http_code

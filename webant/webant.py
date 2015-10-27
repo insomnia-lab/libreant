@@ -8,6 +8,7 @@ from elasticsearch import exceptions as es_exceptions
 from flask.ext.babel import Babel, gettext
 from babel.dates import format_timedelta
 from datetime import datetime
+from logging import getLogger
 
 from presets import PresetManager
 from constants import isoLangs
@@ -35,6 +36,12 @@ class LibreantCoreApp(Flask):
         }
         defaults.update(conf)
         self.config.update(defaults)
+
+        '''dirty trick: prevent default flask handler to be created
+           in flask version > 0.10.1 will be a nicer way to disable default loggers
+           tanks to this new code mitsuhiko/flask@84ad89ffa4390d3327b4d35983dbb4d84293b8e2
+        '''
+        self._logger = getLogger(self.import_name)
 
         self.archivant = Archivant(conf={k: self.config[k] for k in ('FSDB_PATH', 'ES_HOSTS', 'ES_INDEXNAME')})
         self.presetManager = PresetManager(self.config['PRESET_PATHS'])

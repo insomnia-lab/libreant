@@ -46,10 +46,19 @@ class LibreantCoreApp(Flask):
         self.archivant = Archivant(conf={k: self.config[k] for k in ('FSDB_PATH', 'ES_HOSTS', 'ES_INDEXNAME')})
         self.presetManager = PresetManager(self.config['PRESET_PATHS'])
 
-        self.usersDB = users.init_db(self.config['USERS_DATABASE'],
-                                     pwd_salt_size=self.config['PWD_SALT_SIZE'],
-                                     pwd_rounds=self.config['PWD_ROUNDS'])
-        users.populate_with_defaults()
+        if self.config['USERS_DATABASE']:
+            self.usersDB = users.init_db(self.config['USERS_DATABASE'],
+                                         pwd_salt_size=self.config['PWD_SALT_SIZE'],
+                                         pwd_rounds=self.config['PWD_ROUNDS'])
+            users.populate_with_defaults()
+        else:
+            self.logger.warning("""It has not been set any value for 'USERS_DATABASE', \
+all operations about users will be unsupported. Are all admins.""")
+            self.usersDB = None
+
+    @property
+    def users_enabled(self):
+        return bool(self.usersDB)
 
 
 class LibreantViewApp(LibreantCoreApp):

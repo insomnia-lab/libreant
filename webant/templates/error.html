@@ -6,7 +6,7 @@ Libreant | {%trans%}Error{%endtrans%} {{ code }}
 {% endblock %}
 
 {% block navbar %}
-{% import 'navbar.html' as navbar %}
+{% import 'navbar.html' as navbar with context %}
 {{navbar.navbar(search=True)}}
 {% endblock %}
 

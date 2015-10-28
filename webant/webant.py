@@ -238,6 +238,16 @@ def create_app(conf={}):
             app.autht.logout()
             return redirect(url_for('index'), code=302)
 
+        def current_user():
+            app.autht.perform_authentication()
+            if users.api.is_anonymous(app.autht.currIdentity):
+                return None
+            return app.autht.currIdentity
+
+        @app.context_processor
+        def user_processor():
+            return dict(users_enabled = True, current_user = current_user)
+
     @app.template_filter('timepassedformat')
     def timepassedformat_filter(timestamp):
         '''given a timestamp it returns a string

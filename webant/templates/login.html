@@ -1,0 +1,41 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/fixes.html" as fixes %}
+{% import 'searchbar.html' as searchbar %}
+
+{% block title %}
+Libreant | {%trans%}Login{%endtrans%}
+{% endblock %}
+
+{% block navbar %}
+{% import 'navbar.html' as navbar with context%}
+{{navbar.navbar()}}
+{% endblock %}
+
+{% block styles %}
+{{ super() }}
+{% endblock styles %}
+
+{% block content %}
+<div class="container">
+   <div class="row">
+        <div class="col-sm-offset-3 col-sm-6">
+            {% if message %}
+            <div class="alert alert-warning" role="alert">
+                {{ message }}
+            </div>
+            {% endif %}
+            <form class="form" method="post">
+                <div class="form-group">
+                  <label for="username">{%trans%}Username{%endtrans%}:</label>
+                  <input type="text" class="form-control" name="username" id="username" autocomplete="username" autofocus="true" required>
+                </div>
+                <div class="form-group">
+                  <label for="password">{%trans%}Password{%endtrans%}:</label>
+                  <input type="password" class="form-control" name="password" id="password" autocomplete="current-password" required>
+                </div>
+                <button type="submit" class="btn btn-default">{%trans%}Submit{%endtrans%}</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock content %}

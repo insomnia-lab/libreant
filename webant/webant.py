@@ -207,6 +207,37 @@ def create_app(conf={}):
                 return request.values['lang']
         return request.accept_languages.best_match(app.available_translations)
 
+    if app.users_enabled:
+        @app.route('/login', methods=['GET'])
+        def login_form():
+            if app.autht.is_logged_in():
+                return renderErrorPage('you are already logged in', 400)
+            return render_template('login.html')
+
+        @app.route('/login', methods=['POST'])
+        def login():
+            name = request.form.get('username', None)
+            pwd = request.form.get('password', None)
+            if not name:
+                return render_template('login.html', message='Missing username'), 400
+            elif not pwd:
+                return render_template('login.html', message='Missing password'), 400
+            try:
+                usr = users.api.get_user(name=name)
+            except users.api.NotFoundException:
+                return render_template('login.html', message='"{}" is not registered'.format(name)), 400
+            if usr.verify_password(pwd):
+                app.autht.login(usr.id)
+                return redirect(url_for('index'), code=302)
+            return render_template('login.html', message='Wrong password')
+
+        @app.route('/logout')
+        def logout():
+            if not app.autht.is_logged_in():
+                return renderErrorPage('you are not logged in', 400)
+            app.autht.logout()
+            return redirect(url_for('index'), code=302)
+
     @app.template_filter('timepassedformat')
     def timepassedformat_filter(timestamp):
         '''given a timestamp it returns a string

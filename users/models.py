@@ -1,6 +1,6 @@
 import re
 from peewee import PrimaryKeyField, CharField, ForeignKeyField, IntegerField,\
-    Model, Proxy
+    Model, Proxy, CompositeKey
 from playhouse.fields import ManyToManyField
 import users
 
@@ -176,11 +176,16 @@ class GroupToCapability(BaseModel):
     group = ForeignKeyField(Group, on_delete='CASCADE')
     capability = ForeignKeyField(Capability, on_delete='CASCADE')
 
+    class Meta:
+            primary_key = CompositeKey('group', 'capability')
+
 
 class UserToGroup(BaseModel):
     user = ForeignKeyField(User, on_delete='CASCADE')
     group = ForeignKeyField(Group, on_delete='CASCADE')
 
+    class Meta:
+            primary_key = CompositeKey('user', 'group')
 
 GroupToCapabilityProxy.initialize(GroupToCapability)
 UserToGroupProxy.initialize(UserToGroup)

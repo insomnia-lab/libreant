@@ -24,6 +24,17 @@ class TestGroup(TestBaseClass):
         eq_(jhondohe.groups.count(), 1)
         eq_(jhondohe.groups.get().id, anons.id)
 
+    def test_assign_duplicate_user_to_group(self):
+        anons = Group.create(name='anons')
+        jhondohe = User.create(name='jhondhoe', password='pass')
+        anons.users.add(jhondohe)
+        anons.save()
+        with self.assertRaises(IntegrityError):
+            anons.users.add(jhondohe)
+            anons.save()
+        eq_(jhondohe.groups.count(), 1)
+        eq_(jhondohe.groups.get().id, anons.id)
+
     def test_remove_user_from_group(self):
         anons = Group.create(name='anons')
         jhondohe = User.create(name='jhondhoe', password='pass')

@@ -1,6 +1,7 @@
 from . import TestBaseClass
 from nose.tools import eq_
 from users import User, Group, GroupToCapability, Capability, Action
+from peewee import IntegrityError
 
 
 class TestCapability(TestBaseClass):
@@ -26,6 +27,17 @@ class TestCapability(TestBaseClass):
         anons = Group.create(name='anons')
         anons.capabilities.add(cap)
         anons.save()
+        eq_(anons.capabilities.count(), 1)
+        eq_(anons.capabilities.get(), cap)
+
+    def test_assign_same_capability_to_group(self):
+        cap = Capability.create(domain='res', action=Action.DELETE)
+        anons = Group.create(name='anons')
+        anons.capabilities.add(cap)
+        anons.save()
+        with self.assertRaises(IntegrityError):
+            anons.capabilities.add(cap)
+            anons.save()
         eq_(anons.capabilities.count(), 1)
         eq_(anons.capabilities.get(), cap)
 

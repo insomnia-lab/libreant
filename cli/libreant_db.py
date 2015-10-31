@@ -4,7 +4,6 @@ import json
 
 from archivant import Archivant
 from archivant.exceptions import NotFoundException
-from archivant.exceptions import UploadError
 from conf import config_utils
 from conf.defaults import get_def_conf, get_help
 from utils.loggers import initLoggers
@@ -96,18 +95,14 @@ def export_all(pretty):
     click.echo(json.dumps(volumes, indent=indent))
 
 
-@libreant_db.command(name='append-file', help='uploads a file to an existing volume')
-@click.option('-i', '--volumeid', type=click.STRING, )
-@click.option('-f', '--filepath', type=click.Path(exists=True,resolve_path=True), multiple=True, help='the path to the media to be uploaded')
-@click.option('-n', '--name', type=click.STRING, multiple=True, help='[optional] name of the media including the extension')
-@click.option('-m', '--mime', type=click.STRING, multiple=True, help='[optional] mime type of the media')
-@click.option('-t', '--notes', type=click.STRING, multiple=True, help='[optional] notes about the media')
+@libreant_db.command(name='append', help='append a file to an existing volume')
+@click.argument('volumeid')
+@click.option('-f', 'filepath', type=click.Path(exists=True,resolve_path=True), multiple=True, help='the path to the media to be uploaded')
+@click.option('-n', '--name', type=click.STRING, metavar='<file.ext>', multiple=True, help='name of the file, including the extension')
+@click.option('-m', '--mime', type=click.STRING, metavar='<group>/<type>', multiple=True, help='mime type of the media')
+@click.option('-t', '--notes', type=click.STRING, metavar='<string>', multiple=True, help='notes about the media')
 def append_file(volumeid,filepath,name,mime,notes):
-    #attachments = map_attachments(filepath,name,mime,notes)
-    attachments = map_attachments(filename=list(filepath) if not filepath==None else [],\
-                                  name=list(name) if not name==None else [],\
-                                  mime=list(mime) if not mime==None else [],\
-                                  notes=list(notes) if not notes==None else [])
+    attachments = map_attachments(filepath, name, mime, notes)
     try:
         arc.insert_attachments(volumeid,attachments)
     except:
@@ -115,37 +110,31 @@ def append_file(volumeid,filepath,name,mime,notes):
         exit(4)
 
 
-@libreant_db.command(name='insert-volume', help='uploads a volume to the db')
-@click.option('-l', '--language', type=click.STRING, help='specify the language of the media you are going to upload')
-@click.option('-f', '--filepath', type=click.Path(exists=True,resolve_path=True), multiple=True, help='the path to the media to be uploaded')
-@click.option('-n', '--name', type=click.STRING, multiple=True, help='[optional] name of the media including the extension')
-@click.option('-m', '--mime', type=click.STRING, multiple=True, help='[optional] mime type of the media')
-@click.option('-t', '--notes', type=click.STRING, multiple=True, help='[optional] notes about the media')
-@click.option('-x', '--extravalues', type=click.STRING, help='[optional] additional parameters')
-def insert_volume(language,filepath,name,mime,notes,extravalues):
-    def check_extra_values(x_values):
-        raise(NotImplemented)
-    #if len(extravalues)>0:
-    #    check_extra_values(extravalues)
-    #else:
-    #    pass
-    metadata = {"_language":language}
-    attachments = map_attachments(filename=list(filepath) if not filepath==None else [],\
-                                  name=list(name) if not name==None else [],\
-                                  mime=list(mime) if not mime==None else [],\
-                                  notes=list(notes) if not notes==None else [])
+@libreant_db.command(name='insert-volume', help='creates an item in the db')
+@click.option('-l', '--language', type=click.STRING, required=True, help='specify the language of the media you are going to upload')
+@click.option('-f', '--filepath', type=click.Path(exists=True,resolve_path=True), multiple=True, help=' the path to the media to be uploaded')
+@click.option('-n', '--name', type=click.STRING, metavar='<file.ext>', multiple=True, help='name of the file, including the extension')
+@click.option('-m', '--mime', type=click.STRING, metavar='<group>/<type>', multiple=True, help='mime type of the media')
+@click.option('-t', '--notes', type=click.STRING, metavar='<a string about the file>', multiple=True, help='notes about the media')
+@click.option('-e', '--metadata', type=click.STRING, metavar='{"key1":"val1", "key2":"val2",...,"keyN":"valN"}', help='additional parameters in json form')
+def insert_volume(language,filepath,name,mime,notes,metadata):
+    meta = {"_language":language}
+    if metadata:
+        meta.update(json.loads(metadata))
+    attachments = map_attachments(filepath, name, mime, notes)
     try:
-        arc.insert_volume(metadata,attachments)
+        arc.insert_volume(meta,attachments)
     except:
         click.secho('An upload error have occurred!', fg="yellow", err=True)
         exit(4)
+
 
 def map_attachments(filename, name, mime, notes):
     i = 0
     const_names = list() # ["file","name","mime","notes"]
     attr_list = list()
     attachments = list()
-    arglen = len(filename) if isinstance(filename,list) else 0
+
     if filename:
         const_names.append('file')
         attr_list.append(filename)
@@ -158,12 +147,8 @@ def map_attachments(filename, name, mime, notes):
     if notes:
         const_names.append('notes')
         attr_list.append(notes)
-    if arglen>1:
-        for i in map(list,zip(*attr_list)):
-            attachments.append(dict(zip(const_names,i)))
-            print "{}".format(attachments)
-    else:
-        attachments.append(dict(zip(const_names,attr_list[0])))
+    for i in map(list,zip(*attr_list)):
+        attachments.append(dict(zip(const_names,i)))
     return attachments
 
 if __name__ == '__main__':

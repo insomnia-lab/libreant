@@ -36,9 +36,7 @@ class TestApiCapabilities(WebantTestApiCase):
     def test_add_capability_same_name(self):
         capData = {'domain':'/res1/id1/res2/*', 'actions':['READ','UPDATE']}
         self.add_capability(capData)
-        with self.assertRaises(ApiClientError) as ace:
-            self.add_capability(capData)
-            eq_(ace.res.status_code, 409)
+        self.add_capability(capData)
 
     def test_get_capability(self):
         capData = {'domain':'res1/id1/res2/*', 'actions':['READ','UPDATE']}

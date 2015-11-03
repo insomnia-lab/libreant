@@ -34,11 +34,12 @@ class Capability(BaseModel):
         you can use :class:`Action` class to compose the bitmask
     """
 
+    id = PrimaryKeyField()
     domain = CharField()
     action = IntegerField()
 
     class Meta:
-        indexes = ((('domain', 'action'), True),)
+        indexes = ((('domain', 'action'), False),)
 
     @classmethod
     def simToReg(self, sim):

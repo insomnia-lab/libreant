@@ -151,6 +151,14 @@ def get_capabilities_of_group(groupID):
         yield c
 
 
+def get_anonymous_user():
+    return get_user(name='anonymous')
+
+
+def is_anonymous(user):
+    return user.name == 'anonymous'
+
+
 class NotFoundException(Exception):
     pass
 

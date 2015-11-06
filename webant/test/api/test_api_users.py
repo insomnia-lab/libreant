@@ -51,7 +51,7 @@ class TestApiUsers(WebantTestApiCase):
         eq_(r.status_code, 200)
 
     def test_delete_user_not_exists(self):
-        r = self.wtc.delete(self.API_PREFIX + '/users/' + str(2))
+        r = self.wtc.delete(self.API_PREFIX + '/users/' + str(56))
         eq_(r.status_code, 404)
 
     def test_update_user(self):

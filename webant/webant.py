@@ -8,6 +8,7 @@ from elasticsearch import exceptions as es_exceptions
 from flask.ext.babel import Babel, gettext
 from babel.dates import format_timedelta
 from datetime import datetime
+from logging import getLogger
 
 from presets import PresetManager
 from constants import isoLangs
@@ -18,6 +19,8 @@ from agherant import agherant
 from api.blueprint_api import api
 from webserver_utils import gevent_run
 import users
+import util
+from authbone.authorization import CapabilityMissingException
 
 
 class LibreantCoreApp(Flask):
@@ -36,13 +39,28 @@ class LibreantCoreApp(Flask):
         defaults.update(conf)
         self.config.update(defaults)
 
+        '''dirty trick: prevent default flask handler to be created
+           in flask version > 0.10.1 will be a nicer way to disable default loggers
+           tanks to this new code mitsuhiko/flask@84ad89ffa4390d3327b4d35983dbb4d84293b8e2
+        '''
+        self._logger = getLogger(self.import_name)
+
         self.archivant = Archivant(conf={k: self.config[k] for k in ('FSDB_PATH', 'ES_HOSTS', 'ES_INDEXNAME')})
         self.presetManager = PresetManager(self.config['PRESET_PATHS'])
 
-        self.usersDB = users.init_db(self.config['USERS_DATABASE'],
-                                     pwd_salt_size=self.config['PWD_SALT_SIZE'],
-                                     pwd_rounds=self.config['PWD_ROUNDS'])
-        users.populate_with_defaults()
+        if self.config['USERS_DATABASE']:
+            self.usersDB = users.init_db(self.config['USERS_DATABASE'],
+                                         pwd_salt_size=self.config['PWD_SALT_SIZE'],
+                                         pwd_rounds=self.config['PWD_ROUNDS'])
+            users.populate_with_defaults()
+        else:
+            self.logger.warning("""It has not been set any value for 'USERS_DATABASE', \
+all operations about users will be unsupported. Are all admins.""")
+            self.usersDB = None
+
+    @property
+    def users_enabled(self):
+        return bool(self.usersDB)
 
 
 class LibreantViewApp(LibreantCoreApp):
@@ -59,6 +77,12 @@ class LibreantViewApp(LibreantCoreApp):
         Bootstrap(self)
         self.babel = Babel(self)
         self.available_translations = [l.language for l in self.babel.list_translations()]
+        if self.users_enabled:
+            self.autht = util.AuthtFromSession()
+            self.authz = util.AuthzFromSession(authenticator=self.autht)
+        else:
+            self.autht = util.TransparentAutht()
+            self.authz = util.TransparentAuthz()
 
 
 def create_app(conf={}):
@@ -93,6 +117,7 @@ def create_app(conf={}):
             return renderErrorPage(message='Unknown format requested', httpCode=400)
 
     @app.route('/add', methods=['POST'])
+    @app.authz.requires_capability(('/volumes', users.Action.CREATE))
     def upload():
         requiredFields = ['_language']
         optFields = ['_preset']
@@ -136,6 +161,7 @@ def create_app(conf={}):
         return redirect(url_for('view_volume', volumeID=addedVolumeID))
 
     @app.route('/add', methods=['GET'])
+    @app.authz.requires_capability(('/volumes', users.Action.CREATE))
     def add():
         reqPreset = request.args.get('preset', None)
 
@@ -184,6 +210,47 @@ def create_app(conf={}):
                 return request.values['lang']
         return request.accept_languages.best_match(app.available_translations)
 
+    if app.users_enabled:
+        @app.route('/login', methods=['GET'])
+        def login_form():
+            if app.autht.is_logged_in():
+                return renderErrorPage('you are already logged in', 400)
+            return render_template('login.html')
+
+        @app.route('/login', methods=['POST'])
+        def login():
+            name = request.form.get('username', None)
+            pwd = request.form.get('password', None)
+            if not name:
+                return render_template('login.html', message='Missing username'), 400
+            elif not pwd:
+                return render_template('login.html', message='Missing password'), 400
+            try:
+                usr = users.api.get_user(name=name)
+            except users.api.NotFoundException:
+                return render_template('login.html', message='"{}" is not registered'.format(name)), 400
+            if usr.verify_password(pwd):
+                app.autht.login(usr.id)
+                return redirect(url_for('index'), code=302)
+            return render_template('login.html', message='Wrong password')
+
+        @app.route('/logout')
+        def logout():
+            if not app.autht.is_logged_in():
+                return renderErrorPage('you are not logged in', 400)
+            app.autht.logout()
+            return redirect(url_for('index'), code=302)
+
+        def current_user():
+            app.autht.perform_authentication()
+            if users.api.is_anonymous(app.autht.currIdentity):
+                return None
+            return app.autht.currIdentity
+
+        @app.context_processor
+        def user_processor():
+            return dict(users_enabled = True, current_user = current_user)
+
     @app.template_filter('timepassedformat')
     def timepassedformat_filter(timestamp):
         '''given a timestamp it returns a string
@@ -210,6 +277,10 @@ def create_app(conf={}):
     @app.errorhandler(500)
     def internal_server_error(error):
         return renderErrorPage(message='Internal Server Error', httpCode=500)
+
+    @app.errorhandler(CapabilityMissingException)
+    def not_authenticated_handler(error):
+        return renderErrorPage(message='Authorization Required', httpCode=401)
 
     return app
 

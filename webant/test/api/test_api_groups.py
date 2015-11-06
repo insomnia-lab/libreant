@@ -45,7 +45,7 @@ class TestApiGroups(WebantTestApiCase):
         eq_(r.status_code, 200)
 
     def test_delete_grop_not_exists(self):
-        r = self.wtc.delete(self.GRP_URI + str(2))
+        r = self.wtc.delete(self.GRP_URI + str(56))
         eq_(r.status_code, 404)
 
     def test_update_group(self):

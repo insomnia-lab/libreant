@@ -6,7 +6,7 @@ Libreant | {{ volume['metadata']['title'] if 'title' in volume['metadata'] else 
 {% endblock %}
 
 {% block navbar %}
-{% import 'navbar.html' as navbar %}
+{% import 'navbar.html' as navbar with context%}
 {{navbar.navbar()}}
 {% endblock %}
 

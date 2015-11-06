@@ -1,7 +1,7 @@
 {% macro navbar(search=True, search_query="") %}
 <nav class="navbar navbar-default">
     <div class="container-fluid">
-        
+
         <div class="navbar-header">
             <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-responsive-collapse">
                 <span class="icon-bar"></span>
@@ -10,7 +10,7 @@
             </button>
             <a class="navbar-brand" href="/">LibreAnt</a>
         </div>
-        
+
         <div class="navbar-collapse collapse" id="navbar-responsive-collapse">
             <ul class="nav navbar-nav">
                 <li class="{{ "active" if request.path == url_for('add') }}">
@@ -25,6 +25,23 @@
             <form class="navbar-form navbar-left" action="{{url_for('search')}}">
                 <input class="form-control col-lg-8" placeholder="Search" type="text" id="search" name="q" value="{{ search_query }}">
             </form>
+            {% endif %}
+            {% if users_enabled %}
+            <ul class="nav navbar-nav navbar-right">
+                <li class="dropdown">
+                    {% set user = current_user() %}
+                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">
+                        <span class="glyphicon glyphicon-user"></span> {{ user.name }} <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        {% if user %}
+                        <li><a href="{{url_for('logout')}}">{%trans%}Logout{%endtrans%}</a></li>
+                        {% else %}
+                        <li><a href="{{url_for('login')}}">{%trans%}Login{%endtrans%}</a></li>
+                        {% endif %}
+                    </ul>
+                </li>
+            </ul>
             {% endif %}
         </div><!-- /.navbar-collapse -->
     </div><!-- /.container-fluid -->

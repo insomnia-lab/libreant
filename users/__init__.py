@@ -82,11 +82,15 @@ def init_db(dbURL, pwd_salt_size=None, pwd_rounds=None):
 
     :param dbURL: database url, as described in :func:`init_proxy`
     '''
-    db = init_proxy(dbURL)
-    global pwdCryptCtx
-    pwdCryptCtx = gen_crypt_context(salt_size=pwd_salt_size, rounds=pwd_rounds)
-    create_tables(db)
-    return db
+    try:
+        db = init_proxy(dbURL)
+        global pwdCryptCtx
+        pwdCryptCtx = gen_crypt_context(salt_size=pwd_salt_size, rounds=pwd_rounds)
+        create_tables(db)
+        return db
+    except Exception as e:
+        e.args = (e.args[0] + ' [users database]',)
+        raise
 
 
 def gen_crypt_context(salt_size=None, rounds=None):

@@ -1,3 +1,32 @@
+'''
+The `users` package manages the models and the API about users, groups and
+capabilities. Note that this package does **not** specify permissions for
+objects. Actual permissions are handled at the UI level.
+
+The main concepts are:
+
+- A :py:class:`~users.models.User` is what you think it is; something that you can login as.
+- A :py:class:`~users.models.Group` is a collection of users. Note that a user can belong to multiple
+  groups. A group has capabilities.
+- A :py:class:`~users.models.Capability` is a "granted permission". You can think of it like a piece of
+  paper saying, ie. "you can create new attachments".
+
+  - Its :py:attr:`~users.models.Capability.action` is a composition of Create, Read, Update, Delete
+    (it follows the CRUD model).
+  - A :py:attr:`~users.models.Capability.domain` is a regular expression that
+    must "match" to the description of an object. ie. ``/cars/*`` means "every
+    car", while ``/cars/*/tires/`` means "the tires of every car"
+
+This also means that a user has no capability (directly). It just belongs to
+groups, which, in turn, have capabilities.
+
+The rationale behind what a Capability is may seem baroque, but there are
+several advantages to it:
+
+- it is decoupled from  the actual domains used by the UI
+- the regular expression make it possible to create groups that can operate on
+  everything (``*``).
+'''
 from peewee import SqliteDatabase
 from playhouse import db_url
 from passlib.context import CryptContext

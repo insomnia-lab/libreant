@@ -18,20 +18,23 @@ class BaseModel(Model):
 
 
 class Capability(BaseModel):
-    """Capability model
+    """
+    Capability model
 
     A capability is composed by a :attr:`domain`
     and an :attr:`action`. It represent the possibility
     to perform a specific set of actions on the resources
     described by the domain
 
-    :attr:`domain` is a regular expression that
-        describe all the resources involved in the capability.
-        You can use :func:`simToReg` and :func:`regToSim` utility function
-        to easily manipulate domain regular expressions.
-    :attr:`action` is a bitmask representing
-        the actions involved in the capability
-        you can use :class:`Action` class to compose the bitmask
+    .. py:attribute:: domain
+
+        is a regular expression that describe all the resources involved in the
+        capability.  You can use :func:`simToReg` and :func:`regToSim` utility
+        function to easily manipulate domain regular expressions.
+
+    .. py:attribute:: action
+
+        an :class:`~users.models.ActionField` *what* can be done on :attr:`domain`
     """
 
     id = PrimaryKeyField()

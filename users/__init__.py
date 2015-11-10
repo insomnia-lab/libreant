@@ -32,9 +32,9 @@ def init_proxy(dbURL):
         <http://peewee.readthedocs.org/en/latest/peewee/playhouse.html#db-url>`_.
 
         examples:
-        * sqlite: `sqlite:///my_database.db`
-        * postgres: `postgresql://postgres:my_password@localhost:5432/my_database`
-        * mysql: `mysql://user:passwd@ip:port/my_db`
+         * sqlite: ``sqlite:///my_database.db``
+         * postgres: ``postgresql://postgres:my_password@localhost:5432/my_database``
+         * mysql: ``mysql://user:passwd@ip:port/my_db``
     '''
     db_proxy.initialize(db_url.connect(dbURL))
     return db_proxy

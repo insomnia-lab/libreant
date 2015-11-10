@@ -75,14 +75,15 @@ def from_envvars(prefix=None, environ=None, envvars=None, as_json=True):
 
 
 def load_configs(envvar_prefix, defaults=None, path=None):
-    '''load configuration
+    '''Load configuration
 
-    the following steps will be undertake:
-     - if `defaults` is provided, defaults are loded.
-     - It will attempt to load configs from file:
-       if `path` is provided, it will be used, otherwise the path
-       will be taken from envvar `envvar_prefix`+"SETTINGS"
-     - all envvars starting with `envvar_prefix` will be loaded
+    The following steps will be undertake:
+        * if `defaults` is provided, defaults are loded.
+        * It will attempt to load configs from file:
+          if `path` is provided, it will be used, otherwise the path
+          will be taken from envvar `envvar_prefix` + "SETTINGS".
+        * all envvars starting with `envvar_prefix` will be loaded.
+
     '''
     conf = {}
     if defaults:

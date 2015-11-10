@@ -1,7 +1,7 @@
 import logging
 
 
-LOG_NAMES = ['webant', 'fsdb', 'presets', 'agherant', 'config_utils', 'libreantdb', 'archivant']
+LOG_NAMES = ['webant', 'fsdb', 'presets', 'agherant', 'config_utils', 'libreantdb', 'archivant', 'users']
 
 
 def initLoggers(logLevel=logging.WARNING, logNames=LOG_NAMES):

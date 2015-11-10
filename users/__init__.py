@@ -3,6 +3,7 @@ from playhouse import db_url
 from passlib.context import CryptContext
 from models import db_proxy,\
     User, Group, UserToGroup, GroupToCapability, Capability, Action
+import logging
 
 
 class SqliteFKDatabase(SqliteDatabase):
@@ -41,6 +42,7 @@ def init_proxy(dbURL):
 
 def create_tables(database):
     '''Create all tables in the given database'''
+    logging.getLogger(__name__).debug("Creating missing database tables")
     database.connect()
     database.create_tables([User,
                             Group,
@@ -54,6 +56,7 @@ def populate_with_defaults():
 
     If the admin user already exists the function will simply return
     '''
+    logging.getLogger(__name__).debug("Populating with default users")
     if not User.select().where(User.name == 'admin').exists():
         admin = User.create(name='admin', password='admin')
         admins = Group.create(name='admins')
@@ -82,6 +85,9 @@ def init_db(dbURL, pwd_salt_size=None, pwd_rounds=None):
     '''
     if not dbURL:
         dbURL = 'sqlite:///:memory:'
+    logging.getLogger(__name__).debug("Initializing database: {}".format(dict(url=dbURL,
+                                                                              pwd_salt_size=pwd_salt_size,
+                                                                              pwd_rounds=pwd_rounds)))
     try:
         db = init_proxy(dbURL)
         global pwdCryptCtx

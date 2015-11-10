@@ -35,8 +35,6 @@ def init_proxy(dbURL):
         * postgres: `postgresql://postgres:my_password@localhost:5432/my_database`
         * mysql: `mysql://user:passwd@ip:port/my_db`
     '''
-    if not dbURL:
-        dbURL = 'sqlite:///:memory:'
     db_proxy.initialize(db_url.connect(dbURL))
     return db_proxy
 
@@ -82,6 +80,8 @@ def init_db(dbURL, pwd_salt_size=None, pwd_rounds=None):
 
     :param dbURL: database url, as described in :func:`init_proxy`
     '''
+    if not dbURL:
+        dbURL = 'sqlite:///:memory:'
     try:
         db = init_proxy(dbURL)
         global pwdCryptCtx

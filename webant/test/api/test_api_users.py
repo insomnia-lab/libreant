@@ -1,6 +1,6 @@
 from webant.test.api import WebantTestApiCase, ApiClientError
 from nose.tools import eq_
-from flask.json import dumps
+from flask.json import dumps, loads
 
 
 class TestApiUsers(WebantTestApiCase):
@@ -26,6 +26,11 @@ class TestApiUsers(WebantTestApiCase):
         uid = self.add_user(userData)
         rg = self.wtc.get(self.API_PREFIX + '/users/' + str(uid))
         eq_(rg.status_code, 200)
+
+    def test_get_users(self):
+        rg = self.wtc.get(self.USR_URI)
+        eq_(rg.status_code, 200)
+        eq_(len((loads(rg.data))['data']), 2) # the 2 default user
 
     def test_add_user_no_name(self):
         with self.assertRaises(ApiClientError) as ace:

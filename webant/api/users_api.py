@@ -1,6 +1,6 @@
 from webant.util import routes_collector
 from util import ApiError, make_success_response, on_json_load_error
-from flask import request, url_for, jsonify#, current_app, jsonify
+from flask import request, url_for, jsonify
 import users.api
 from users import Action, Capability
 
@@ -24,6 +24,12 @@ def delete_user(userID):
     except users.api.NotFoundException, e:
         raise ApiError("Not found", 404, details=str(e))
     return make_success_response("user has been successfully deleted")
+
+
+@route('/users/', methods=['GET'])
+def get_users():
+    usrs = [{'id': u.id, 'name': u.name} for u in users.api.get_users()]
+    return jsonify({'data': usrs})
 
 
 @route('/users/', methods=['POST'])
@@ -80,6 +86,12 @@ def delete_group(groupID):
     except users.api.NotFoundException, e:
         raise ApiError("Not found", 404, details=str(e))
     return make_success_response("group has been successfully deleted")
+
+
+@route('/groups/', methods=['GET'])
+def get_groups():
+    groups = [ {'id': g.id, 'name': g.name } for g in users.api.get_groups() ]
+    return jsonify({'data': groups})
 
 
 @route('/groups/', methods=['POST'])
@@ -151,6 +163,16 @@ def get_groups_of_user(userID):
     except users.api.NotFoundException, e:
         raise ApiError("Not found", 404, details=str(e))
     return jsonify({'data': groups})
+
+
+@route('/capabilities/', methods=['GET'])
+def get_capabilities():
+    capabilities = []
+    for c in users.api.get_capabilities():
+        capabilities.append({'id': c.id,
+                             'domain': Capability.regToSim(c.domain),
+                             'actions':Action.bitmask_to_list(c.action)})
+    return jsonify({'data': capabilities})
 
 
 @route('/capabilities/<int:capID>', methods=['GET'])

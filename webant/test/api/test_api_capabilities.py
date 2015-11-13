@@ -47,6 +47,11 @@ class TestApiCapabilities(WebantTestApiCase):
         eq_(capDataRet['domain'], capData['domain'])
         eq_(capDataRet['actions'], capData['actions'])
 
+    def test_get_capabilities(self):
+        rg = self.wtc.get(self.CAP_URI)
+        eq_(rg.status_code, 200)
+        eq_(len((loads(rg.data))['data']), 2) # the 2 default caps
+
     def test_delete_capability(self):
         capData = {'domain':'*', 'actions':['DELETE']}
         capID = self.add_capability(capData)

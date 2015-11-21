@@ -23,7 +23,7 @@ Libreant | {{ volume['metadata']['title'] if 'title' in volume['metadata'] else 
              <a class="btn btn-default" href="{{ url_for('download_attachment', volumeID=volume['id'], attachmentID=attachment['id']) }}">
                 <div class="row" style="display: flex; align-items: center;">
                     <div class="col-xs-1">
-                        <span class="glyphicon glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+                        <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
                     </div>
                     <div class="col-xs-11">
                         <strong>{{ attachment['metadata']['name'] }}</strong>
@@ -35,7 +35,7 @@ Libreant | {{ volume['metadata']['title'] if 'title' in volume['metadata'] else 
     <br>
     <br>
     {% endif %}
-    
+
     <article>
         <h4>{%trans%}Details{%endtrans%}</h4>
         <table class="table table-striped">
@@ -75,5 +75,5 @@ Libreant | {{ volume['metadata']['title'] if 'title' in volume['metadata'] else 
         </table>
         {% endif %}
     </article>
-<div class="container">
+</div>
 {% endblock content %}

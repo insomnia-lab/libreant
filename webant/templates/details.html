@@ -1,8 +1,9 @@
 {% extends "bootstrap/base.html" %}
 {% import "bootstrap/fixes.html" as fixes %}
 
+{% set title = volume['metadata']['title'] if 'title' in volume['metadata'] else volume['id'] %}
 {% block title %}
-Libreant | {{ volume['metadata']['title'] if 'title' in volume['metadata'] else volume['id'] }}
+Libreant | {{ title }}
 {% endblock %}
 
 {% block navbar %}
@@ -14,7 +15,7 @@ Libreant | {{ volume['metadata']['title'] if 'title' in volume['metadata'] else 
 
 <div class="container">
     <header class="page-header" style="margin-top:0px">
-	    <h1>{{ volume['metadata']['title'] if 'title' in volume['metadata'] else volume['id'] }}
+	    <h1>{{ title }}
 		    <small>{{ volume['metadata']['actors'] | sort | join(',') }}</small>
 	    </h1>
     </header>

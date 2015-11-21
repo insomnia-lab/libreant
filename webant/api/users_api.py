@@ -2,7 +2,7 @@ from webant.util import routes_collector
 from util import ApiError, make_success_response, on_json_load_error
 from flask import request, url_for, jsonify
 import users.api
-from users import Action, Capability
+from users import Action
 
 routes = []
 route = routes_collector(routes)
@@ -167,11 +167,7 @@ def get_groups_of_user(userID):
 
 @route('/capabilities/', methods=['GET'])
 def get_capabilities():
-    capabilities = []
-    for c in users.api.get_capabilities():
-        capabilities.append({'id': c.id,
-                             'domain': Capability.regToSim(c.domain),
-                             'actions':Action.bitmask_to_list(c.action)})
+    capabilities = [ c.to_dict() for c in users.api.get_capabilities()]
     return jsonify({'data': capabilities})
 
 
@@ -181,10 +177,7 @@ def get_capability(capID):
         cap = users.api.get_capability(capID)
     except users.api.NotFoundException, e:
         raise ApiError("Not found", 404, details=str(e))
-    return jsonify({'data':
-                      {'id': cap.id,
-                       'domain': Capability.regToSim(cap.domain),
-                       'actions': cap.action.to_list()}})
+    return jsonify({'data': cap.to_dict()})
 
 
 @route('/capabilities/<int:capID>', methods=['DELETE'])
@@ -257,7 +250,7 @@ def delete_capability_from_group(groupID, capID):
 @route('/groups/<int:groupID>/capabilities/', methods=['GET'])
 def get_capabilities_of_group(groupID):
     try:
-        caps = [{'id': cap.id} for cap in users.api.get_capabilities_of_group(groupID)]
+        caps = [ cap.to_dict() for cap in users.api.get_capabilities_of_group(groupID)]
     except users.api.NotFoundException, e:
         raise ApiError("Not found", 404, details=str(e))
     return jsonify({'data': caps})

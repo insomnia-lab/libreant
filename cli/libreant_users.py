@@ -13,6 +13,11 @@ usersDB = None
 conf = dict()
 
 
+def die(msg, exit_code=1):
+        click.secho('ERROR: ' + msg, err=True, fg='red')
+        exit(exit_code)
+
+
 @click.group(name="libreant-users", help="manage libreant users")
 @click.version_option()
 @click.option('-s', '--settings', type=click.Path(exists=True, readable=True), help='file from wich load settings')
@@ -28,6 +33,8 @@ def libreant_users(debug, settings, users_db):
     if users_db:
         cliConf['USERS_DATABASE'] = users_db
     conf.update(cliConf)
+    if conf['USERS_DATABASE'] is None:
+        die('--users-db not set')
     initLoggers(logging.DEBUG if conf.get('DEBUG', False) else logging.WARNING)
 
     global usersDB

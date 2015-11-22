@@ -16,6 +16,9 @@ class BaseModel(Model):
     class Meta:
         database = db_proxy  # Use proxy for our DB.
 
+    def to_dict(self):
+        return dict(id=self.id)
+
 
 class Capability(BaseModel):
     """Capability model
@@ -40,6 +43,9 @@ class Capability(BaseModel):
 
     class Meta:
         indexes = ((('domain', 'action'), False),)
+
+    def to_dict(self):
+        return dict(id=self.id, domain=self.domain, action=self.action.to_list())
 
     @classmethod
     def simToReg(self, sim):
@@ -124,6 +130,9 @@ class Group(BaseModel):
     name = CharField(unique=True)
     capabilities = ManyToManyField(Capability, related_name='groups', through_model=GroupToCapabilityProxy)
 
+    def to_dict(self):
+        return dict(id=self.id, name=self.name)
+
     def can(self, domain, action):
         for cap in self.capabilities:
             if(cap.match(domain, action)):
@@ -144,6 +153,9 @@ class User(BaseModel):
             self.name = kargs['name']
         if 'password' in kargs:
             self.set_password(kargs['password'])
+
+    def to_dict(self):
+        return dict(id=self.id, name=self.name)
 
     def set_password(self, password):
         """set user password

@@ -201,7 +201,11 @@ def list_capabilities(groupname):
     click.echo(json.dumps([c.to_dict() for c in group.capabilities]))
 
 
-@group_subcmd.command(name='cap-add', help='Add a new capability to a group')
+@group_subcmd.command(name='cap-add',
+                      short_help='Add a new capability to a group',
+                      help='Add a new capability to a group\n\n'
+                      'An action is expressed as a subset of the string "CRUD"\n'
+                      'Examples of valid values are R,CR,CRUD,CD,etc.')
 @click.argument('groupname')
 @click.argument('domain')
 @click.argument('action')

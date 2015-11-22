@@ -182,14 +182,25 @@ def create_app(conf={}):
                         mimetype='text/xml')
 
     @app.route('/view/<volumeID>')
+    @app.autht.requires_authentication
     def view_volume(volumeID):
+        app.authz.perform_authorization(('volumes/{}'.format(volumeID), users.Action.READ))
         try:
             volume = app.archivant.get_volume(volumeID)
         except NotFoundException:
             return renderErrorPage(message='no volume found with id "{}"'.format(volumeID), httpCode=404)
+        # hide button from action toolbar if current user has not capability to perform them
+        hideFromToolbar = None
+        if app.users_enabled:
+            currentDomain = 'volumes/{}'.format(volumeID)
+            hideFromToolbar = {}
+            hideFromToolbar['delete'] = not app.autht.currIdentity.can(currentDomain, users.Action.DELETE)
         similar = app.archivant._db.mlt(volume['id'])['hits']['hits'][:10]
         return render_template('details.html',
-                               volume=volume, similar=similar)
+                               volume=volume,
+                               similar=similar,
+                               hide_from_toolbar=hideFromToolbar,
+                               api_url=app.config['API_URL'])
 
     @app.route('/download/<volumeID>/<attachmentID>')
     def download_attachment(volumeID, attachmentID):

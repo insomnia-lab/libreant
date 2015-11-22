@@ -201,6 +201,24 @@ def list_capabilities(groupname):
     click.echo(json.dumps([c.to_dict() for c in group.capabilities]))
 
 
+class ActionParamType(click.ParamType):
+    name='action'
+
+    def convert(self, value, param, ctx):
+        possibleactions = {v[0]: v for v in users.Action.ACTIONS}
+        value = '' if value == '0' else value
+        try:
+            value = [possibleactions[x] for x in value]
+        except KeyError as exc:
+            self.fail('"%s is not a valid literal; '
+                        'valid values are %s (which stand for %s)' % (
+                            exc.args[0],
+                            ', '.join(possibleactions.keys()),
+                            ', '.join(possibleactions.values())
+                        ))
+        return users.Action.from_list(value)
+
+
 @group_subcmd.command(name='cap-add',
                       short_help='Add a new capability to a group',
                       help='Add a new capability to a group\n\n'
@@ -208,13 +226,8 @@ def list_capabilities(groupname):
                       'Examples of valid values are R,CR,CRUD,CD,etc.')
 @click.argument('groupname')
 @click.argument('domain')
-@click.argument('action')
+@click.argument('action', type=ActionParamType())
 def capability_add(groupname, domain, action):
-    possibleactions = {v[0]: v for v in users.Action.ACTIONS}
-    action = '' if action == '0' else action
-    action = [possibleactions[x] for x in action]
-    action = users.Action.from_list(action)
-
     group = users.api.get_group(name=groupname)
     cap = users.api.add_capability(domain, action)
     users.api.add_capability_to_group(cap.id, group.id)

@@ -68,12 +68,13 @@ class LibreantViewApp(LibreantCoreApp):
         defaults = {
             'BOOTSTRAP_SERVE_LOCAL': True,
             'AGHERANT_DESCRIPTIONS': [],
+            'API_URL': "/api/v1"
         }
         defaults.update(conf)
         super(LibreantViewApp, self).__init__(import_name, defaults)
         if self.config['AGHERANT_DESCRIPTIONS']:
             self.register_blueprint(agherant, url_prefix='/agherant')
-        self.register_blueprint(api, url_prefix='/api/v1')
+        self.register_blueprint(api, url_prefix=self.config['API_URL'])
         Bootstrap(self)
         self.babel = Babel(self)
         self.available_translations = [l.language for l in self.babel.list_translations()]

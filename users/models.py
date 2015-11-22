@@ -55,16 +55,18 @@ class Capability(BaseModel):
         return re.sub('\[\^/\]\+', '*', reg[3:-3])
 
     def match_domain(self, dom):
-        """Check if the given :param:`dom` is included in this capability domain"""
+        """Check if the given `dom` is included in this capability domain"""
         return bool(re.match(self.domain, dom))
 
     def match_action(self, act):
-        """Check if the given :param:`act` is allowed from this capability"""
+        """Check if the given `act` is allowed from this capability"""
         return (self.action & act) == act
 
     def match(self, dom, act):
-        """Check if the given :param:`domain` and :param:`act` are allowed
-        by this capability"""
+        """
+        Check if the given `domain` and `act` are allowed
+        by this capability
+        """
         return self.match_domain(dom) and self.match_action(act)
 
 
@@ -166,7 +168,7 @@ class User(BaseModel):
                 .where(User.id == self.id))
 
     def can(self, domain, action):
-        """Can perform :param:`action` on the given :param:`domain`."""
+        """Can perform `action` on the given `domain`."""
         for cap in self.capabilities:
             if(cap.match(domain, action)):
                 return True

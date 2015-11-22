@@ -232,25 +232,30 @@ class Archivant():
     def insert_volume(self, metadata, attachments=[]):
         '''Insert a new volume
 
-           Returns the ID of the added volume
+        Returns the ID of the added volume
 
-           `metadata` must be a dict containg metadata of the volume.
-           The only required key is `_language`
-           {
-             "_language" : "it",  # language of the metadata
-             "key1" : "value1",   # attribute
-             "key2" : "value2",
+        `metadata` must be a dict containg metadata of the volume::
+
+            {
+              "_language" : "it",  # language of the metadata
+              "key1" : "value1",   # attribute
+              "key2" : "value2",
               ...
-             "keyN" : "valueN"
-           }
+              "keyN" : "valueN"
+            }
 
-           `attachments` must be an array of dict
-           {
-               "file"  : "/prova/una/path/a/caso" # path or fp
-               "name"  : "nome_buffo.ext"         # name of the file (extension included) [optional if a path was given]
-               "mime"  : "application/json"       # mime type of the file [optional]
-               "notes" : "this file is awesome"   # notes that will be attached to this file [optional]
-           }
+            The only required key is `_language`
+
+
+        `attachments` must be an array of dict::
+
+            {
+              "file"  : "/prova/una/path/a/caso" # path or fp
+              "name"  : "nome_buffo.ext"         # name of the file (extension included) [optional if a path was given]
+              "mime"  : "application/json"       # mime type of the file [optional]
+              "notes" : "this file is awesome"   # notes that will be attached to this file [optional]
+            }
+
         '''
 
         log.debug("adding new volume:\n\tdata: {}\n\tfiles: {}".format(metadata, attachments))
@@ -337,9 +342,9 @@ class Archivant():
     def update_attachment(self, volumeID, attachmentID, metadata):
         '''update an existing attachment
 
-           the given metadata dict will be merged with the old one.
-           only the following fields could be updated:
-             [name, mime, notes, download_count]
+        the given metadata dict will be merged with the old one.
+        only the following fields could be updated:
+        [name, mime, notes, download_count]
         '''
         log.debug('updating metadata of attachment {} from volume {}'.format(attachmentID, volumeID))
         modifiable_fields = ['name', 'mime', 'notes', 'download_count']

@@ -8,10 +8,10 @@ logger = logging.getLogger(__name__)
 class PresetManager(object):
     '''PresetManager deals with presets loading, validating, storing
 
-    you can use it like this:
+    you can use it like this::
 
-    python::
-    pm = PresetManager(["/path/to/presets/folder", "/another/path"])
+        pm = PresetManager(["/path/to/presets/folder", "/another/path"])
+
     '''
 
     MAX_DEPTH = 5
@@ -109,14 +109,15 @@ class Schema(object):
     a specific object structure.
 
     all child class in order to use schema validation must:
-     - describe the desired object schema using ```self.fields```
-     - save input object in ```self.body```
+     - describe the desired object schema using `self.fields`
+     - save input object in `self.body`
 
-    ```self.fields``` must be a ```dict```,
-    where keys match the relative self.body keys
+    `self.fields` must be a dict,
+    where keys match the relative `self.body` keys
     and values describe how relative self.body valuse must be.
 
     Example::
+
         self.fields = { 'description': {
                             'type': basestring,
                             'required': False,
@@ -128,6 +129,7 @@ class Schema(object):
                             'default': True
                         }
                       }
+
     '''
 
     fields = {}

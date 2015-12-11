@@ -13,9 +13,10 @@ def gevent_run(app):
         run_app = DebuggedApplication(app)
 
     def run_server():
+        import logging
         port = int(app.config.get('PORT', 5000))
         address = app.config.get('ADDRESS', '')
-        print('Listening on http://%s:%d/' % (address or '0.0.0.0', port))
+        logging.getLogger('webant').info('Listening on http://{}:{}/'.format(address or '0.0.0.0', port))
         http_server = WSGIServer((address, port), run_app)
         http_server.serve_forever()
 

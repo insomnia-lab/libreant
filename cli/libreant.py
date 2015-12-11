@@ -58,6 +58,7 @@ def libreant(settings, debug, port, address, fsdb_path, es_indexname, es_hosts, 
             raise
         else:
             click.secho(str(e), fg='yellow', err=True)
+            exit(1)
 
 if __name__ == '__main__':
     libreant()

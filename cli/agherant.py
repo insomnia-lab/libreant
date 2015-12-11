@@ -28,7 +28,7 @@ def agherant(settings, debug, port, address, agherant_descriptions):
     if agherant_descriptions:
         cliConf['AGHERANT_DESCRIPTIONS'] = agherant_descriptions
     conf.update(cliConf)
-    initLoggers(logging.DEBUG if conf.get('DEBUG', False) else logging.WARNING)
+    initLoggers(logging.DEBUG if conf.get('DEBUG', False) else logging.INFO)
     try:
         main(conf)
     except Exception as e:

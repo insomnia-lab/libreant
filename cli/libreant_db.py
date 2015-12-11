@@ -35,7 +35,7 @@ def libreant_db(debug, settings, fsdb_path, es_indexname, es_hosts):
     if es_hosts:
         cliConf['ES_HOSTS'] = es_hosts
     conf.update(cliConf)
-    initLoggers(logging.DEBUG if conf.get('DEBUG', False) else logging.WARNING)
+    initLoggers(logging.DEBUG if conf.get('DEBUG', False) else logging.INFO)
 
     try:
         global arc

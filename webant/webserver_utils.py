@@ -20,7 +20,7 @@ def gevent_run(app):
         http_server.serve_forever()
 
     if app.config['DEBUG']:
-        from werkzeug.serving import run_with_reloader
+        from werkzeug._reloader import run_with_reloader
         run_with_reloader(run_server)
     else:
         run_server()

@@ -55,7 +55,7 @@ class Capability(BaseModel):
         indexes = ((('domain', 'action'), False),)
 
     def to_dict(self):
-        return dict(id=self.id, domain=self.domain, action=self.action.to_list())
+        return dict(id=self.id, domain=self.regToSim(self.domain), action=self.action.to_list())
 
     @classmethod
     def simToReg(self, sim):

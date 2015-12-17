@@ -9,8 +9,14 @@ from conf import config_utils
 from conf.defaults import get_def_conf, get_help
 from utils.loggers import initLoggers
 
+json_dumps = json.dumps
 usersDB = None
 conf = dict()
+
+
+def pretty_json_dumps(*args, **kargs):
+    kargs['indent'] = 3
+    return json.dumps(*args, **kargs)
 
 
 def die(msg, exit_code=1):
@@ -23,7 +29,8 @@ def die(msg, exit_code=1):
 @click.option('-s', '--settings', type=click.Path(exists=True, readable=True), help='file from wich load settings')
 @click.option('-d', '--debug', is_flag=True, help=get_help('DEBUG'))
 @click.option('--users-db', type=click.Path(), metavar="<url>", help=get_help('USERS_DATABASE') )
-def libreant_users(debug, settings, users_db):
+@click.option('-p', '--pretty', is_flag=True, help="format the output on multiple lines")
+def libreant_users(debug, settings, users_db, pretty):
     initLoggers(logNames=['config_utils'])
     global conf
     conf = config_utils.load_configs('LIBREANT_', defaults=get_def_conf(), path=settings)
@@ -35,13 +42,22 @@ def libreant_users(debug, settings, users_db):
     conf.update(cliConf)
     if conf['USERS_DATABASE'] is None:
         die('--users-db not set')
+    if pretty:
+        global json_dumps
+        json_dumps = pretty_json_dumps
     initLoggers(logging.DEBUG if conf.get('DEBUG', False) else logging.WARNING)
 
     global usersDB
-    usersDB = users.init_db(conf['USERS_DATABASE'],
-                               pwd_salt_size=conf['PWD_SALT_SIZE'],
-                               pwd_rounds=conf['PWD_ROUNDS'])
-    users.populate_with_defaults()
+    try:
+        usersDB = users.init_db(conf['USERS_DATABASE'],
+                                   pwd_salt_size=conf['PWD_SALT_SIZE'],
+                                   pwd_rounds=conf['PWD_ROUNDS'])
+        users.populate_with_defaults()
+    except Exception as e:
+        if conf['DEBUG']:
+            raise
+        else:
+            die(str(e))
 
 
 class ExistingUserType(click.ParamType):
@@ -69,7 +85,7 @@ def user_subcmd():
     pass
 
 
-@user_subcmd.command(name='add')
+@user_subcmd.command(name='create', help='Create new user')
 @click.argument('username')
 def user_add(username):
     try:
@@ -82,25 +98,25 @@ def user_add(username):
     password = click.prompt('Password', hide_input=True,
                             confirmation_prompt=True)
     user = users.api.add_user(username, password)
-    click.echo(json.dumps(user.to_dict()))
+    click.echo(json_dumps(user.to_dict()))
 
 
-@user_subcmd.command(name='list')
+@user_subcmd.command(name='list', help='List all the users')
 @click.option('--password', is_flag=True, help='Show also password (in hashed form)')
 def user_list(password):
     if password:
         all_users = [{'name': user.name, 'id': user.id, 'pwd_hash': user.pwd_hash} for user in users.User.select()]
     else:
         all_users = [{'name': user.name, 'id': user.id} for user in users.User.select()]
-    click.echo(json.dumps(all_users))
+    click.echo(json_dumps(all_users))
 
 
-@user_subcmd.command(name='show')
+@user_subcmd.command(name='show', help='Show user infos')
 @click.argument('user', metavar='USERNAME', type=ExistingUserType())
 def user_show(user):
     data = user.to_dict()
     data['groups'] = [group.to_dict() for group in user.groups]
-    click.echo(json.dumps(data))
+    click.echo(json_dumps(data))
 
 
 @user_subcmd.command(name='passwd', help='change the password for a user')
@@ -123,7 +139,7 @@ def user_check_password(user):
         click.secho('Incorrect password', fg='red', err=True)
 
 
-@user_subcmd.command(name='delete')
+@user_subcmd.command(name='delete', help='Delete a user')
 @click.argument('user', metavar='USERNAME', type=ExistingUserType())
 def user_del(user):
     users.api.delete_user(user.id)
@@ -134,13 +150,13 @@ def group_subcmd():
     pass
 
 
-@group_subcmd.command(name='delete')
+@group_subcmd.command(name='delete', help='Delete a group')
 @click.argument('group', metavar='GROUPNAME', type=ExistingGroupType())
 def group_del(group):
     users.api.delete_group(group.id)
 
 
-@group_subcmd.command(name='create')
+@group_subcmd.command(name='create', help='Create a group')
 @click.argument('groupname')
 def group_add(groupname):
     try:
@@ -150,12 +166,12 @@ def group_add(groupname):
     else:
         die('Group already present')
     group = users.api.add_group(groupname)
-    click.echo(json.dumps(group.to_dict()))
+    click.echo(json_dumps(group.to_dict()))
 
 
 @group_subcmd.command(name='list', help='List groups')
 def list_groups():
-    click.echo(json.dumps([g.to_dict() for g in users.Group.select()]))
+    click.echo(json_dumps([g.to_dict() for g in users.Group.select()]))
 
 
 @group_subcmd.command(name='show', help='Show group properties and members')
@@ -163,7 +179,7 @@ def list_groups():
 def show_group(group):
     groupdict = group.to_dict()
     groupdict['users'] = [user.to_dict() for user in users.api.get_users_in_group(group.id)]
-    click.echo(json.dumps(groupdict))
+    click.echo(json_dumps(groupdict))
 
 
 @group_subcmd.command(name='user-remove', help='Remove a user from a group')
@@ -174,7 +190,7 @@ def remove_from_group(user, group):
     userdata = user.to_dict()
     userdata['groups'] = [ug.to_dict() for ug in
                           users.api.get_groups_of_user(user.id)]
-    click.echo(json.dumps(userdata))
+    click.echo(json_dumps(userdata))
 
 
 @group_subcmd.command(name='user-add', help='Add a user to a group')
@@ -184,7 +200,7 @@ def add_to_group(user, group):
     users.api.add_user_to_group(user.id, group.id)
     userdata = user.to_dict()
     userdata['groups'] = [ug.to_dict() for ug in users.api.get_groups_of_user(user.id)]
-    click.echo(json.dumps(userdata))
+    click.echo(json_dumps(userdata))
 
 
 @libreant_users.group(name='capability')
@@ -195,7 +211,7 @@ def caps_subcmd():
 @group_subcmd.command(name='cap-list', help='List capabilities owned by group')
 @click.argument('group', metavar='GROUPNAME', type=ExistingGroupType())
 def list_capabilities(group):
-    click.echo(json.dumps([c.to_dict() for c in group.capabilities]))
+    click.echo(json_dumps([c.to_dict() for c in group.capabilities]))
 
 
 class ActionParamType(click.ParamType):
@@ -230,7 +246,7 @@ def capability_add(group, domain, action):
 
     groupdata = group.to_dict()
     groupdata['capabilities'] = [c.to_dict() for c in group.capabilities]
-    click.echo(json.dumps(groupdata))
+    click.echo(json_dumps(groupdata))
 
 
 @caps_subcmd.command(name='delete')
@@ -242,4 +258,4 @@ def capability_del(capid):
 @caps_subcmd.command(name='list', help='List every capability')
 def capability_list():
     allcaps = users.Capability.select()
-    click.echo(json.dumps([c.to_dict() for c in allcaps]))
+    click.echo(json_dumps([c.to_dict() for c in allcaps]))

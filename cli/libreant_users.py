@@ -75,7 +75,7 @@ def user_subcmd():
     pass
 
 
-@user_subcmd.command(name='add')
+@user_subcmd.command(name='create', help='Create new user')
 @click.argument('username')
 def user_add(username):
     try:
@@ -91,7 +91,7 @@ def user_add(username):
     click.echo(json.dumps(user.to_dict()))
 
 
-@user_subcmd.command(name='list')
+@user_subcmd.command(name='list', help='List all the users')
 @click.option('--password', is_flag=True, help='Show also password (in hashed form)')
 def user_list(password):
     if password:
@@ -101,7 +101,7 @@ def user_list(password):
     click.echo(json.dumps(all_users))
 
 
-@user_subcmd.command(name='show')
+@user_subcmd.command(name='show', help='Show user infos')
 @click.argument('user', metavar='USERNAME', type=ExistingUserType())
 def user_show(user):
     data = user.to_dict()
@@ -129,7 +129,7 @@ def user_check_password(user):
         click.secho('Incorrect password', fg='red', err=True)
 
 
-@user_subcmd.command(name='delete')
+@user_subcmd.command(name='delete', help='Delete a user')
 @click.argument('user', metavar='USERNAME', type=ExistingUserType())
 def user_del(user):
     users.api.delete_user(user.id)
@@ -140,13 +140,13 @@ def group_subcmd():
     pass
 
 
-@group_subcmd.command(name='delete')
+@group_subcmd.command(name='delete', help='Delete a group')
 @click.argument('group', metavar='GROUPNAME', type=ExistingGroupType())
 def group_del(group):
     users.api.delete_group(group.id)
 
 
-@group_subcmd.command(name='create')
+@group_subcmd.command(name='create', help='Create a group')
 @click.argument('groupname')
 def group_add(groupname):
     try:

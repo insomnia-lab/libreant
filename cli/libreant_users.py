@@ -38,10 +38,16 @@ def libreant_users(debug, settings, users_db):
     initLoggers(logging.DEBUG if conf.get('DEBUG', False) else logging.WARNING)
 
     global usersDB
-    usersDB = users.init_db(conf['USERS_DATABASE'],
-                               pwd_salt_size=conf['PWD_SALT_SIZE'],
-                               pwd_rounds=conf['PWD_ROUNDS'])
-    users.populate_with_defaults()
+    try:
+        usersDB = users.init_db(conf['USERS_DATABASE'],
+                                   pwd_salt_size=conf['PWD_SALT_SIZE'],
+                                   pwd_rounds=conf['PWD_ROUNDS'])
+        users.populate_with_defaults()
+    except Exception as e:
+        if conf['DEBUG']:
+            raise
+        else:
+            die(str(e))
 
 
 class ExistingUserType(click.ParamType):

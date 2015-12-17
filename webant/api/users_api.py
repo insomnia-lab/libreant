@@ -156,7 +156,7 @@ def get_capability(capID):
     return jsonify({'data':
                       {'id': cap.id,
                        'domain': Capability.regToSim(cap.domain),
-                       'actions': Action.bitmask_to_list(cap.action)}})
+                       'actions': cap.action.to_list()}})
 
 
 @route('/capabilities/<int:capID>', methods=['DELETE'])
@@ -181,7 +181,7 @@ def add_capability():
     if not actions:
         raise ApiError("Bad Request", 400, details="missing 'actions' parameter")
     try:
-        cap = users.api.add_capability(domain=domain, action=Action.list_to_bitmask(actions))
+        cap = users.api.add_capability(domain=domain, action=Action.from_list(actions))
     except users.api.ConflictException, e:
         raise ApiError("Conflict", 409, details=str(e))
     link_self = url_for('.get_capability', capID=cap.id, _external=True)
@@ -198,7 +198,7 @@ def update_capability(capID):
         raise ApiError("Unsupported media type", 415)
     updates = request.json
     if 'actions' in updates:
-        updates['action'] = Action.list_to_bitmask(updates.pop('actions'))
+        updates['action'] = Action.from_list(updates.pop('actions'))
     try:
         users.api.update_capability(capID, updates)
     except users.api.NotFoundException, e:

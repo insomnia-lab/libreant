@@ -12,9 +12,22 @@ GroupToCapabilityProxy = Proxy()
 UserToGroupProxy = Proxy()
 
 
+class ActionField(IntegerField):
+    db_field = 'action'
+
+    def db_value(self, value):
+        return value
+
+    def python_value(self, value):
+        return Action(value)
+
+
 class BaseModel(Model):
     class Meta:
         database = db_proxy  # Use proxy for our DB.
+
+    def to_dict(self):
+        return dict(id=self.id)
 
 
 class Capability(BaseModel):
@@ -39,10 +52,13 @@ class Capability(BaseModel):
 
     id = PrimaryKeyField()
     domain = CharField()
-    action = IntegerField()
+    action = ActionField()
 
     class Meta:
         indexes = ((('domain', 'action'), False),)
+
+    def to_dict(self):
+        return dict(id=self.id, domain=self.regToSim(self.domain), action=self.action.to_list())
 
     @classmethod
     def simToReg(self, sim):
@@ -73,7 +89,7 @@ class Capability(BaseModel):
         return self.match_domain(dom) and self.match_action(act)
 
 
-class Action():
+class Action(int):
     """Actions utiliy class
 
     You can use this class attributes to compose the actions bitmask::
@@ -89,23 +105,27 @@ class Action():
     # the index of the action in the list correspond to the its position in the bitmask
     ACTIONS = ['CREATE', 'READ', 'UPDATE', 'DELETE']
 
-    @classmethod
-    def bitmask_to_list(cls, bitmask):
+    def __new__(cls, bitmask):
+        if bitmask >= 2**len(cls.ACTIONS):
+            raise ValueError('bitmask %d is too big' % bitmask)
+        return super(Action, cls).__new__(cls, bitmask)
+
+    def to_list(self):
         '''convert an actions bitmask into a list of action strings'''
         res = []
-        for a in cls.ACTIONS:
-            aBit = cls.action_bitmask(a)
-            if ((bitmask & aBit) == aBit):
+        for a in self.__class__.ACTIONS:
+            aBit = self.__class__.action_bitmask(a)
+            if ((self & aBit) == aBit):
                 res.append(a)
         return res
 
     @classmethod
-    def list_to_bitmask(cls, actions):
+    def from_list(cls, actions):
         '''convert list of actions into the corresponding bitmask'''
         bitmask = 0
         for a in actions:
             bitmask |= cls.action_bitmask(a)
-        return bitmask
+        return Action(bitmask)
 
     @classmethod
     def action_bitmask(cls, action):
@@ -127,6 +147,9 @@ class Group(BaseModel):
     name = CharField(unique=True)
     capabilities = ManyToManyField(Capability, related_name='groups', through_model=GroupToCapabilityProxy)
 
+    def to_dict(self):
+        return dict(id=self.id, name=self.name)
+
     def can(self, domain, action):
         for cap in self.capabilities:
             if(cap.match(domain, action)):
@@ -147,6 +170,9 @@ class User(BaseModel):
             self.name = kargs['name']
         if 'password' in kargs:
             self.set_password(kargs['password'])
+
+    def to_dict(self):
+        return dict(id=self.id, name=self.name)
 
     def set_password(self, password):
         """set user password
@@ -183,7 +209,7 @@ class GroupToCapability(BaseModel):
     capability = ForeignKeyField(Capability, on_delete='CASCADE')
 
     class Meta:
-            primary_key = CompositeKey('group', 'capability')
+        primary_key = CompositeKey('group', 'capability')
 
 
 class UserToGroup(BaseModel):
@@ -191,7 +217,8 @@ class UserToGroup(BaseModel):
     group = ForeignKeyField(Group, on_delete='CASCADE')
 
     class Meta:
-            primary_key = CompositeKey('user', 'group')
+        primary_key = CompositeKey('user', 'group')
+
 
 GroupToCapabilityProxy.initialize(GroupToCapability)
 UserToGroupProxy.initialize(UserToGroup)

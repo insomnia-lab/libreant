@@ -133,6 +133,7 @@ conf = dict(
         entry_points={'console_scripts': [
           'libreant=cli.libreant:libreant',
           'agherant=cli.agherant:agherant',
+          'libreant-users=cli.libreant_users:libreant_users',
           'libreant-db=cli.libreant_db:libreant_db'
         ]},
         classifiers=[

@@ -1,13 +1,14 @@
 import tempfile
 import os
 
-from flask import Flask, render_template, request, abort, Response, redirect, url_for, make_response
+from flask import Flask, render_template, request, Response, redirect, url_for
 from werkzeug import secure_filename
 from flask_bootstrap import Bootstrap
 from elasticsearch import exceptions as es_exceptions
 from flask.ext.babel import Babel, gettext
 from babel.dates import format_timedelta
 from datetime import datetime
+from logging import getLogger
 
 from presets import PresetManager
 from constants import isoLangs
@@ -17,6 +18,9 @@ from archivant.exceptions import NotFoundException, FileOpNotSupported
 from agherant import agherant
 from api.blueprint_api import api
 from webserver_utils import gevent_run
+import users
+import util
+from authbone.authorization import CapabilityMissingException
 
 
 class LibreantCoreApp(Flask):
@@ -27,13 +31,36 @@ class LibreantCoreApp(Flask):
             'FSDB_PATH': "",
             'SECRET_KEY': 'really insecure, please change me!',
             'ES_HOSTS': None,
-            'ES_INDEXNAME': 'libreant'
+            'ES_INDEXNAME': 'libreant',
+            'USERS_DATABASE': "",
+            'PWD_ROUNDS': None,
+            'PWD_SALT_SIZE': None
         }
         defaults.update(conf)
         self.config.update(defaults)
 
+        '''dirty trick: prevent default flask handler to be created
+           in flask version > 0.10.1 will be a nicer way to disable default loggers
+           tanks to this new code mitsuhiko/flask@84ad89ffa4390d3327b4d35983dbb4d84293b8e2
+        '''
+        self._logger = getLogger(self.import_name)
+
         self.archivant = Archivant(conf={k: self.config[k] for k in ('FSDB_PATH', 'ES_HOSTS', 'ES_INDEXNAME')})
         self.presetManager = PresetManager(self.config['PRESET_PATHS'])
+
+        if self.config['USERS_DATABASE']:
+            self.usersDB = users.init_db(self.config['USERS_DATABASE'],
+                                         pwd_salt_size=self.config['PWD_SALT_SIZE'],
+                                         pwd_rounds=self.config['PWD_ROUNDS'])
+            users.populate_with_defaults()
+        else:
+            self.logger.warning("""It has not been set any value for 'USERS_DATABASE', \
+all operations about users will be unsupported. Are all admins.""")
+            self.usersDB = None
+
+    @property
+    def users_enabled(self):
+        return bool(self.usersDB)
 
 
 class LibreantViewApp(LibreantCoreApp):
@@ -41,15 +68,22 @@ class LibreantViewApp(LibreantCoreApp):
         defaults = {
             'BOOTSTRAP_SERVE_LOCAL': True,
             'AGHERANT_DESCRIPTIONS': [],
+            'API_URL': "/api/v1"
         }
         defaults.update(conf)
         super(LibreantViewApp, self).__init__(import_name, defaults)
         if self.config['AGHERANT_DESCRIPTIONS']:
             self.register_blueprint(agherant, url_prefix='/agherant')
-        self.register_blueprint(api, url_prefix='/api/v1')
+        self.register_blueprint(api, url_prefix=self.config['API_URL'])
         Bootstrap(self)
         self.babel = Babel(self)
         self.available_translations = [l.language for l in self.babel.list_translations()]
+        if self.users_enabled:
+            self.autht = util.AuthtFromSession()
+            self.authz = util.AuthzFromSession(authenticator=self.autht)
+        else:
+            self.autht = util.TransparentAutht()
+            self.authz = util.TransparentAuthz()
 
 
 def create_app(conf={}):
@@ -63,7 +97,7 @@ def create_app(conf={}):
     def search():
         query = request.args.get('q', None)
         if query is None:
-            abort(400, "No query given")
+            return renderErrorPage(message='No query given', httpCode=400)
         res = app.archivant._db.user_search(query)['hits']['hits']
         books = []
         for b in res:
@@ -81,9 +115,10 @@ def create_app(conf={}):
                                             books=books, query=query),
                             mimetype='text/xml')
         else:
-            abort(500)
+            return renderErrorPage(message='Unknown format requested', httpCode=400)
 
     @app.route('/add', methods=['POST'])
+    @app.authz.requires_capability(('/volumes', users.Action.CREATE))
     def upload():
         requiredFields = ['_language']
         optFields = ['_preset']
@@ -127,6 +162,7 @@ def create_app(conf={}):
         return redirect(url_for('view_volume', volumeID=addedVolumeID))
 
     @app.route('/add', methods=['GET'])
+    @app.authz.requires_capability(('/volumes', users.Action.CREATE))
     def add():
         reqPreset = request.args.get('preset', None)
 
@@ -146,14 +182,25 @@ def create_app(conf={}):
                         mimetype='text/xml')
 
     @app.route('/view/<volumeID>')
+    @app.autht.requires_authentication
     def view_volume(volumeID):
+        app.authz.perform_authorization(('volumes/{}'.format(volumeID), users.Action.READ))
         try:
             volume = app.archivant.get_volume(volumeID)
         except NotFoundException:
             return renderErrorPage(message='no volume found with id "{}"'.format(volumeID), httpCode=404)
+        # hide button from action toolbar if current user has not capability to perform them
+        hideFromToolbar = None
+        if app.users_enabled:
+            currentDomain = 'volumes/{}'.format(volumeID)
+            hideFromToolbar = {}
+            hideFromToolbar['delete'] = not app.autht.currIdentity.can(currentDomain, users.Action.DELETE)
         similar = app.archivant._db.mlt(volume['id'])['hits']['hits'][:10]
         return render_template('details.html',
-                               volume=volume, similar=similar)
+                               volume=volume,
+                               similar=similar,
+                               hide_from_toolbar=hideFromToolbar,
+                               api_url=app.config['API_URL'])
 
     @app.route('/download/<volumeID>/<attachmentID>')
     def download_attachment(volumeID, attachmentID):
@@ -175,6 +222,47 @@ def create_app(conf={}):
                 return request.values['lang']
         return request.accept_languages.best_match(app.available_translations)
 
+    if app.users_enabled:
+        @app.route('/login', methods=['GET'])
+        def login_form():
+            if app.autht.is_logged_in():
+                return renderErrorPage('you are already logged in', 400)
+            return render_template('login.html')
+
+        @app.route('/login', methods=['POST'])
+        def login():
+            name = request.form.get('username', None)
+            pwd = request.form.get('password', None)
+            if not name:
+                return render_template('login.html', message='Missing username'), 400
+            elif not pwd:
+                return render_template('login.html', message='Missing password'), 400
+            try:
+                usr = users.api.get_user(name=name)
+            except users.api.NotFoundException:
+                return render_template('login.html', message='"{}" is not registered'.format(name)), 400
+            if usr.verify_password(pwd):
+                app.autht.login(usr.id)
+                return redirect(url_for('index'), code=302)
+            return render_template('login.html', message='Wrong password')
+
+        @app.route('/logout')
+        def logout():
+            if not app.autht.is_logged_in():
+                return renderErrorPage('you are not logged in', 400)
+            app.autht.logout()
+            return redirect(url_for('index'), code=302)
+
+        def current_user():
+            app.autht.perform_authentication()
+            if users.api.is_anonymous(app.autht.currIdentity):
+                return None
+            return app.autht.currIdentity
+
+        @app.context_processor
+        def user_processor():
+            return dict(users_enabled = True, current_user = current_user)
+
     @app.template_filter('timepassedformat')
     def timepassedformat_filter(timestamp):
         '''given a timestamp it returns a string
@@ -190,9 +278,8 @@ def create_app(conf={}):
 
     @app.errorhandler(es_exceptions.ConnectionError)
     def handle_elasticsearch_down(error):
-        rsp = make_response('DB connection error', 503)
-        app.logger.error("Error connecting to DB; check your configuration")
-        return rsp
+        app.logger.exception("Error connecting to DB; check your configuration")
+        return renderErrorPage(message='DB connection error', httpCode=503)
 
     @app.errorhandler(404)
     def not_found(error):
@@ -202,6 +289,10 @@ def create_app(conf={}):
     @app.errorhandler(500)
     def internal_server_error(error):
         return renderErrorPage(message='Internal Server Error', httpCode=500)
+
+    @app.errorhandler(CapabilityMissingException)
+    def not_authenticated_handler(error):
+        return renderErrorPage(message='Authorization Required', httpCode=401)
 
     return app
 

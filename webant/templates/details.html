@@ -1,12 +1,13 @@
 {% extends "bootstrap/base.html" %}
 {% import "bootstrap/fixes.html" as fixes %}
 
+{% set title = volume['metadata']['title'] if 'title' in volume['metadata'] else volume['id'] %}
 {% block title %}
-Libreant | {{ volume['metadata']['title'] if 'title' in volume['metadata'] else volume['id'] }}
+Libreant | {{ title }}
 {% endblock %}
 
 {% block navbar %}
-{% import 'navbar.html' as navbar %}
+{% import 'navbar.html' as navbar with context%}
 {{navbar.navbar()}}
 {% endblock %}
 
@@ -14,16 +15,26 @@ Libreant | {{ volume['metadata']['title'] if 'title' in volume['metadata'] else 
 
 <div class="container">
     <header class="page-header" style="margin-top:0px">
-	    <h1>{{ volume['metadata']['title'] if 'title' in volume['metadata'] else volume['id'] }}
+	    <h1>{{ title }}
 		    <small>{{ volume['metadata']['actors'] | sort | join(',') }}</small>
 	    </h1>
     </header>
+    <div class="btn-toolbar" role="toolbar" aria-label="toolbar">
+        <div class="btn-group pull-right" role="group" aria-label="action toolbar">
+            {% if not hide_from_toolbar['delete'] %}
+            <button data-toggle="modal" data-target="#confirm-deletion-modal"
+                    type="button" class="btn btn-default red-on-hover" aria-label='delete'>
+                <span class="glyphicon glyphicon-trash"></span>
+            </button>
+            {% endif %}
+       </div>
+    </div>
      {% if (volume['attachments'] | length) > 0 %}
         {% for attachment in volume['attachments'] %}
              <a class="btn btn-default" href="{{ url_for('download_attachment', volumeID=volume['id'], attachmentID=attachment['id']) }}">
                 <div class="row" style="display: flex; align-items: center;">
                     <div class="col-xs-1">
-                        <span class="glyphicon glyphicon glyphicon-download-alt" aria-hidden="true"></span>
+                        <span class="glyphicon glyphicon-download-alt" aria-hidden="true"></span>
                     </div>
                     <div class="col-xs-11">
                         <strong>{{ attachment['metadata']['name'] }}</strong>
@@ -35,7 +46,7 @@ Libreant | {{ volume['metadata']['title'] if 'title' in volume['metadata'] else 
     <br>
     <br>
     {% endif %}
-    
+
     <article>
         <h4>{%trans%}Details{%endtrans%}</h4>
         <table class="table table-striped">
@@ -75,5 +86,29 @@ Libreant | {{ volume['metadata']['title'] if 'title' in volume['metadata'] else 
         </table>
         {% endif %}
     </article>
-<div class="container">
+</div>
+
+<!-- Confirm Deletion Modal -->
+<div class="modal fade" id="confirm-deletion-modal" tabindex="-1" role="dialog" aria-labelledby="confirm deletion modal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">{%trans%}Confirm deletion{%endtrans%}</h4>
+      </div>
+      <div class="modal-body">
+      <p>{%trans%}Are you sure you want to delete this volume?{%endtrans%}</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">No</button>
+        <button id="delete-button" data-target="{{volume['id']}}" type="button" class="btn btn-primary">{%trans%}Yes{%endtrans%}</button>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock content %}
+{% block scripts%}
+    {{super()}}
+    <script src="{{ url_for('static', filename='js/action-toolbar.js') }}"></script>
+    <script>var API_URL="{{ api_url }}"</script>
+{% endblock scripts%}

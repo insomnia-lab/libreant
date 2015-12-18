@@ -1,7 +1,11 @@
 API
-=============
+===
 
 .. toctree::
-   :maxdepth: 4
+   :maxdepth: 1
 
+   archivant
+   conf
    libreantdb
+   presets
+   users

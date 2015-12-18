@@ -11,7 +11,6 @@ class TestArchivantGetAttachment(TestArchivant):
         attachments = self.generate_attachments(1)
         id = self.arc.insert_volume(volume_metadata, attachments=attachments)
         added_volume = self.arc.get_volume(id)
-        print added_volume['attachments'][0]['id']
         self.arc.get_attachment(id, added_volume['attachments'][0]['id'])
 
     def test_get_file(self):

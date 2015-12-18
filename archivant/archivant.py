@@ -19,12 +19,13 @@ log = getLogger('archivant')
 class Archivant():
     ''' Implementation of a Data Access Layer
 
-        Archivant handling both an fsdb instance and
-        a libreantdb one exposes an API to operate on 'volumes'.
+        Archivant handles both an fsdb instance and
+        a libreantdb one and exposes an high-level API to operate on 'volumes'.
 
         A 'volume' represents a physical/digital object stored within archivant.
-        Volumes are structured as described in `Archivant.normalize_volume`,
-        these have metadata and a list of attachments.
+        Volumes are structured as described in :meth:`~Archivant.normalize_volume`;
+        shortly, they have language, metadata and attachments.
+        An attachment is an URL plus some metadata.
 
         If you won't configure the FSDB_PATH parameter, fsdb will not be initialized
         and archivant will start in metadata-only mode.
@@ -50,10 +51,16 @@ class Archivant():
         # initialize elasticsearch
         if not self._config['ES_INDEXNAME']:
             raise ValueError('ES_INDEXNAME cannot be empty')
-        db = DB(Elasticsearch(hosts=self._config['ES_HOSTS']),
-                index_name=self._config['ES_INDEXNAME'])
-        db.setup_db()
-        self._db = db
+        self.__db = None
+
+    @property
+    def _db(self):
+        if self.__db is None:
+            db = DB(Elasticsearch(hosts=self._config['ES_HOSTS']),
+                    index_name=self._config['ES_INDEXNAME'])
+            db.setup_db()
+            self.__db = db
+        return self.__db
 
     @property
     def _fsdb(self):
@@ -76,25 +83,27 @@ class Archivant():
 
            This function makes side effect on input volume
 
-           output example:
-           {
-            'id': 'AU0paPZOMZchuDv1iDv8',
-            'type': 'volume',
-            'metadata': {'_language': 'en',
-                         'key1': 'value1',
-                         'key2': 'value2',
-                         'key3': 'value3'},
-            'attachments': [{'id': 'a910e1kjdo2d192d1dko1p2kd1209d',
-                             'type' : 'attachment',
-                             'url': 'fsdb:///624bffa8a6f90813b7982d0e5b4c1475ebec40e3',
-                             'metadata': {'download_count': 0,
-                                          'mime': 'application/json',
-                                          'name': 'tmp9fyat_',
-                                          'notes': 'this file is awsome',
-                                          'sha1': '624bffa8a6f90813b7982d0e5b4c1475ebec40e3',
-                                          'size': 10}
-                           }]
-           }
+           output example::
+
+            {
+                'id': 'AU0paPZOMZchuDv1iDv8',
+                'type': 'volume',
+                'metadata': {'_language': 'en',
+                            'key1': 'value1',
+                            'key2': 'value2',
+                            'key3': 'value3'},
+                'attachments': [{'id': 'a910e1kjdo2d192d1dko1p2kd1209d',
+                                'type' : 'attachment',
+                                'url': 'fsdb:///624bffa8a6f90813b7982d0e5b4c1475ebec40e3',
+                                'metadata': {'download_count': 0,
+                                            'mime': 'application/json',
+                                            'name': 'tmp9fyat_',
+                                            'notes': 'this file is awsome',
+                                            'sha1': '624bffa8a6f90813b7982d0e5b4c1475ebec40e3',
+                                            'size': 10}
+                            }]
+            }
+
         '''
         res = dict()
         res['type'] = 'volume'
@@ -223,25 +232,30 @@ class Archivant():
     def insert_volume(self, metadata, attachments=[]):
         '''Insert a new volume
 
-           Returns the ID of the added volume
+        Returns the ID of the added volume
 
-           `metadata` must be a dict containg metadata of the volume.
-           The only required key is `_language`
-           {
-             "_language" : "it",  # language of the metadata
-             "key1" : "value1",   # attribute
-             "key2" : "value2",
+        `metadata` must be a dict containg metadata of the volume::
+
+            {
+              "_language" : "it",  # language of the metadata
+              "key1" : "value1",   # attribute
+              "key2" : "value2",
               ...
-             "keyN" : "valueN"
-           }
+              "keyN" : "valueN"
+            }
 
-           `attachments` must be an array of dict
-           {
-               "file"  : "/prova/una/path/a/caso" # path or fp
-               "name"  : "nome_buffo.ext"         # name of the file (extension included) [optional if a path was given]
-               "mime"  : "application/json"       # mime type of the file [optional]
-               "notes" : "this file is awesome"   # notes that will be attached to this file [optional]
-           }
+            The only required key is `_language`
+
+
+        `attachments` must be an array of dict::
+
+            {
+              "file"  : "/prova/una/path/a/caso" # path or fp
+              "name"  : "nome_buffo.ext"         # name of the file (extension included) [optional if a path was given]
+              "mime"  : "application/json"       # mime type of the file [optional]
+              "notes" : "this file is awesome"   # notes that will be attached to this file [optional]
+            }
+
         '''
 
         log.debug("adding new volume:\n\tdata: {}\n\tfiles: {}".format(metadata, attachments))
@@ -328,9 +342,9 @@ class Archivant():
     def update_attachment(self, volumeID, attachmentID, metadata):
         '''update an existing attachment
 
-           the given metadata dict will be merged with the old one.
-           only the following fields could be updated:
-             [name, mime, notes, download_count]
+        the given metadata dict will be merged with the old one.
+        only the following fields could be updated:
+        [name, mime, notes, download_count]
         '''
         log.debug('updating metadata of attachment {} from volume {}'.format(attachmentID, volumeID))
         modifiable_fields = ['name', 'mime', 'notes', 'download_count']

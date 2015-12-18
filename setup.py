@@ -87,7 +87,7 @@ def read(fname):
 
 conf = dict(
         name='libreant',
-        version='0.2.2',
+        version='0.3',
         description='{e,}book archive focused on small grass root archives, distributed search, low assumptions',
         long_description=read('README.rst'),
         author='insomnialab',
@@ -99,6 +99,7 @@ conf = dict(
                   'webant.api',
                   'presets',
                   'archivant',
+                  'users',
                   'utils',
                   'cli',
                   'conf'],
@@ -108,10 +109,13 @@ conf = dict(
           'flask-bootstrap',
           'Flask-Babel',
           'flask-script',
+          'Flask-Authbone >=0.2',
           'Flask',
           'opensearch',
           'Fsdb',
-          'click'
+          'click',
+          'peewee',
+          'passlib >=1.6, <1.7' # version 1.7 will drop python2 suport
         ],
         package_data = {
           # If any package contains *.mo include them
@@ -129,6 +133,7 @@ conf = dict(
         entry_points={'console_scripts': [
           'libreant=cli.libreant:libreant',
           'agherant=cli.agherant:agherant',
+          'libreant-users=cli.libreant_users:libreant_users',
           'libreant-db=cli.libreant_db:libreant_db'
         ]},
         classifiers=[

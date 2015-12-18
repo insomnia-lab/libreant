@@ -1,7 +1,7 @@
-libreantdb package
-==================
+presets package
+===============
 
-.. automodule:: libreantdb
+.. automodule:: presets
     :members:
     :undoc-members:
     :show-inheritance:
@@ -9,7 +9,7 @@ libreantdb package
 Submodules
 ----------
 
-.. automodule:: libreantdb.api
+.. automodule:: presets.presetManager
     :members:
     :undoc-members:
     :show-inheritance:

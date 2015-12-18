@@ -20,7 +20,7 @@ class TestArchivantGetVolume(TestArchivant):
         for _ in range(n):
             id = self.arc.insert_volume(self.generate_volume_metadata())
             ids.append(id)
-        self.arc._db.es.indices.refresh()
+        self.refresh_index()
         volumes = [vol for vol in self.arc.get_all_volumes()]
         for vol in volumes:
             ok_(vol['id'] in ids)

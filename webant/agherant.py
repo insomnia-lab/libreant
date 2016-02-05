@@ -1,5 +1,4 @@
 from logging import getLogger
-log = getLogger('agherant')
 from itertools import chain
 
 from flask import Blueprint, render_template, abort, request, Response, \
@@ -9,6 +8,7 @@ import opensearch
 
 from util import memoize, requestedFormat
 
+log = getLogger('agherant')
 agherant = Blueprint('agherant', __name__)
 Client = memoize(opensearch.Client)
 

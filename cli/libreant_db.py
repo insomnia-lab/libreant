@@ -112,15 +112,21 @@ def append_file(volumeid,filepath,name,notes):
 
 
 @libreant_db.command(name='insert-volume', help='creates an item in the db')
-@click.option('-l', '--language', type=click.STRING, required=True, help='specify the language of the media you are going to upload')
-@click.option('-f', '--filepath', type=click.Path(exists=True,resolve_path=True), multiple=True, help='path to the media to be uploaded')
-@click.option('-n', '--name', type=click.STRING, metavar='<file.ext>', multiple=True, help='filename (once uploaded)')
-@click.option('-t', '--notes', type=click.STRING, metavar='<a string about the file>', multiple=True, help='notes about the media')
-@click.option('-e', '--metadata', type=click.STRING, metavar='{"title":"Ulysses", "actors":["joyce", "beach"],...}', help='all the metadata')
+@click.option('-l', '--language', type=click.STRING, required=True,
+              help='specify the language of the media you are going to upload')
+@click.option('-f', '--filepath',
+              type=click.Path(exists=True,resolve_path=True),
+              multiple=True, help='path to the media to be uploaded')
+@click.option('-n', '--name', type=click.STRING, metavar='<file.ext>',
+              multiple=True, help='filename (once uploaded)')
+@click.option('-t', '--notes', type=click.STRING, multiple=True,
+              help='notes about the media '
+              '(ie: "complete version" or "poor quality"')
+@click.argument('metadata', type=click.File('r'))
 def insert_volume(language, filepath, name, notes, metadata):
     meta = {"_language":language}
     if metadata:
-        meta.update(json.loads(metadata))
+        meta.update(json.load(metadata))
     attachments = attach_list(filepath, name, notes)
     try:
         out = arc.insert_volume(meta,attachments)
@@ -138,12 +144,11 @@ def attach_list(filepaths, names, notes):
     assert type(filepaths) in (list, tuple)
     assert type(names) in (list, tuple)
     assert type(notes) in (list, tuple)
-    # this if clause means "if their length is not the same for everyone"
-    if len(set(
-        len(l) for l in (filepaths, names, notes)
-    )) != 1:
+
+    # this if clause means "if those lists are not of the same length"
+    if len(set( len(l) for l in (filepaths, names, notes))) != 1:
         click.secho('The number of --filepath, --names, and -note '
-                    'should be the same')
+                    'should be the same', err=True)
         exit(2)
 
     attach_list = []
@@ -152,11 +157,11 @@ def attach_list(filepaths, names, notes):
         mime = mimetypes.guess_type(fname)[0]
         if mime is None:
             click.secho('Error: could not guess a mimetype for %s: '
-                        'missing extension?' % fname)
+                        'missing extension?' % fname, err=True)
             exit(1)
         if '/' not in mime:
             click.secho('Error: could not guess mime subtype for %s: '
-                        'missing extension?' % fname)
+                        'missing extension?' % fname, err=True)
             exit(1)
         attach_list.append({
             'file': fname,

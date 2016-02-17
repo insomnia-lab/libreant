@@ -111,7 +111,7 @@ def append_file(volumeid,filepath,name,notes):
         exit(4)
 
 
-@libreant_db.command(name='insert-volume', help='creates an item in the db')
+@libreant_db.command(name='insert-volume')
 @click.option('-l', '--language', type=click.STRING, required=True,
               help='specify the language of the media you are going to upload')
 @click.option('-f', '--filepath',
@@ -124,6 +124,32 @@ def append_file(volumeid,filepath,name,notes):
               '(ie: "complete version" or "poor quality"')
 @click.argument('metadata', type=click.File('r'))
 def insert_volume(language, filepath, name, notes, metadata):
+    '''
+    Add a new volume to libreant.
+
+    The metadata of the volume are taken from a json file whose path must be
+    passed as argument. Passing "-" as argument will read the file from stdin.
+    language is an exception, because it must be set using --language
+
+    For every attachment you must add a --file, a --name AND a --notes.
+
+    \b
+    Examples:
+        Adds a volume with no metadata. Yes, it makes no sense but you can
+          libreant_db insert-volume -l en - <<<'{}'
+        Adds a volume with no files attached
+          libreant_db insert-volume -l en - <<EOF
+          {
+            "title": "How to create volumes",
+            "actors": ["libreant devs", "open access conspiration"]
+          }
+          EOF
+        Adds a volume with one attachment but no metadata
+          libreant_db insert-volume -l en -f /path/book.epub -n somename.epub --notes 'poor quality'
+        Adds a volume with two attachments but no metadata
+          libreant_db insert-volume -l en -f /path/book.epub -n somename.epub --notes 'poor quality' -f /path/someother.epub -n second.epub --notes 'preprint'
+
+    '''
     meta = {"_language":language}
     if metadata:
         meta.update(json.load(metadata))

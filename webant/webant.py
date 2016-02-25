@@ -181,6 +181,27 @@ def create_app(conf={}):
         file_upload = app.archivant.is_file_op_supported()
         return render_template('add.html', file_upload=file_upload, preset=preset, availablePresets=app.presetManager.presets, isoLangs=isoLangs)
 
+    @app.route('/edit-volume/<volumeID>', methods=['GET'])
+    @app.autht.requires_authentication
+    def edit_volume(volumeID):
+        app.authz.perform_authorization(('volumes/{}'.format(volumeID), users.Action.UPDATE))
+        try:
+            volume = app.archivant.get_volume(volumeID)
+        except NotFoundException:
+            return renderErrorPage(message='no volume found with id "{}"'.format(volumeID), httpCode=404)
+
+        try:
+            preset = app.presetManager.presets[volume['metadata']['_preset']]
+        except KeyError as e:
+            app.logger.exception(e)
+            preset = None
+
+        return render_template('edit-volume.html',
+                               volume=volume,
+                               file_ops_supported=app.archivant.is_file_op_supported(),
+                               isoLangs=isoLangs,
+                               preset=preset)
+
     @app.route('/description.xml')
     def description():
         return Response(render_template('opens_desc.xml'),
@@ -200,6 +221,7 @@ def create_app(conf={}):
             currentDomain = 'volumes/{}'.format(volumeID)
             hideFromToolbar = {}
             hideFromToolbar['delete'] = not app.autht.currIdentity.can(currentDomain, users.Action.DELETE)
+            hideFromToolbar['edit'] = not app.autht.currIdentity.can(currentDomain, users.Action.UPDATE)
         similar = app.archivant._db.mlt(volume['id'])['hits']['hits'][:10]
         return render_template('details.html',
                                volume=volume,

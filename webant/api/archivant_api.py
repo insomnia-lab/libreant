@@ -6,7 +6,7 @@ from webant.util import send_attachment_file, routes_collector
 from flask import request, current_app, url_for, jsonify
 from archivant import Archivant
 from archivant.exceptions import NotFoundException
-from util import ApiError, make_success_response
+from util import ApiError, on_json_load_error, make_success_response
 
 
 routes = []
@@ -55,7 +55,11 @@ def add_volume():
 
 @route('/volumes/<volumeID>', methods=['PUT'])
 def update_volume(volumeID):
-    metadata = receive_volume_metadata()
+    request.on_json_loading_failed = on_json_load_error
+    metadata = request.get_json()
+    # the next two lines should be removed when Flask version is >= 1.0
+    if not metadata:
+        raise ApiError("Unsupported media type", 415)
     try:
         current_app.archivant.update_volume(volumeID, metadata)
     except NotFoundException, e:

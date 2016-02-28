@@ -23,7 +23,7 @@ class compile_translations(Command):
 
     def run(self):
         """
-           Compile all message catalogs .mo files into .po files.
+           Compile all message catalogs .po files into .mo files.
            Skips not changed file based on source mtime.
         """
         # thanks to deluge guys ;)

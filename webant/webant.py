@@ -128,8 +128,8 @@ def create_app(conf={}):
 
         for requiredField in requiredFields:
             if requiredField not in request.form:
-                renderErrorPage(gettext("Required field '%(mField)s' is missing",
-                                mField=requiredField), 400)
+                return renderErrorPage(gettext("Required field '%(mField)s' is missing",
+                                       mField=requiredField), 400)
             else:
                 body[requiredField] = request.form[requiredField]
 
@@ -155,10 +155,15 @@ def create_app(conf={}):
 
             attachments.append(fileInfo)
 
-        addedVolumeID = app.archivant.insert_volume(body, attachments=attachments)
-        # remove temp files
-        for a in attachments:
-            os.remove(a['file'])
+        try:
+            addedVolumeID = app.archivant.insert_volume(body, attachments=attachments)
+        except Exception as e:
+            app.logger.exception(e)
+            return renderErrorPage(str(e), 500)
+        finally:
+            # remove temp files
+            for a in attachments:
+                os.remove(a['file'])
         return redirect(url_for('view_volume', volumeID=addedVolumeID))
 
     @app.route('/add', methods=['GET'])

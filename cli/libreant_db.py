@@ -4,7 +4,7 @@ import json
 import os
 import mimetypes
 
-from . import load_cfg
+from . import load_cfg, die, bye
 from archivant import Archivant
 from archivant.exceptions import NotFoundException
 from conf.defaults import get_def_conf, get_help
@@ -47,8 +47,7 @@ def libreant_db(debug, settings, fsdb_path, es_indexname, es_hosts):
         if conf.get('DEBUG', False):
             raise
         else:
-            click.secho(str(e), fg='yellow', err=True)
-            exit(1)
+            die(str(e))
 
 
 @libreant_db.command(name="export-volume", help="export a volume")
@@ -58,8 +57,7 @@ def export_volume(volumeid, pretty):
     try:
         volume = arc.get_volume(volumeid)
     except NotFoundException as e:
-        click.secho(str(e), fg="yellow", err=True)
-        exit(4)
+        bye(str(e), exit_code=4)
 
     indent = 3 if pretty else None
     ouput = json.dumps(volume, indent=indent)
@@ -72,8 +70,7 @@ def delete_volume(volumeid):
     try:
         arc.delete_volume(volumeid)
     except NotFoundException as e:
-        click.secho(str(e), fg="yellow", err=True)
-        exit(4)
+        bye(str(e), exit_code=4)
 
 
 @libreant_db.command(help="search volumes by query")
@@ -83,8 +80,7 @@ def search(query, pretty):
     results = arc._db.user_search(query)['hits']['hits']
     results = map(arc.normalize_volume, results)
     if not results:
-        click.secho("No results found for '{}'".format(query), fg="yellow", err=True)
-        exit(4)
+        bye("No results found for '{}'".format(query), exit_code=4)
     indent = 3 if pretty else None
     output = json.dumps(results, indent=indent)
     click.echo(output)
@@ -107,8 +103,7 @@ def append_file(volumeid, filepath, notes):
     try:
         arc.insert_attachments(volumeid,attachments)
     except:
-        click.secho('An upload error occurred in updating an attachment!',fg='yellow', err=True)
-        exit(4)
+        die('An upload error occurred in updating an attachment!', exit_code=4)
 
 
 @libreant_db.command(name='insert-volume')
@@ -155,8 +150,7 @@ def insert_volume(language, filepath, notes, metadata):
     try:
         out = arc.insert_volume(meta,attachments)
     except:
-        click.secho('An upload error have occurred!', fg="yellow", err=True)
-        exit(4)
+        die('An upload error have occurred!', exit_code=4)
     click.echo(out)
 
 
@@ -170,7 +164,7 @@ def attach_list(filepaths, notes):
 
     # this if clause means "if those lists are not of the same length"
     if len(filepaths) != len(notes):
-        raise click.ClickException('The number of --filepath, and --notes must be the same')
+        die('The number of --filepath, and --notes must be the same')
 
     attach_list = []
     for fname, note in zip(filepaths, notes):

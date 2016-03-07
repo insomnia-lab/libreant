@@ -2,7 +2,7 @@ import click
 import logging
 import json
 
-from . import load_cfg
+from . import load_cfg, die
 from conf.defaults import get_def_conf, get_help
 from utils.loggers import initLoggers
 from webant.webant import main
@@ -58,8 +58,8 @@ def libreant(settings, debug, port, address, fsdb_path, es_indexname, es_hosts, 
         if conf.get('DEBUG', False):
             raise
         else:
-            click.secho(str(e), fg='yellow', err=True)
-            exit(1)
+            die(str(e))
+
 
 if __name__ == '__main__':
     libreant()

@@ -7,16 +7,12 @@ log = getLogger('config_utils')
 
 
 def from_file(fname):
-    if not os.path.exists(fname):
-        log.warning('config file does not exist: "{}"'.format(fname))
-        return {}
     try:
         with open(fname) as buf:
             conf = json.load(buf)
             return conf
-    except Exception:
-        log.warning('Error loading config file', exc_info=1)
-        return {}
+    except EnvironmentError as ee:
+        raise Exception('Cannot read configuration file: {0} [{1}]'.format(fname, ee.strerror))
 
 
 def from_envvar_file(envvar, environ=None):

@@ -92,11 +92,11 @@ def test_file_variable_notset():
     eq_(conf, {})
 
 
+@raises(Exception)
 def test_file_notexist():
-    '''if config file does not exist, it is ignored'''
-    conf = from_envvar_file('MYRC',
-                            environ={'MYRC': '/tmp/notexist.webant.test'})
-    eq_(conf, {})
+    '''if config file does not exist an exception should be raised'''
+    from_envvar_file('MYRC',
+                     environ={'MYRC': '/tmp/notexist.webant.test'})
 
 
 def test_file_exist():

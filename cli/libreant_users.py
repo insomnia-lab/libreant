@@ -5,7 +5,7 @@ import json
 import users.api
 import users
 
-from conf import config_utils
+from . import load_cfg
 from conf.defaults import get_def_conf, get_help
 from utils.loggers import initLoggers
 
@@ -34,7 +34,7 @@ def libreant_users(debug, settings, users_db, pretty):
     initLoggers(logNames=['config_utils'])
     global conf
     conf = get_def_conf()
-    conf.update(config_utils.load_configs('LIBREANT_', path=settings))
+    conf.update(load_cfg(settings, debug=debug))
     cliConf = {}
     if debug:
         cliConf['DEBUG'] = True

@@ -2,7 +2,7 @@ import click
 import logging
 import json
 
-from conf import config_utils
+from . import load_cfg
 from conf.defaults import get_def_conf, get_help
 from utils.loggers import initLoggers
 from webant.webant import main
@@ -25,7 +25,7 @@ from custom_types import StringList
 def libreant(settings, debug, port, address, fsdb_path, es_indexname, es_hosts, users_db, preset_paths, agherant_descriptions, dump_settings):
     initLoggers(logNames=['config_utils'])
     conf = get_def_conf()
-    conf.update(config_utils.load_configs('LIBREANT_', path=settings))
+    conf.update(load_cfg(settings, debug=debug))
     cliConf = {}
     if debug:
         cliConf['DEBUG'] = True

@@ -4,9 +4,9 @@ import json
 import os
 import mimetypes
 
+from . import load_cfg
 from archivant import Archivant
 from archivant.exceptions import NotFoundException
-from conf import config_utils
 from conf.defaults import get_def_conf, get_help
 from utils.loggers import initLoggers
 from custom_types import StringList
@@ -27,7 +27,7 @@ def libreant_db(debug, settings, fsdb_path, es_indexname, es_hosts):
     initLoggers(logNames=['config_utils'])
     global conf
     conf = get_def_conf()
-    conf.update(config_utils.load_configs('LIBREANT_', path=settings))
+    conf.update(load_cfg(settings, debug=debug))
     cliConf = {}
     if debug:
         cliConf['DEBUG'] = True

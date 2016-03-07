@@ -17,7 +17,8 @@ from custom_types import StringList
 @click.option('--agherant-descriptions', type=StringList(), metavar="<url>..", help=get_help('AGHERANT_DESCRIPTIONS'))
 def agherant(settings, debug, port, address, agherant_descriptions):
     initLoggers(logNames=['config_utils'])
-    conf = config_utils.load_configs('LIBREANT_', defaults=get_def_conf(), path=settings)
+    conf = get_def_conf()
+    conf.update(config_utils.load_configs('LIBREANT_', path=settings))
     cliConf = {}
     if debug:
         cliConf['DEBUG'] = True

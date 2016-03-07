@@ -24,7 +24,8 @@ from custom_types import StringList
 @click.option('--dump-settings', is_flag=True, help='dump current settings and exit')
 def libreant(settings, debug, port, address, fsdb_path, es_indexname, es_hosts, users_db, preset_paths, agherant_descriptions, dump_settings):
     initLoggers(logNames=['config_utils'])
-    conf = config_utils.load_configs('LIBREANT_', defaults=get_def_conf(), path=settings)
+    conf = get_def_conf()
+    conf.update(config_utils.load_configs('LIBREANT_', path=settings))
     cliConf = {}
     if debug:
         cliConf['DEBUG'] = True

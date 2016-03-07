@@ -26,7 +26,8 @@ arc = None
 def libreant_db(debug, settings, fsdb_path, es_indexname, es_hosts):
     initLoggers(logNames=['config_utils'])
     global conf
-    conf = config_utils.load_configs('LIBREANT_', defaults=get_def_conf(), path=settings)
+    conf = get_def_conf()
+    conf.update(config_utils.load_configs('LIBREANT_', path=settings))
     cliConf = {}
     if debug:
         cliConf['DEBUG'] = True

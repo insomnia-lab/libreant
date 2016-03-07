@@ -33,7 +33,8 @@ def die(msg, exit_code=1):
 def libreant_users(debug, settings, users_db, pretty):
     initLoggers(logNames=['config_utils'])
     global conf
-    conf = config_utils.load_configs('LIBREANT_', defaults=get_def_conf(), path=settings)
+    conf = get_def_conf()
+    conf.update(config_utils.load_configs('LIBREANT_', path=settings))
     cliConf = {}
     if debug:
         cliConf['DEBUG'] = True

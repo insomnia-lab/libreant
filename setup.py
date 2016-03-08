@@ -104,7 +104,7 @@ conf = dict(
                   'cli',
                   'conf'],
         install_requires=[
-          'gevent',
+          'gevent >=1.0.1, <=1.1', # gevent version 1.0.0 do not support pyhton 2.7.8 https://github.com/gevent/gevent/issues/513
           'elasticsearch >=1, <2',
           'flask-bootstrap',
           'Flask-Babel',

@@ -181,14 +181,8 @@ def attach_list(filepaths, names, notes):
     for fname, name, note in zip(filepaths, names, notes):
         assert os.path.exists(fname)
         mime = mimetypes.guess_type(fname)[0]
-        if mime is None:
-            click.secho('Error: could not guess a mimetype for %s: '
-                        'missing extension?' % fname, err=True)
-            exit(1)
         if '/' not in mime:
-            click.secho('Error: could not guess mime subtype for %s: '
-                        'missing extension?' % fname, err=True)
-            exit(1)
+            mime = None
         attach_list.append({
             'file': fname,
             'name': name,

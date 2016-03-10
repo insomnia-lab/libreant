@@ -28,11 +28,11 @@ Libreant | {%trans%}Search{%endtrans%}: {{ query }}
 
 {% block content %}
 <div class="container">
-    
+
     <div class="search-bar">
         {{ searchbar.searchbar(search_query=query) }}
     </div>
-    
+
     <div class='search-info'>
         {% trans num = books|length%}{{num}} result was found for{%pluralize%}{{num}} results were found for{% endtrans %} <strong>{{ query }}</strong>
     </div>
@@ -50,20 +50,19 @@ Libreant | {%trans%}Search{%endtrans%}: {{ query }}
 
     <div id="item-list">
         {% for b in books %}
-        <div class="item-div row dyn-href" href="{{url_for('view_volume', volumeID=b['_id'])}}">
+        <a href="{{url_for('view_volume', volumeID=b['_id'])}}">
+        <div class="item-div row">
             <div class="item-thumbnail hidden-xs col-sm-1 vcenter">
-                <a href="{{url_for('view_volume', volumeID=b['_id'])}}">
-			        <span class="glyphicon glyphicon-book"></span>
-		        </a>
+                <span class="glyphicon glyphicon-book"></span>
             </div>
             <div class="item-main col-xs-12 col-sm-7 vcenter">
-                <a class="item-title" href="{{url_for('view_volume', volumeID=b['_id'])}}"
+                <p class="item-title"
                     {% if 'title' in b %}
                         title="{{ b['title'] }}"> {{ b['title'] }}
                     {% else %}
                         title="{{ b['_id'] }}"> {{ b['_id'] }}
                     {% endif %}
-                </a>
+                </p>
             </div>
             <div class="item-sub col-xs-12 col-sm-3 vcenter">
                 <ul class="meta-list list-unstyled">
@@ -77,14 +76,10 @@ Libreant | {%trans%}Search{%endtrans%}: {{ query }}
                 </ul>
             </div>
         </div>
+        </a>
         {% endfor %}
     </div>
 
     {% endif %}
 </div>
 {% endblock content %}
-
-{% block scripts %}
-    {{super()}}
-    <script src="{{ url_for('static', filename='js/ui-main.js') }}"></script>
-{% endblock scripts %}

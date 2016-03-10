@@ -97,7 +97,7 @@ def export_all(pretty):
     click.echo(json.dumps(volumes, indent=indent))
 
 
-@libreant_db.command(name='append', help='append a file to an existing volume')
+@libreant_db.command(name='attach', help='adds an attachment to an existing volume')
 @click.argument('volumeid')
 @click.option('-f', 'filepath', type=click.Path(exists=True,resolve_path=True), multiple=True, help='the path of the attachment')
 @click.option('-t', '--notes', type=click.STRING, metavar='<string>', multiple=True, help='notes about the attachment')
@@ -142,9 +142,9 @@ def insert_volume(language, filepath, notes, metadata):
           }
           EOF
         Adds a volume with one attachment but no metadata
-          libreant-db insert-volume -l en -f /path/book.epub --notes 'poor quality'
+          libreant-db insert-volume -l en -f /path/book.epub --notes 'poor quality' - <<<'{}'
         Adds a volume with two attachments but no metadata
-          libreant-db insert-volume -l en -f /path/book.epub --notes 'poor quality' -f /path/someother.epub --notes 'preprint'
+          libreant-db insert-volume -l en -f /path/book.epub --notes 'poor quality' -f /path/someother.epub --notes 'preprint' - <<<'{}'
 
     '''
     meta = {"_language":language}

@@ -100,10 +100,9 @@ def export_all(pretty):
 @libreant_db.command(name='append', help='append a file to an existing volume')
 @click.argument('volumeid')
 @click.option('-f', 'filepath', type=click.Path(exists=True,resolve_path=True), multiple=True, help='the path to the media to be uploaded')
-@click.option('-n', '--name', type=click.STRING, metavar='<file.ext>', multiple=True, help='name of the file, including the extension')
 @click.option('-t', '--notes', type=click.STRING, metavar='<string>', multiple=True, help='notes about the media')
-def append_file(volumeid,filepath,name,notes):
-    attachments = attach_list(filepath, name, notes)
+def append_file(volumeid, filepath, notes):
+    attachments = attach_list(filepath, notes)
     try:
         arc.insert_attachments(volumeid,attachments)
     except:
@@ -117,13 +116,11 @@ def append_file(volumeid,filepath,name,notes):
 @click.option('-f', '--filepath',
               type=click.Path(exists=True,resolve_path=True),
               multiple=True, help='path to the media to be uploaded')
-@click.option('-n', '--name', type=click.STRING, metavar='<file.ext>',
-              multiple=True, help='filename (once uploaded)')
 @click.option('-t', '--notes', type=click.STRING, multiple=True,
               help='notes about the media '
               '(ie: "complete version" or "poor quality"')
 @click.argument('metadata', type=click.File('r'))
-def insert_volume(language, filepath, name, notes, metadata):
+def insert_volume(language, filepath, notes, metadata):
     '''
     Add a new volume to libreant.
 
@@ -131,7 +128,7 @@ def insert_volume(language, filepath, name, notes, metadata):
     passed as argument. Passing "-" as argument will read the file from stdin.
     language is an exception, because it must be set using --language
 
-    For every attachment you must add a --file, a --name AND a --notes.
+    For every attachment you must add a --file AND a --notes.
 
     \b
     Examples:
@@ -145,15 +142,15 @@ def insert_volume(language, filepath, name, notes, metadata):
           }
           EOF
         Adds a volume with one attachment but no metadata
-          libreant_db insert-volume -l en -f /path/book.epub -n somename.epub --notes 'poor quality'
+          libreant_db insert-volume -l en -f /path/book.epub --notes 'poor quality'
         Adds a volume with two attachments but no metadata
-          libreant_db insert-volume -l en -f /path/book.epub -n somename.epub --notes 'poor quality' -f /path/someother.epub -n second.epub --notes 'preprint'
+          libreant_db insert-volume -l en -f /path/book.epub --notes 'poor quality' -f /path/someother.epub --notes 'preprint'
 
     '''
     meta = {"_language":language}
     if metadata:
         meta.update(json.load(metadata))
-    attachments = attach_list(filepath, name, notes)
+    attachments = attach_list(filepath, notes)
     try:
         out = arc.insert_volume(meta,attachments)
     except:
@@ -162,23 +159,23 @@ def insert_volume(language, filepath, name, notes, metadata):
     click.echo(out)
 
 
-def attach_list(filepaths, names, notes):
+def attach_list(filepaths, notes):
     '''
     all the arguments are lists
     returns a list of dictionaries; each dictionary "represent" an attachment
     '''
     assert type(filepaths) in (list, tuple)
-    assert type(names) in (list, tuple)
     assert type(notes) in (list, tuple)
 
     # this if clause means "if those lists are not of the same length"
-    if len(set( len(l) for l in (filepaths, names, notes))) != 1:
-        click.secho('The number of --filepath, --names, and -note '
-                    'should be the same', err=True)
+    if len(filepaths) != len(notes):
+        click.secho('The number of --filepath, and --note must be the same',
+                    err=True)
         exit(2)
 
     attach_list = []
-    for fname, name, note in zip(filepaths, names, notes):
+    for fname, note in zip(filepaths, notes):
+        name = os.path.basename(fname)
         assert os.path.exists(fname)
         mime = mimetypes.guess_type(fname)[0]
         if '/' not in mime:

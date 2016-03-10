@@ -1,29 +1,75 @@
 function initializePopover(){
-$('[data-toggle="popover"]').popover();
+    $('[data-toggle="popover"]').popover();
 }
 
 
 /*********  custom fields stuff **********/
 
-function validateCustomField(customField) {
-key = customField.find('.custom-key input').first();
-value = customField.find('.custom-value input').first();
-if(key.prop('value') !== "" || value.prop('value') !== ""){
-    key.prop('required', true);
-    value.prop('required', true);
-}else{
-    key.prop('required', false);
-    value.prop('required', false);
+
+function clearEmptyInput(e){
+    if(e.target.value.trim() === '')
+        e.target.value = '';
 }
+
+function validateCustomKeysRepetition() {
+
+	var counts = {};
+
+    function inc(key){
+        if(counts.hasOwnProperty(key))
+            counts[key]++;
+        else
+            counts[key] = 1;
+    }
+
+    // collect presets
+    elements = document.getElementById('mega-form').elements;
+	for(var i = 0; i < elements.length; i++)
+        inc(elements[i].name.trim());
+
+    customKeys = $('#custom-metadata .custom-field-form .custom-key input');
+
+    // collect custom keys
+    customKeys.each(function(index, elem) {
+        inc(elem.value.trim());
+    });
+
+    customKeys.each(function(index, elem) {
+        validityMessage = "";
+        value = elem.value.trim();
+        if(value){
+            if(value.startsWith('_'))
+                validityMessage = "Key cannot stats with underscore";
+            if(counts[value] > 1)
+                validityMessage = "Key used more than once";
+        }
+
+        if(validityMessage == ""){
+            elem.setCustomValidity("");
+            $(elem).parent().removeClass('has-error');
+        } else {
+            elem.setCustomValidity(validityMessage);
+            $(elem).parent().addClass('has-error');
+        }
+    });
+}
+
+function validateCustomField(customField) {
+    key = customField.find('.custom-key input').get(0);
+    value = customField.find('.custom-value input').get(0);
+    if(key.value.trim() != "" || value.value.trim() != ""){
+        key.setAttribute('required', 'true');
+        value.setAttribute('required', 'true');
+    }else{
+        key.removeAttribute('required');
+        value.removeAttribute('required');
+    }
 }
 
 
 function addCustomField(animation) {
 	newCustomField = $('#templates .custom-field-form').clone();
-	newCustomField.find('.remove-custom-field button').bind('click', onRemoveCustomField);
-	newCustomField.find('input').bind('input', function(e){
-		validateCustomField( $(e.target).parents('.custom-field-form'));
-	});
+	bindCustomField(newCustomField);
 
 	if(animation){
 		newCustomField.hide();
@@ -40,6 +86,21 @@ function onRemoveCustomField(e) {
 	customField.slideUp('fast', function (){
 		this.remove();
 	});
+}
+
+function bindCustomField(customField) {
+	customField.find('.remove-custom-field button').bind('click', onRemoveCustomField);
+    customField.find('.custom-key input').bind('input', validateCustomKeysRepetition);
+    customField.find('input').bind('input', function(e){
+		validateCustomField( $(e.target).parents('.custom-field-form'));
+	});
+    customField.find('input').focusout(clearEmptyInput);
+}
+
+function bindAllCustomFields() {
+    $('#custom-metadata .custom-field-form').each(function() {
+         bindCustomField($(this));
+    });
 }
 
 /*********  end custom fields stuff **********/
@@ -91,14 +152,15 @@ function collectMetadata(){
 	elements = document.getElementById('mega-form').elements;
 	for(var i = 0; i < elements.length; i++){
 		elem = elements[i];
-		if((elem.name === '') || (elem.tagName === 'button'))
+		kname = elem.name.trim()
+        if((kname === '') || (elem.tagName === 'button'))
 			continue;
-		metadata[elem.name] = elem.value;
+		metadata[kname] = elem.value.trim();
 	}
 	// collect custom keys
 	$('#custom-metadata .custom-field-form').each(function( index ) {
-		key = $(this).find('.custom-key input')[0].value;
-		value = $(this).find('.custom-value input')[0].value;
+		key = $(this).find('.custom-key input')[0].value.trim();
+		value = $(this).find('.custom-value input')[0].value.trim();
 		if(key !== "" && value !== "")
 			metadata[key] = value;
 	});
@@ -106,10 +168,11 @@ function collectMetadata(){
 }
 
 
+
 /********* Initialization *********/
 
 $('[data-toggle="tooltip"]').tooltip();
 initializePopover();
-$('#custom-metadata .custom-field-form button').bind('click', onRemoveCustomField);
+bindAllCustomFields();
 
 /******* End Initialization *******/

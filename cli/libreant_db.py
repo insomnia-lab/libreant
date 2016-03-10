@@ -178,7 +178,7 @@ def attach_list(filepaths, notes):
         name = os.path.basename(fname)
         assert os.path.exists(fname)
         mime = mimetypes.guess_type(fname)[0]
-        if '/' not in mime:
+        if mime is not None and '/' not in mime:
             mime = None
         attach_list.append({
             'file': fname,

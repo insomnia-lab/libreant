@@ -3,7 +3,8 @@ from tempfile import mkdtemp
 from unittest import TestCase
 from shutil import rmtree
 
-from nose.tools import eq_
+from nose.tools import eq_, raises
+import click
 
 from cli.libreant_db import attach_list
 
@@ -23,6 +24,14 @@ class TestAttachList(TestCase):
 
     def test_empty(self):
         eq_(len(attach_list([], [])), 0)
+
+    @raises(click.BadOptionUsage)
+    def test_length_no_notes(self):
+        attach_list([self.generate('foo')], [])
+
+    @raises(click.BadOptionUsage)
+    def test_length_too_many_notes(self):
+        attach_list([], ['mynote'])
 
     def test_no_mime(self):
         attachments = attach_list([self.generate('foo')], ['mynote'])

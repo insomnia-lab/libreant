@@ -99,8 +99,8 @@ def export_all(pretty):
 
 @libreant_db.command(name='append', help='append a file to an existing volume')
 @click.argument('volumeid')
-@click.option('-f', 'filepath', type=click.Path(exists=True,resolve_path=True), multiple=True, help='the path to the media to be uploaded')
-@click.option('-t', '--notes', type=click.STRING, metavar='<string>', multiple=True, help='notes about the media')
+@click.option('-f', 'filepath', type=click.Path(exists=True,resolve_path=True), multiple=True, help='the path of the attachment')
+@click.option('-t', '--notes', type=click.STRING, metavar='<string>', multiple=True, help='notes about the attachment')
 def append_file(volumeid, filepath, notes):
     attachments = attach_list(filepath, notes)
     try:
@@ -112,12 +112,12 @@ def append_file(volumeid, filepath, notes):
 
 @libreant_db.command(name='insert-volume')
 @click.option('-l', '--language', type=click.STRING, required=True,
-              help='specify the language of the media you are going to upload')
+              help='specify the language of the volume')
 @click.option('-f', '--filepath',
               type=click.Path(exists=True,resolve_path=True),
-              multiple=True, help='path to the media to be uploaded')
+              multiple=True, help='path to the attachment to be uploaded')
 @click.option('-t', '--notes', type=click.STRING, multiple=True,
-              help='notes about the media '
+              help='notes about the attachment '
               '(ie: "complete version" or "poor quality"')
 @click.argument('metadata', type=click.File('r'))
 def insert_volume(language, filepath, notes, metadata):
@@ -133,18 +133,18 @@ def insert_volume(language, filepath, notes, metadata):
     \b
     Examples:
         Adds a volume with no metadata. Yes, it makes no sense but you can
-          libreant_db insert-volume -l en - <<<'{}'
+          libreant-db insert-volume -l en - <<<'{}'
         Adds a volume with no files attached
-          libreant_db insert-volume -l en - <<EOF
+          libreant-db insert-volume -l en - <<EOF
           {
             "title": "How to create volumes",
             "actors": ["libreant devs", "open access conspiration"]
           }
           EOF
         Adds a volume with one attachment but no metadata
-          libreant_db insert-volume -l en -f /path/book.epub --notes 'poor quality'
+          libreant-db insert-volume -l en -f /path/book.epub --notes 'poor quality'
         Adds a volume with two attachments but no metadata
-          libreant_db insert-volume -l en -f /path/book.epub --notes 'poor quality' -f /path/someother.epub --notes 'preprint'
+          libreant-db insert-volume -l en -f /path/book.epub --notes 'poor quality' -f /path/someother.epub --notes 'preprint'
 
     '''
     meta = {"_language":language}

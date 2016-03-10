@@ -29,7 +29,8 @@ def delete_user(userID):
 @route('/users/', methods=['POST'])
 def add_user():
     request.on_json_loading_failed = on_json_load_error
-    userData = request.json
+    userData = request.get_json()
+    # the next two lines should be removed when Flask version is >= 1.0
     if not userData:
         raise ApiError("Unsupported media type", 415)
     name = userData.get('name', None)
@@ -52,10 +53,12 @@ def add_user():
 @route('/users/<int:userID>', methods=['PATCH'])
 def update_user(userID):
     request.on_json_loading_failed = on_json_load_error
-    if not request.json:
+    userData = request.get_json()
+    # the next two lines should be removed when Flask version is >= 1.0
+    if not userData:
         raise ApiError("Unsupported media type", 415)
     try:
-        users.api.update_user(userID, request.json)
+        users.api.update_user(userID, userData)
     except users.api.NotFoundException, e:
         raise ApiError("Not found", 404, details=str(e))
     return make_success_response("user has been successfully updated")
@@ -82,7 +85,8 @@ def delete_group(groupID):
 @route('/groups/', methods=['POST'])
 def add_group():
     request.on_json_loading_failed = on_json_load_error
-    groupData = request.json
+    groupData = request.get_json()
+    # the next two lines should be removed when Flask version is >= 1.0
     if not groupData:
         raise ApiError("Unsupported media type", 415)
     name = groupData.get('name', None)
@@ -102,10 +106,12 @@ def add_group():
 @route('/groups/<int:groupID>', methods=['PATCH'])
 def update_group(groupID):
     request.on_json_loading_failed = on_json_load_error
-    if not request.json:
+    groupData = request.get_json()
+    # the next two lines should be removed when Flask version is >= 1.0
+    if not groupData:
         raise ApiError("Unsupported media type", 415)
     try:
-        users.api.update_group(groupID, request.json)
+        users.api.update_group(groupID, groupData)
     except users.api.NotFoundException, e:
         raise ApiError("Not found", 404, details=str(e))
     return make_success_response("group has been successfully updated")
@@ -171,7 +177,8 @@ def delete_capability(capID):
 @route('/capabilities/', methods=['POST'])
 def add_capability():
     request.on_json_loading_failed = on_json_load_error
-    capData = request.json
+    capData = request.get_json()
+    # the next two lines should be removed when Flask version is >= 1.0
     if not capData:
         raise ApiError("Unsupported media type", 415)
     domain = capData.get('domain', None)
@@ -194,13 +201,14 @@ def add_capability():
 @route('/capabilities/<int:capID>', methods=['PATCH'])
 def update_capability(capID):
     request.on_json_loading_failed = on_json_load_error
-    if not request.json:
+    capData = request.get_json()
+    # the next two lines should be removed when Flask version is >= 1.0
+    if not capData:
         raise ApiError("Unsupported media type", 415)
-    updates = request.json
-    if 'actions' in updates:
-        updates['action'] = Action.from_list(updates.pop('actions'))
+    if 'actions' in capData:
+        capData['action'] = Action.from_list(capData.pop('actions'))
     try:
-        users.api.update_capability(capID, updates)
+        users.api.update_capability(capID, capData)
     except users.api.NotFoundException, e:
         raise ApiError("Not found", 404, details=str(e))
     return make_success_response("capability has been successfully updated")

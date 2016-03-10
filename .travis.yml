@@ -6,14 +6,23 @@ python:
 services:
   - elasticsearch
 
+env:
+  - VERSION_GEVENT="1.0.1"
+  - VERSION_GEVENT="1.0.2"
+  - VERSION_GEVENT="1.1.0"
+
+before_install:
+  - pip install --force gevent==$VERSION_GEVENT
+
+
 install:
-  - "pip install flake8 sphinx"
-  - "python setup.py install"
+  - pip install flake8 sphinx
+  - python setup.py install
 
 before_script:
   - sleep 10 # wait for elasticsearch
 
 script:
-  - 'flake8'
+  - flake8
   - python setup.py test
-  - "python setup.py build_sphinx"
+  - python setup.py build_sphinx

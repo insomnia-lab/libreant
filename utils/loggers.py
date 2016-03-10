@@ -1,10 +1,10 @@
 import logging
 
 
-LOG_NAMES = ['webant', 'fsdb', 'presets', 'agherant', 'config_utils', 'libreantdb', 'archivant', 'users']
+LOG_NAMES = ['webant', 'fsdb', 'presets', 'agherant', 'config_utils', 'libreantdb', 'archivant', 'users', 'werkzeug']
 
 
-def initLoggers(logLevel=logging.WARNING, logNames=LOG_NAMES):
+def initLoggers(logLevel=logging.INFO, logNames=LOG_NAMES):
     streamHandler = logging.StreamHandler()
     formatter = logging.Formatter(
         '%(asctime)s [%(name)s] [%(levelname)s] %(message)s')

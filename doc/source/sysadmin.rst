@@ -6,6 +6,9 @@ Installation
 
 System dependencies
 ^^^^^^^^^^^^^^^^^^^^
+.. note::
+        In this moment we do *not* support elasticsearch v2.
+        There are plans to do it shortly!
 
 Debian wheezy / Debian jessie / Ubuntu
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -35,7 +38,15 @@ Arch
 
 Install all necessary packages::
 
-    sudo pacman -Sy python2 python2-virtualenv elasticsearch
+    sudo pacman -Sy python2 python2-virtualenv 
+
+And take care to install elasticsearch<2.x::
+
+    wget https://archive.archlinux.org/packages/e/elasticsearch/elasticsearch-1.7.3-1-x86_64.pkg.tar.xz
+    wget https://archive.archlinux.org/packages/e/elasticsearch/elasticsearch-1.7.3-1-x86_64.pkg.tar.xz.sig
+    sudo pacman-key --verify elasticsearch-1.7.3-1-x86_64.pkg.tar.xz elasticsearch-1.7.3-1-x86_64.pkg.tar.xz.sig
+    sudo pacman -U elasticsearch-1.7.3.1-x86_64.pkg.tar.xz
+    echo "IgnorePkg elasticsearch" | sudo tee -a /etc/pacman.conf
 
 Python dependencies
 ^^^^^^^^^^^^^^^^^^^^

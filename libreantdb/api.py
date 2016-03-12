@@ -1,8 +1,14 @@
+import time
+
 from elasticsearch import NotFoundError
 from elasticsearch.helpers import scan
 
 import logging
 log = logging.getLogger(__name__)
+
+
+def current_time_millisec():
+    return int(round(time.time() * 10**3))
 
 
 def validate_book(body):
@@ -89,12 +95,10 @@ class DB(object):
         '''
         maps = {
             'book': {  # this need to be the document type!
-                # special elasticsearch field
-                # http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/mapping-timestamp-field.html
-                # initialized with element creation date, hidden by default in query result
-                "_timestamp": {"enabled": "true",
-                               "store": "yes"},
                 "properties": {
+                    "_insertion_date" : {
+                        "type": "long",
+                        "null_value": 0},
                     "_text_en": {
                         "type": "string",
                         "analyzer": "english"},
@@ -142,6 +146,7 @@ class DB(object):
             self.es.indices.create(index=self.index_name,
                                    body={'settings': settings,
                                          'mappings': maps})
+
         if wait_for_ready:
             log.debug('waiting for index "{}" to be ready'.format(self.index_name))
             self.es.cluster.health(index=self.index_name, level='index', wait_for_status='yellow')
@@ -186,9 +191,9 @@ class DB(object):
         return scan(self.es, index=self.index_name)
 
     def get_last_inserted(self, size=30):
-        query = {"fields": ["_timestamp", "_source"],
-                 "query": {"match_all": {}},
-                 "sort": [{"_timestamp": "desc"}]}
+        query = {"query": {"match_all": {}},
+                 "sort": [{"_insertion_date": {"order":"desc",
+                                                "missing": "_last"}}]}
         return self._search(body=query, size=size)
 
     def get_books_simplequery(self, query):
@@ -240,6 +245,7 @@ class DB(object):
         if 'doc_type' not in book:
             book['doc_type'] = 'book'
         book['body'] = validate_book(book['body'])
+        book['body']['_insertion_date'] = current_time_millisec()
         return self.es.create(index=self.index_name, **book)
 
     def delete_book(self, id):

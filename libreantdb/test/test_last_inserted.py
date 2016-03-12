@@ -20,9 +20,9 @@ def test_last():
 
 
 @with_setup(cleanall, cleanall)
-def test_has_timestamp():
-    ''' last_inserted results must have ['fields']['_timestamp']'''
+def test_has_insertion_date():
+    ''' last_inserted results must have '_insertion_date']'''
     db.add_book(doc_type='book',
                 body=dict(title='ma che ne so', _language='it'))['_id']
     db.es.indices.refresh(index=db.index_name)
-    assert('_timestamp' in db.get_last_inserted()['hits']['hits'][0]['fields'])
+    assert('_insertion_date' in db.get_last_inserted()['hits']['hits'][0]['_source'])

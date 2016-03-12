@@ -28,11 +28,11 @@ class TestAttachList(TestCase):
     def test_empty(self):
         eq_(len(attach_list([], [])), 0)
 
-    @raises(click.BadOptionUsage)
+    @raises(click.ClickException)
     def test_length_no_notes(self):
         attach_list([self.generate('foo')], [])
 
-    @raises(click.BadOptionUsage)
+    @raises(click.ClickException)
     def test_length_too_many_notes(self):
         attach_list([], ['mynote'])
 

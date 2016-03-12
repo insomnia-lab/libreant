@@ -169,8 +169,7 @@ def attach_list(filepaths, notes):
 
     # this if clause means "if those lists are not of the same length"
     if len(filepaths) != len(notes):
-        raise click.BadOptionUsage('--notes',
-                                   'The number of --filepath, and --notes must be the same',)
+        raise click.ClickException('The number of --filepath, and --notes must be the same')
 
     attach_list = []
     for fname, note in zip(filepaths, notes):

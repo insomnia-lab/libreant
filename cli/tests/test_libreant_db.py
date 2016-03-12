@@ -89,7 +89,7 @@ class TestInsert(TestDedicatedEs):
 
     def test_no_metadata(self):
         res = self.cli.invoke(libreant_db, ('insert-volume', '-l', 'en'))
-        assert res.exit_code != 0
+        assert res.exit_code == 0
 
     def test_no_language(self):
         '''--language is required'''

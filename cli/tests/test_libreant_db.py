@@ -96,7 +96,7 @@ class TestInsert(TestDedicatedEs):
         eq_(export_res.exit_code, 0)
         volume_data = json.loads(export_res.output)
         eq_(volume_data['metadata']['_language'], 'en')
-        eq_(len(volume_data['metadata'].keys()), 1)
+        eq_(len(volume_data['metadata'].keys()), 2) # _language and _insertion_date properties
 
     def test_no_language(self):
         '''--language is required'''

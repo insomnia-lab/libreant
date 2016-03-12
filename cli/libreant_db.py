@@ -119,7 +119,7 @@ def append_file(volumeid, filepath, notes):
 @click.option('-t', '--notes', type=click.STRING, multiple=True,
               help='notes about the attachment '
               '(ie: "complete version" or "poor quality"')
-@click.argument('metadata', type=click.File('r'))
+@click.argument('metadata', type=click.File('r'), required=False)
 def insert_volume(language, filepath, notes, metadata):
     '''
     Add a new volume to libreant.
@@ -142,9 +142,9 @@ def insert_volume(language, filepath, notes, metadata):
           }
           EOF
         Adds a volume with one attachment but no metadata
-          libreant-db insert-volume -l en -f /path/book.epub --notes 'poor quality' - <<<'{}'
+          libreant-db insert-volume -l en -f /path/book.epub --notes 'poor quality'
         Adds a volume with two attachments but no metadata
-          libreant-db insert-volume -l en -f /path/book.epub --notes 'poor quality' -f /path/someother.epub --notes 'preprint' - <<<'{}'
+          libreant-db insert-volume -l en -f /path/book.epub --notes 'poor quality' -f /path/someother.epub --notes 'preprint'
 
     '''
     meta = {"_language":language}
@@ -169,8 +169,7 @@ def attach_list(filepaths, notes):
 
     # this if clause means "if those lists are not of the same length"
     if len(filepaths) != len(notes):
-        raise click.BadOptionUsage('--notes',
-                                   'The number of --filepath, and --notes must be the same',)
+        raise click.ClickException('The number of --filepath, and --notes must be the same')
 
     attach_list = []
     for fname, note in zip(filepaths, notes):

@@ -28,11 +28,11 @@ class TestAttachList(TestCase):
     def test_empty(self):
         eq_(len(attach_list([], [])), 0)
 
-    @raises(click.BadOptionUsage)
+    @raises(click.ClickException)
     def test_length_no_notes(self):
         attach_list([self.generate('foo')], [])
 
-    @raises(click.BadOptionUsage)
+    @raises(click.ClickException)
     def test_length_too_many_notes(self):
         attach_list([], ['mynote'])
 
@@ -89,7 +89,7 @@ class TestInsert(TestDedicatedEs):
 
     def test_no_metadata(self):
         res = self.cli.invoke(libreant_db, ('insert-volume', '-l', 'en'))
-        assert res.exit_code != 0
+        assert res.exit_code == 0
 
     def test_no_language(self):
         '''--language is required'''

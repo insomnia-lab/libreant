@@ -21,9 +21,14 @@ Libreant | {{ title }}
     </header>
     <div class="btn-toolbar" role="toolbar" aria-label="toolbar">
         <div class="btn-group pull-right" role="group" aria-label="action toolbar">
+            {% if not hide_from_toolbar['edit'] %}
+            <a href="{{ url_for('edit_volume', volumeID=volume['id']) }}" type="button" class="btn btn-default" aria-label='edit volume metadata' title='edit volume metadata'>
+                <span class="glyphicon glyphicon glyphicon-pencil"></span>
+            </a>
+            {% endif %}
             {% if not hide_from_toolbar['delete'] %}
             <button data-toggle="modal" data-target="#confirm-deletion-modal"
-                    type="button" class="btn btn-default red-on-hover" aria-label='delete'>
+                    type="button" class="btn btn-default" aria-label='delete volume' title='delete volume'>
                 <span class="glyphicon glyphicon-trash"></span>
             </button>
             {% endif %}

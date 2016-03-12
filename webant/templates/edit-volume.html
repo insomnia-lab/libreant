@@ -1,0 +1,182 @@
+{% extends "bootstrap/base.html" %}
+{% import "bootstrap/fixes.html" as fixes %}
+
+{% block title %}
+Libreant | {%trans%}Edit {%endtrans%} {{ volume['title'] }}
+{% endblock %}
+
+{% block styles %}
+{{super()}}
+<noscript><style>
+.only-script{ display: none;}
+</style></noscript>
+<link href="{{ url_for('static', filename='edit.css') }}" rel="stylesheet">
+{% endblock %}
+
+{% block navbar %}
+{% import 'navbar.html' as navbar with context %}
+{{navbar.navbar()}}
+{% endblock %}
+
+{% block content %}
+<noscript>
+    <div class="container">
+        <div class="alert alert-danger" role="alert">
+            <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+            <span class="sr-only">Error:</span>
+            <strong>{%trans%}Error{%endtrans%}:</strong> {%trans%}Could not load the page because your browser does not support javascript{%endtrans%}
+        </div>
+    </div>
+</noscript>
+
+<div class="container only-script">
+    <header><center><h1>{%trans%}Edit {%endtrans%} {{ volume['title']}}</h1></center></header>
+    <br>
+    <form id="mega-form" class="form-horizontal"
+          action="{{ url_for('api.update_volume', volumeID=volume['id'])}}" onsubmit="submitFormHandler(); return false;">
+        <div class="form-group">
+            <div class="col-sm-12">
+                <div class="input-group">
+                    <label class="input-group-addon" for="title">{%trans%}Language{%endtrans%}</label>
+                    <select id="language" name="_language" placeholder="Language" class="form-control" type="text" required autocomplete="off">
+                        {% for lang in isoLangs %}
+                        <option value="{{ lang['code'] }}" {% if lang['code'] == volume['metadata']['_language'] %} selected {%endif%}>
+                                {{ lang['name']}}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <span class="glyphicon glyphicon-info-sign input-group-addon"
+                    tabindex="-1" data-trigger="focus" data-placement="auto right" data-toggle="popover"
+                    title="{%trans%}Description{%endtrans%}"
+                    aria-label="{%trans%}Field description{%endtrans%}"
+                    data-content="{%trans%}This is the language that you are using to fill this form.{%endtrans%}"></span>
+                </div>
+            </div>
+        </div>
+
+        <div id="preset-metadata">
+            {% if preset %}
+            <input name="_preset" type="text" value="{{preset.id}}" hidden>
+            {% for prop in preset.properties %}
+            {% set value = volume['metadata'].pop(prop.id) if prop.id in volume['metadata'] else None %}
+            <div class="form-group">
+                <div class="col-sm-12">
+                    <div class="input-group">
+                        <label class="input-group-addon" for="title">{{ prop.id }}</label>
+                        {% if prop.type == "enum" %}
+                        <select name="{{ prop.id }}" placeholder="{{ prop.id }}" class="form-control" type="text" {% if prop.required %} required {% endif %}>
+                            <option value="" disabled {% if not value %}selected{%endif%}>{%trans%}Select a value{%endtrans%}</option>
+                            {% for v in prop.values %}
+                                    <option value="{{ v }}" {{ 'selected' if v == value }}>{{ v }}</option>
+                            {% endfor %}
+                        </select>
+                        {% else %}
+                        <input name="{{ prop.id }}" class="form-control" type="text"
+                               {% if value %} value="{{value}}" {%endif%} placeholder="{{ prop.id }}"
+                               {% if prop.required %} required {%endif%}>
+                        {% endif %}
+                        {% if prop.description %}
+                        <span class="glyphicon glyphicon-info-sign input-group-addon"
+                        tabindex="-1" data-trigger="focus" data-placement="auto right" data-toggle="popover"
+                        title="{%trans%}Description{%endtrans%}"
+                        aria-label="{%trans%}Field description{%endtrans%}"
+                        data-content="{{ prop.description }}"/>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            {% endif %}
+        </div>
+
+        <br>
+
+        <div id="custom-metadata">
+        {% for p_key, p_value in volume['metadata'].iteritems() %}
+            {% if p_key[0] != '_' %}
+            <div class="form-group custom-field-form">
+              <div class='col-sm-12'>
+                <div class="custom-key">
+                    <input class="form-control" placeholder="{%trans%}custom key{%endtrans%}" value="{{ p_key }}" type="text">
+                </div>
+                <div class='custom-value'>
+                    <input class="form-control" placeholder="{%trans%}custom value{%endtrans%}" value="{{ p_value}}" type="text">
+                </div>
+                <div class='remove-custom-field'>
+                   <button type="button" class="close" aria-label="remove custom field">
+                    <span aria-hidden="true" class="glyphicon glyphicon-remove-circle"></span>
+                   </button>
+                </div>
+             </div>
+            </div>
+            {% endif %}
+        {% endfor %}
+        </div>
+
+        <div id='templates' hidden>
+            <div class="form-group custom-field-form">
+              <div class='col-sm-12'>
+                <div class="custom-key">
+                    <input class="form-control" placeholder="{%trans%}custom key{%endtrans%}" type="text">
+                </div>
+                <div class='custom-value'>
+                    <input class="form-control" placeholder="{%trans%}custom value{%endtrans%}" type="text">
+                </div>
+                <div class='remove-custom-field'>
+                   <button type="button" class="close" aria-label="remove custom field">
+                    <span aria-hidden="true" class="glyphicon glyphicon-remove-circle"></span>
+                   </button>
+                </div>
+             </div>
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-top:-10px">
+            <div class="col-xs-12" align="right">
+                <span id="custom-fields-plus-button" onClick="addCustomField(true)" style="margin-right: 10px" data-toggle="tooltip" data-trigger="hover" data-placement="auto left" title="add another custom field" class="glyphicon glyphicon glyphicon-plus"></span>
+            </div>
+        </div>
+
+        <br>
+
+        <div class="form-group" align="center">
+            <button id="submit-button" class="btn btn-primary" type="submit" >{%trans%}Update{%endtrans%}</button>
+            <button id="updating-button" class="btn btn-primary" style='display: none' disabled="disabled"><span class='glyphicon glyphicon-refresh spin'></span></button>
+        </div>
+
+    </form>
+
+
+    <div id='success-modal' class="modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-body text-center">
+            <p style='font-size:17px'><span class='glyphicon glyphicon-ok' style='color: green'></span> {%trans%}The volume has been successfully updated{%endtrans%}</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">{%trans%}Continue editing{%endtrans%}</button>
+            <a href="{{ url_for('view_volume', volumeID=volume['id'])}}" type="button" class="btn btn-primary">{%trans%}View volume{%endtrans%}</a>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+    <div id='error-modal' class="modal" tabindex="-1" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-body text-center">
+            <p style='font-size:17px'><span style='color: red' class='glyphicon glyphicon-exclamation-sign'></span> {%trans%}Error: could not update the volume{%endtrans%}</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">{%trans%}OK{%endtrans%}</button>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+</div>
+{% endblock %}
+{% block scripts %}
+{{ super() }}
+<script type="text/javascript" src="{{url_for('static', filename='js/edit-volume.js')}}"></script>
+{%endblock%}
+

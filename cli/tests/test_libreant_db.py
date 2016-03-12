@@ -90,6 +90,13 @@ class TestInsert(TestDedicatedEs):
     def test_no_metadata(self):
         res = self.cli.invoke(libreant_db, ('insert-volume', '-l', 'en'))
         assert res.exit_code == 0
+        vid = [line for line in res.output.split('\n')
+               if line.strip()][-1].strip()
+        export_res = self.cli.invoke(libreant_db, ('export-volume', vid))
+        eq_(export_res.exit_code, 0)
+        volume_data = json.loads(export_res.output)
+        eq_(volume_data['metadata']['_language'], 'en')
+        eq_(len(volume_data['metadata'].keys()), 1)
 
     def test_no_language(self):
         '''--language is required'''

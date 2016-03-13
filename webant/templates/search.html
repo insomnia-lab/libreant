@@ -82,34 +82,16 @@ Libreant | {%trans%}Search{%endtrans%}: {{ query }}
 
 
     {% if pagination %}
-    <div class='text-center'>
-        {% set search_url = ("%s?q=%s&size=%d&page=" | format(url_for('search'), query, size)) %}
-        <nav>
-          <ul class="pagination">
-            {% if pagination['prev'] %}
-            <li>
-              <a href="{{ search_url}}{{pagination['prev']}}" aria-label="Previous page">
-                <span aria-hidden="true">&laquo;</span>
-              </a>
-            </li>
-            {% endif %}
-            {% for i in range(pagination['first'], pagination['last']+1) %}
-                {% if i == pagination['current'] %}
-                    <li class="active"><a>{{i}}</a></li>
-                {% else %}
-                    <li><a href="{{ search_url }}{{i}}">{{i}}</a></li>
-                {% endif %} 
-            {% endfor %}
-            {% if pagination['next'] %}
-            <li>
-              <a href="{{ search_url }}{{pagination['next']}}" aria-label="Next page">
-                <span aria-hidden="true">&raquo;</span>
-              </a>
-            </li>
-            {% endif %}
-          </ul>
-        </nav>
-    </div>
+        {% set search_url = ("%s?q=%s&size=%d&page=" | format(url_for('search'), query, size))+"%d" %}
+        {% import 'pagination.html' as pag %}
+        <div class='text-center'>
+            {{ pag.pagination(pagination['prev'],
+                              pagination['first'],
+                              pagination['current'],
+                              pagination['last'],
+                              pagination['next'],
+                              target_url = search_url) }}
+        </div>
     {% endif %}
 
     {% endif %}

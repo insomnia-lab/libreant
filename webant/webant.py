@@ -68,7 +68,9 @@ class LibreantViewApp(LibreantCoreApp):
         defaults = {
             'BOOTSTRAP_SERVE_LOCAL': True,
             'AGHERANT_DESCRIPTIONS': [],
-            'API_URL': "/api/v1"
+            'API_URL': '/api/v1',
+            'RESULTS_PER_PAGE': 30,
+            'MAX_RESULTS_PER_PAGE': 100
         }
         defaults.update(conf)
         super(LibreantViewApp, self).__init__(import_name, defaults)
@@ -98,7 +100,31 @@ def create_app(conf={}):
         query = request.args.get('q', None)
         if query is None:
             return renderErrorPage(message='No query given', httpCode=400)
-        res = app.archivant._db.user_search(query)['hits']['hits']
+
+        try:
+            page = int(request.args.get('page', 1))
+        except ValueError:
+            return renderErrorPage(message='Invalid page number', httpCode=400)
+        if(page < 1):
+            return renderErrorPage(message='Invalid page number', httpCode=400)
+
+        try:
+            size = int(request.args.get('size', app.config['RESULTS_PER_PAGE']))
+        except ValueError:
+            return renderErrorPage(message='Invalid size number', httpCode=400)
+        if(size < 1 or size > app.config['MAX_RESULTS_PER_PAGE']):
+            return renderErrorPage(message='Invalid size number', httpCode=400)
+
+        from_ = (page-1)*size
+        res = app.archivant._db.get_books_querystring(query, from_=from_, size=size)
+        totalRes = res['hits']['total']
+        totalPages = (totalRes == 0) + totalRes/size + (totalRes % size > 0)
+        if(page > totalPages):
+            return renderErrorPage(message='Page number too high, maximum is {}'.format(totalPages), httpCode=400)
+        pagination=util.get_centered_pagination(current=page, total=totalPages)
+        if pagination['first']  == pagination['last']:
+            pagination = None
+        res = res['hits']['hits']
         books = []
         for b in res:
             src = b['_source']
@@ -109,7 +135,12 @@ def create_app(conf={}):
                                  ['text/html',
                                   'text/xml', 'application/rss+xml', 'opensearch'])
         if (not format) or (format is 'text/html'):
-            return render_template('search.html', books=books, query=query)
+            return render_template('search.html',
+                                   books=books,
+                                   query=query,
+                                   total=totalRes,
+                                   pagination=pagination,
+                                   size=size)
         elif format in ['opensearch', 'text/xml', 'application/rss+xml']:
             return Response(render_template('opens.xml',
                                             books=books, query=query),

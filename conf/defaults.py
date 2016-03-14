@@ -10,7 +10,8 @@ defConf = {
   'PRESET_PATHS': ([], "list of paths where to look for presets definition"),
   'AGHERANT_DESCRIPTIONS': (None, "list of description urls of nodes to aggregate"),
   'BOOTSTRAP_SERVE_LOCAL': (True, "decide to serve bootstrap related files as local content"),
-  'MAX_RESULTS_PER_PAGE': (50, "number of max results for one request"),
+  'RESULTS_PER_PAGE': (30, "number of results displayed per page"),
+  'MAX_RESULTS_PER_PAGE': (100, "maximum number of results that can be delivered to one request"),
   'USERS_DATABASE': (None, "url of the database used for users managment"),
   'PWD_SALT_SIZE': (16, "size of the salt used by password hashing algorithm"),
   'PWD_ROUNDS': (pbkdf2_sha256.default_rounds, "number of rounds runs by password hashing algorithm")

@@ -100,6 +100,9 @@ def populate_with_defaults():
     if not User.select().where(User.name == 'anonymous').exists():
         anon = User.create(name='anonymous', password='')
         anons = Group.create(name='anonymous')
+        readCap = Capability.create(domain=Capability.simToReg('/volumes/*'),
+                                    action=Action.READ)
+        anons.capabilities.add(readCap)
         anon.groups.add(anons)
         anon.save()
 

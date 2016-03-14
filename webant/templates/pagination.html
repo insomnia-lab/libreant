@@ -3,7 +3,7 @@
       <ul class="pagination">
         {% if prev %}
         <li>
-          <a href="{{ target_url | format(prev) }}" aria-label="Previous page">
+          <a rel="prev" href="{{ target_url | format(prev) }}" aria-label="Previous page">
             <span aria-hidden="true">&laquo;</span>
           </a>
         </li>
@@ -17,7 +17,7 @@
         {% endfor %}
         {% if next %}
         <li>
-          <a href="{{ target_url | format(next) }}" aria-label="Next page">
+          <a rel="next" href="{{ target_url | format(next) }}" aria-label="Next page">
             <span aria-hidden="true">&raquo;</span>
           </a>
         </li>

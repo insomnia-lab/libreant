@@ -45,20 +45,19 @@ header h1{
 
     <div id="item-list">
         {% for b in items %}
-        <div class="item-div row dyn-href" href="{{url_for('view_volume', volumeID=b['_id'])}}">
+        <a href="{{url_for('view_volume', volumeID=b['_id'])}}">
+        <div class="item-div row">
             <div class="item-thumbnail hidden-xs col-sm-1 vcenter">
-                <a href="{{url_for('view_volume', volumeID=b['_id'])}}">
-			        <span class="glyphicon glyphicon-book"></span>
-		        </a>
+                <span class="glyphicon glyphicon-book"></span>
             </div>
             <div class="item-main col-xs-12 col-sm-7 vcenter">
-                <a class="item-title" href="{{url_for('view_volume', volumeID=b['_id'])}}"
+                <p class="item-title"
                     {% if 'title' in b['_source'] %}
                         title="{{ b['_source']['title'] }}"> {{ b['_source']['title'] }}
                     {% else %}
                         title="{{ b['_id'] }}"> {{ b['_id'] }}
                     {% endif %}
-                </a>
+                </p>
             </div>
             <div class="item-sub col-xs-12 col-sm-3 vcenter">
                 <ul class="meta-list list-unstyled">
@@ -77,6 +76,7 @@ header h1{
                 </ul>
             </div>
         </div>
+        </a>
         {% endfor %}
     </div>
 
@@ -92,5 +92,4 @@ header h1{
         $(this).text(date.toLocaleString());
     });
     </script>
-    <script src="{{ url_for('static', filename='js/ui-main.js') }}"></script>
 {% endblock scripts %}

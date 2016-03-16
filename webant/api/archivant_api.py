@@ -24,7 +24,7 @@ def get_volumes():
         size = int(request.args.get('size', 10))
     except ValueError:
         raise ApiError("Bad Request", 400, details="could not covert 'size' parameter to number")
-    if size > current_app.config.get('MAX_RESULTS_PER_PAGE', 50):
+    if size > current_app.config['MAX_RESULTS_PER_PAGE']:
         raise ApiError("Request Entity Too Large", 413, details="'size' parameter is too high")
 
     q_res = current_app.archivant._db.get_books_querystring(query=q, from_=from_, size=size)

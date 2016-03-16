@@ -87,7 +87,7 @@ def read(fname):
 
 conf = dict(
         name='libreant',
-        version='0.3',
+        version='0.4',
         description='{e,}book archive focused on small grass root archives, distributed search, low assumptions',
         long_description=read('README.rst'),
         author='insomnialab',

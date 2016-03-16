@@ -68,7 +68,9 @@ class LibreantViewApp(LibreantCoreApp):
         defaults = {
             'BOOTSTRAP_SERVE_LOCAL': True,
             'AGHERANT_DESCRIPTIONS': [],
-            'API_URL': "/api/v1"
+            'API_URL': '/api/v1',
+            'RESULTS_PER_PAGE': 30,
+            'MAX_RESULTS_PER_PAGE': 100
         }
         defaults.update(conf)
         super(LibreantViewApp, self).__init__(import_name, defaults)
@@ -98,7 +100,31 @@ def create_app(conf={}):
         query = request.args.get('q', None)
         if query is None:
             return renderErrorPage(message='No query given', httpCode=400)
-        res = app.archivant._db.user_search(query)['hits']['hits']
+
+        try:
+            page = int(request.args.get('page', 1))
+        except ValueError:
+            return renderErrorPage(message='Invalid page number', httpCode=400)
+        if(page < 1):
+            return renderErrorPage(message='Invalid page number', httpCode=400)
+
+        try:
+            size = int(request.args.get('size', app.config['RESULTS_PER_PAGE']))
+        except ValueError:
+            return renderErrorPage(message='Invalid size number', httpCode=400)
+        if(size < 1 or size > app.config['MAX_RESULTS_PER_PAGE']):
+            return renderErrorPage(message='Invalid size number', httpCode=400)
+
+        from_ = (page-1)*size
+        res = app.archivant._db.get_books_querystring(query, from_=from_, size=size)
+        totalRes = res['hits']['total']
+        totalPages = (totalRes == 0) + totalRes/size + (totalRes % size > 0)
+        if(page > totalPages):
+            return renderErrorPage(message='Page number too high, maximum is {}'.format(totalPages), httpCode=400)
+        pagination=util.get_centered_pagination(current=page, total=totalPages)
+        if pagination['first']  == pagination['last']:
+            pagination = None
+        res = res['hits']['hits']
         books = []
         for b in res:
             src = b['_source']
@@ -109,7 +135,12 @@ def create_app(conf={}):
                                  ['text/html',
                                   'text/xml', 'application/rss+xml', 'opensearch'])
         if (not format) or (format is 'text/html'):
-            return render_template('search.html', books=books, query=query)
+            return render_template('search.html',
+                                   books=books,
+                                   query=query,
+                                   total=totalRes,
+                                   pagination=pagination,
+                                   size=size)
         elif format in ['opensearch', 'text/xml', 'application/rss+xml']:
             return Response(render_template('opens.xml',
                                             books=books, query=query),
@@ -128,8 +159,8 @@ def create_app(conf={}):
 
         for requiredField in requiredFields:
             if requiredField not in request.form:
-                renderErrorPage(gettext("Required field '%(mField)s' is missing",
-                                mField=requiredField), 400)
+                return renderErrorPage(gettext("Required field '%(mField)s' is missing",
+                                       mField=requiredField), 400)
             else:
                 body[requiredField] = request.form[requiredField]
 
@@ -155,10 +186,15 @@ def create_app(conf={}):
 
             attachments.append(fileInfo)
 
-        addedVolumeID = app.archivant.insert_volume(body, attachments=attachments)
-        # remove temp files
-        for a in attachments:
-            os.remove(a['file'])
+        try:
+            addedVolumeID = app.archivant.insert_volume(body, attachments=attachments)
+        except Exception as e:
+            app.logger.exception(e)
+            return renderErrorPage(str(e), 500)
+        finally:
+            # remove temp files
+            for a in attachments:
+                os.remove(a['file'])
         return redirect(url_for('view_volume', volumeID=addedVolumeID))
 
     @app.route('/add', methods=['GET'])
@@ -175,6 +211,32 @@ def create_app(conf={}):
             preset = None
         file_upload = app.archivant.is_file_op_supported()
         return render_template('add.html', file_upload=file_upload, preset=preset, availablePresets=app.presetManager.presets, isoLangs=isoLangs)
+
+    @app.route('/edit-volume/<volumeID>', methods=['GET'])
+    @app.autht.requires_authentication
+    def edit_volume(volumeID):
+        app.authz.perform_authorization(('volumes/{}'.format(volumeID), users.Action.UPDATE))
+        try:
+            volume = app.archivant.get_volume(volumeID)
+        except NotFoundException:
+            return renderErrorPage(message='no volume found with id "{}"'.format(volumeID), httpCode=404)
+
+        # if volume has a preset, load it from presetManager
+        preset = None
+        if '_preset' in volume['metadata']:
+            volumePreset = volume['metadata']['_preset']
+            try:
+                preset = app.presetManager.presets[volumePreset]
+            except KeyError:
+                app.logger.exception("Has been asked to modify a volume "
+                                     "with a preset that does not exists "
+                                     " any more: '{}'".format(volumePreset))
+
+        return render_template('edit-volume.html',
+                               volume=volume,
+                               file_ops_supported=app.archivant.is_file_op_supported(),
+                               isoLangs=isoLangs,
+                               preset=preset)
 
     @app.route('/description.xml')
     def description():
@@ -195,6 +257,7 @@ def create_app(conf={}):
             currentDomain = 'volumes/{}'.format(volumeID)
             hideFromToolbar = {}
             hideFromToolbar['delete'] = not app.autht.currIdentity.can(currentDomain, users.Action.DELETE)
+            hideFromToolbar['edit'] = not app.autht.currIdentity.can(currentDomain, users.Action.UPDATE)
         similar = app.archivant._db.mlt(volume['id'])['hits']['hits'][:10]
         return render_template('details.html',
                                volume=volume,

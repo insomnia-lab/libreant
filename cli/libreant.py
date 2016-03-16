@@ -50,7 +50,7 @@ def libreant(settings, debug, port, address, fsdb_path, es_indexname, es_hosts, 
         click.echo(json.dumps(conf, indent=3))
         exit(0)
 
-    initLoggers(logging.DEBUG if conf.get('DEBUG', False) else logging.WARNING)
+    initLoggers(logging.DEBUG if conf.get('DEBUG', False) else logging.INFO)
     try:
         main(conf)
     except Exception as e:

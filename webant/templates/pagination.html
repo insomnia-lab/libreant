@@ -1,0 +1,27 @@
+{% macro pagination(prev, first, current, last, next, target_url) %}
+    <nav>
+      <ul class="pagination">
+        {% if prev %}
+        <li>
+          <a rel="prev" href="{{ target_url | format(prev) }}" aria-label="Previous page">
+            <span aria-hidden="true">&laquo;</span>
+          </a>
+        </li>
+        {% endif %}
+        {% for i in range(first, last+1) %}
+            {% if i == current %}
+                <li class="active"><a>{{i}}</a></li>
+            {% else %}
+                <li><a href="{{ target_url | format(i) }}">{{i}}</a></li>
+            {% endif %}
+        {% endfor %}
+        {% if next %}
+        <li>
+          <a rel="next" href="{{ target_url | format(next) }}" aria-label="Next page">
+            <span aria-hidden="true">&raquo;</span>
+          </a>
+        </li>
+        {% endif %}
+      </ul>
+    </nav>
+{% endmacro %}

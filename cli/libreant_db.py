@@ -1,6 +1,8 @@
 import click
 import logging
 import json
+import os
+import mimetypes
 
 from archivant import Archivant
 from archivant.exceptions import NotFoundException
@@ -16,7 +18,7 @@ arc = None
 
 @click.group(name="libreant-db", help="command line program to manage libreant database")
 @click.version_option()
-@click.option('-s', '--settings', type=click.Path(exists=True, readable=True), help='file from wich load settings')
+@click.option('-s', '--settings', type=click.Path(exists=True, readable=True), help='file from which load settings')
 @click.option('-d', '--debug', is_flag=True, help=get_help('DEBUG'))
 @click.option('--fsdb-path', type=click.Path(), metavar="<path>", help=get_help('FSDB_PATH'))
 @click.option('--es-indexname', type=click.STRING, metavar="<name>", help=get_help('ES_INDEXNAME'))
@@ -35,12 +37,12 @@ def libreant_db(debug, settings, fsdb_path, es_indexname, es_hosts):
     if es_hosts:
         cliConf['ES_HOSTS'] = es_hosts
     conf.update(cliConf)
-    initLoggers(logging.DEBUG if conf.get('DEBUG', False) else logging.WARNING)
+    initLoggers(logging.DEBUG if conf.get('DEBUG', False) else logging.INFO)
 
     try:
         global arc
         arc = Archivant(conf=conf)
-    except Exception, e:
+    except Exception as e:
         if conf.get('DEBUG', False):
             raise
         else:
@@ -93,6 +95,96 @@ def export_all(pretty):
     indent = 3 if pretty else None
     volumes = [vol for vol in arc.get_all_volumes()]
     click.echo(json.dumps(volumes, indent=indent))
+
+
+@libreant_db.command(name='attach', help='adds an attachment to an existing volume')
+@click.argument('volumeid')
+@click.option('-f', 'filepath', type=click.Path(exists=True,resolve_path=True), multiple=True, help='the path of the attachment')
+@click.option('-t', '--notes', type=click.STRING, metavar='<string>', multiple=True, help='notes about the attachment')
+def append_file(volumeid, filepath, notes):
+    attachments = attach_list(filepath, notes)
+    try:
+        arc.insert_attachments(volumeid,attachments)
+    except:
+        click.secho('An upload error occurred in updating an attachment!',fg='yellow', err=True)
+        exit(4)
+
+
+@libreant_db.command(name='insert-volume')
+@click.option('-l', '--language', type=click.STRING, required=True,
+              help='specify the language of the volume')
+@click.option('-f', '--filepath',
+              type=click.Path(exists=True,resolve_path=True),
+              multiple=True, help='path to the attachment to be uploaded')
+@click.option('-t', '--notes', type=click.STRING, multiple=True,
+              help='notes about the attachment '
+              '(ie: "complete version" or "poor quality"')
+@click.argument('metadata', type=click.File('r'), required=False)
+def insert_volume(language, filepath, notes, metadata):
+    '''
+    Add a new volume to libreant.
+
+    The metadata of the volume are taken from a json file whose path must be
+    passed as argument. Passing "-" as argument will read the file from stdin.
+    language is an exception, because it must be set using --language
+
+    For every attachment you must add a --file AND a --notes.
+
+    \b
+    Examples:
+        Adds a volume with no metadata. Yes, it makes no sense but you can
+          libreant-db insert-volume -l en - <<<'{}'
+        Adds a volume with no files attached
+          libreant-db insert-volume -l en - <<EOF
+          {
+            "title": "How to create volumes",
+            "actors": ["libreant devs", "open access conspiration"]
+          }
+          EOF
+        Adds a volume with one attachment but no metadata
+          libreant-db insert-volume -l en -f /path/book.epub --notes 'poor quality'
+        Adds a volume with two attachments but no metadata
+          libreant-db insert-volume -l en -f /path/book.epub --notes 'poor quality' -f /path/someother.epub --notes 'preprint'
+
+    '''
+    meta = {"_language":language}
+    if metadata:
+        meta.update(json.load(metadata))
+    attachments = attach_list(filepath, notes)
+    try:
+        out = arc.insert_volume(meta,attachments)
+    except:
+        click.secho('An upload error have occurred!', fg="yellow", err=True)
+        exit(4)
+    click.echo(out)
+
+
+def attach_list(filepaths, notes):
+    '''
+    all the arguments are lists
+    returns a list of dictionaries; each dictionary "represent" an attachment
+    '''
+    assert type(filepaths) in (list, tuple)
+    assert type(notes) in (list, tuple)
+
+    # this if clause means "if those lists are not of the same length"
+    if len(filepaths) != len(notes):
+        raise click.ClickException('The number of --filepath, and --notes must be the same')
+
+    attach_list = []
+    for fname, note in zip(filepaths, notes):
+        name = os.path.basename(fname)
+        assert os.path.exists(fname)
+        mime = mimetypes.guess_type(fname)[0]
+        if mime is not None and '/' not in mime:
+            mime = None
+        attach_list.append({
+            'file': fname,
+            'name': name,
+            'mime': mime,
+            'note': note
+        })
+    return attach_list
 
 
 if __name__ == '__main__':

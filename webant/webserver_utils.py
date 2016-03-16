@@ -13,14 +13,21 @@ def gevent_run(app):
         run_app = DebuggedApplication(app)
 
     def run_server():
+        from gevent import version_info
+
+        logger = app._logger
         port = int(app.config.get('PORT', 5000))
         address = app.config.get('ADDRESS', '')
-        print('Listening on http://%s:%d/' % (address or '0.0.0.0', port))
-        http_server = WSGIServer((address, port), run_app)
+        logger.info('Listening on http://{}:{}/'.format(address or '0.0.0.0', port))
+        server_params = dict()
+        #starting from gevent version 1.1b1 we can pass custom logger to gevent
+        if version_info[:2] >= (1,1):
+            server_params['log'] = logger
+        http_server = WSGIServer((address, port), run_app, **server_params)
         http_server.serve_forever()
 
     if app.config['DEBUG']:
-        from werkzeug.serving import run_with_reloader
+        from werkzeug._reloader import run_with_reloader
         run_with_reloader(run_server)
     else:
         run_server()

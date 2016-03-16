@@ -26,8 +26,13 @@
 .meta-list .glyphicon{
     margin-right: 4px;
 }
-#item-list .item-div:first-of-type{
+#item-list > a:nth-child(1) > .item-div:nth-child(1) {
     border-top: 1px solid #EEE;
+}
+
+#item-list > a, #item-list > a:hover {
+    color: #232323;
+    text-decoration: none;
 }
 
 #item-list .item-div{

@@ -23,7 +23,7 @@ class compile_translations(Command):
 
     def run(self):
         """
-           Compile all message catalogs .mo files into .po files.
+           Compile all message catalogs .po files into .mo files.
            Skips not changed file based on source mtime.
         """
         # thanks to deluge guys ;)
@@ -87,7 +87,7 @@ def read(fname):
 
 conf = dict(
         name='libreant',
-        version='0.3',
+        version='0.4',
         description='{e,}book archive focused on small grass root archives, distributed search, low assumptions',
         long_description=read('README.rst'),
         author='insomnialab',
@@ -104,7 +104,7 @@ conf = dict(
                   'cli',
                   'conf'],
         install_requires=[
-          'gevent',
+          'gevent >=1.0.1, <=1.1', # gevent version 1.0.0 do not support pyhton 2.7.8 https://github.com/gevent/gevent/issues/513
           'elasticsearch >=1, <2',
           'flask-bootstrap',
           'Flask-Babel',

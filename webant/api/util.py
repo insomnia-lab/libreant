@@ -1,4 +1,4 @@
-from flask import jsonify
+from flask import jsonify, request
 
 
 class ApiError(Exception):
@@ -14,6 +14,8 @@ class ApiError(Exception):
 
 
 def on_json_load_error(e):
+    if request.mimetype != 'application/json':
+        raise ApiError("Wrong media type", 415, details="Expected 'application/json' encoded data" )
     raise ApiError("Bad request", 400, details=str(e))
 
 

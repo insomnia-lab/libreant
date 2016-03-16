@@ -2,6 +2,34 @@
 Libreant changelog
 ===================
 
+0.4
++++
+
+Web Interface:
+--------------
+- The page to modify metadata of volumes has been added. If you have
+  enough permission you should see a button with a pencil on the single-volume-view page.
+- Added support for paginated results in search page.
+
+CLI:
+----
+- added new command ``libreant-db insert-volume`` to insert a volume along with its attachments.
+- added new command ``libreant-db attach`` to attach new files to an already existing volume.
+
+Logs:
+-----
+- changed default log level to INFO.
+- all startup messages are now printed using loggers.
+- using recent versions of gevent (>= 1.1b1) it is now possible to
+  have a completely uniform log format.
+
+Warning:
+--------
+- Due to breaking changes introduced in new version of Elasticsearch (deprecation of ``_timestamp`` field),
+  it is not possible to use libreant with version of Elasticsearch major or equal to ``2.0``.
+  Probably in the next release we'll provide support for these versions.
+
+
 0.3
 +++
 

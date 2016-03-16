@@ -1,19 +1,30 @@
 language: python
 
-python:
-  - "2.7"
-
 services:
   - elasticsearch
 
-install:
-  - "pip install flake8 sphinx"
-  - "python setup.py install"
+matrix:
+    include:
+        - python: "2.7"
+          env: TEST_SUITE=test VERSION_GEVENT=1.0.1
+        - python: "2.7"
+          env: TEST_SUITE=test VERSION_GEVENT=1.0.2
+        - python: "2.7"
+          env: TEST_SUITE=test VERSION_GEVENT=1.1.0
+        - python: "2.7"
+          env: TEST_SUITE=build_sphinx
+        - python: "2.7"
+          env: TEST_SUITE=flake
 
-before_script:
-  - sleep 10 # wait for elasticsearch
+before_install:
+    - '[[ -n $VERSION_GEVENT ]] && pip install --force gevent==$VERSION_GEVENT || true'
+
+install:
+    - 'if [[ $TEST_SUITE == flake ]]; then pip install flake8; return $? ; fi'
+    - 'if [[ $TEST_SUITE != flake ]]; then python setup.py install; return $? ; fi'
+    - 'if [[ $TEST_SUITE == build_sphinx ]]; then pip install sphinx; return $? ; fi'
 
 script:
-  - 'flake8'
-  - python setup.py test
-  - "python setup.py build_sphinx"
+    - 'if [[ $TEST_SUITE == flake ]]; then flake8; return $?; fi'
+    - 'if [[ $TEST_SUITE == test ]]; then sleep 10 && python setup.py test ; return $?; fi'
+    - 'if [[ $TEST_SUITE == build_sphinx ]]; then python setup.py build_sphinx; return $?; fi'

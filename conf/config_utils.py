@@ -11,6 +11,9 @@ def from_file(fname):
         with open(fname) as buf:
             conf = json.load(buf)
             return conf
+    except ValueError as ve:
+        log.error('Bad json format on conf file: "{0}"; {1}'.format(fname, str(ve)))
+        raise ve
     except EnvironmentError as ee:
         raise Exception('Cannot read configuration file: {0} [{1}]'.format(fname, ee.strerror))
 

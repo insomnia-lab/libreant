@@ -99,6 +99,21 @@ def test_file_notexist():
                      environ={'MYRC': '/tmp/notexist.webant.test'})
 
 
+@raises(ValueError)
+def test_file_wrong_format():
+    '''if config file has bad json fomat an exception should be raised'''
+    tempFd, tempPath = mkstemp(suffix='.json', prefix='webant_test',
+                               text=True)
+    try:
+        with os.fdopen(tempFd, 'w') as f:
+            f.write('not in json format $%^&*(, ')
+
+        from_envvar_file('MYRC',
+                         environ={'MYRC': tempPath})
+    finally:
+        os.unlink(tempPath)
+
+
 def test_file_exist():
     '''if config file exists, it is parsed as json'''
     tempfd, temppath = mkstemp(suffix='.json', prefix='webant_test',

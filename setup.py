@@ -112,7 +112,7 @@ conf = dict(
           'Flask-Authbone >=0.2',
           'Flask',
           'opensearch',
-          'Fsdb == 0.3.3',
+          'Fsdb >= 0.3.3, <= 1.2.1',
           'click',
           'peewee',
           'passlib >=1.6, <1.7' # version 1.7 will drop python2 suport

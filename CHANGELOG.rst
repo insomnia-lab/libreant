@@ -2,6 +2,19 @@
 Libreant changelog
 ===================
 
+Next release
+++++++++++++
+- Changed default capability for anonynous (non logged) user: now she can read all volumes
+  in the collection.
+
+  Tip: if you have an existing and alredy initialized user database, it won't be changed, i.e.
+  if you upgrade from a previous version of libreant and you have existing users, the anonymous
+  user won't get the read capability.
+  In the case you want to add this capability to the already existing anonymous user you can use the
+  following command::
+
+    libreant-users --users-db <users-db-url> group cap-add anonymous "volumes/*" R
+
 0.4
 +++
 

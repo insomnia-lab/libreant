@@ -54,7 +54,7 @@ class TestApiCapabilities(WebantTestApiCase):
         eq_(r.status_code, 200)
 
     def test_delete_capability_not_exists(self):
-        r = self.wtc.delete(self.CAP_URI + str(2))
+        r = self.wtc.delete(self.CAP_URI + str(1032))
         eq_(r.status_code, 404)
 
     def test_update_capability(self):

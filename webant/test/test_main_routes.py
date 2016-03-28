@@ -18,3 +18,12 @@ class WebantMainRoutes(WebantTestCase):
 
     def test_recents(self):
         eq_(self.wtc.get('/recents').status_code, 200)
+
+    def test_do_add(self):
+        rv = self.wtc.post('/add',
+                      data=dict(
+                          _language='en',
+                          field_title='I am a canary',
+                      ), follow_redirects=True)
+        eq_(rv.status_code, 200)
+        assert 'I am a canary' in rv.data

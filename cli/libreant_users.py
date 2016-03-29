@@ -5,7 +5,7 @@ import json
 import users.api
 import users
 
-from conf import config_utils
+from . import load_cfg, die, bye
 from conf.defaults import get_def_conf, get_help
 from utils.loggers import initLoggers
 
@@ -19,11 +19,6 @@ def pretty_json_dumps(*args, **kargs):
     return json.dumps(*args, **kargs)
 
 
-def die(msg, exit_code=1):
-        click.secho('ERROR: ' + msg, err=True, fg='red')
-        exit(exit_code)
-
-
 @click.group(name="libreant-users", help="manage libreant users")
 @click.version_option()
 @click.option('-s', '--settings', type=click.Path(exists=True, readable=True), help='file from wich load settings')
@@ -33,7 +28,8 @@ def die(msg, exit_code=1):
 def libreant_users(debug, settings, users_db, pretty):
     initLoggers(logNames=['config_utils'])
     global conf
-    conf = config_utils.load_configs('LIBREANT_', defaults=get_def_conf(), path=settings)
+    conf = get_def_conf()
+    conf.update(load_cfg(settings, debug=debug))
     cliConf = {}
     if debug:
         cliConf['DEBUG'] = True
@@ -41,7 +37,7 @@ def libreant_users(debug, settings, users_db, pretty):
         cliConf['USERS_DATABASE'] = users_db
     conf.update(cliConf)
     if conf['USERS_DATABASE'] is None:
-        die('--users-db not set')
+        die('Error: --users-db not set')
     if pretty:
         global json_dumps
         json_dumps = pretty_json_dumps
@@ -57,7 +53,7 @@ def libreant_users(debug, settings, users_db, pretty):
         if conf['DEBUG']:
             raise
         else:
-            die(str(e))
+            die('Error: ' + str(e))
 
 
 class ExistingUserType(click.ParamType):
@@ -134,9 +130,9 @@ def user_check_password(user):
     password = click.prompt('Password', hide_input=True,
                             confirmation_prompt=False)
     if user.verify_password(password):
-        click.secho('Password correct', fg='green')
+        bye('Password correct', fg='green', exit_code=0)
     else:
-        click.secho('Incorrect password', fg='red', err=True)
+        bye('Incorrect password', fg='red', exit_code=1)
 
 
 @user_subcmd.command(name='delete', help='Delete a user')

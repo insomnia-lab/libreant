@@ -7,16 +7,15 @@ log = getLogger('config_utils')
 
 
 def from_file(fname):
-    if not os.path.exists(fname):
-        log.warning('config file does not exist: "{}"'.format(fname))
-        return {}
     try:
         with open(fname) as buf:
             conf = json.load(buf)
             return conf
-    except Exception:
-        log.warning('Error loading config file', exc_info=1)
-        return {}
+    except ValueError as ve:
+        log.error('Bad json format on conf file: "{0}"; {1}'.format(fname, str(ve)))
+        raise ve
+    except EnvironmentError as ee:
+        raise Exception('Cannot read configuration file: {0} [{1}]'.format(fname, ee.strerror))
 
 
 def from_envvar_file(envvar, environ=None):
@@ -74,11 +73,10 @@ def from_envvars(prefix=None, environ=None, envvars=None, as_json=True):
     return conf
 
 
-def load_configs(envvar_prefix, defaults=None, path=None):
+def load_configs(envvar_prefix, path=None):
     '''Load configuration
 
     The following steps will be undertake:
-        * if `defaults` is provided, defaults are loded.
         * It will attempt to load configs from file:
           if `path` is provided, it will be used, otherwise the path
           will be taken from envvar `envvar_prefix` + "SETTINGS".
@@ -86,8 +84,6 @@ def load_configs(envvar_prefix, defaults=None, path=None):
 
     '''
     conf = {}
-    if defaults:
-        conf.update(defaults)
     if path:
         conf.update(from_file(path))
     else:

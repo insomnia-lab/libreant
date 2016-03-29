@@ -1,7 +1,7 @@
 import click
 import logging
 
-from conf import config_utils
+from . import load_cfg
 from conf.defaults import get_def_conf, get_help
 from utils.loggers import initLoggers
 from webant.agherant_standalone import main
@@ -17,7 +17,8 @@ from custom_types import StringList
 @click.option('--agherant-descriptions', type=StringList(), metavar="<url>..", help=get_help('AGHERANT_DESCRIPTIONS'))
 def agherant(settings, debug, port, address, agherant_descriptions):
     initLoggers(logNames=['config_utils'])
-    conf = config_utils.load_configs('LIBREANT_', defaults=get_def_conf(), path=settings)
+    conf = get_def_conf()
+    conf.update(load_cfg(settings, debug=debug))
     cliConf = {}
     if debug:
         cliConf['DEBUG'] = True
@@ -36,6 +37,7 @@ def agherant(settings, debug, port, address, agherant_descriptions):
             raise
         else:
             click.secho(str(e), fg='yellow', err=True)
+            exit(1)
 
 if __name__ == '__main__':
     agherant()

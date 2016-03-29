@@ -2,7 +2,7 @@ import click
 import logging
 import json
 
-from conf import config_utils
+from . import load_cfg, die
 from conf.defaults import get_def_conf, get_help
 from utils.loggers import initLoggers
 from webant.webant import main
@@ -24,7 +24,8 @@ from custom_types import StringList
 @click.option('--dump-settings', is_flag=True, help='dump current settings and exit')
 def libreant(settings, debug, port, address, fsdb_path, es_indexname, es_hosts, users_db, preset_paths, agherant_descriptions, dump_settings):
     initLoggers(logNames=['config_utils'])
-    conf = config_utils.load_configs('LIBREANT_', defaults=get_def_conf(), path=settings)
+    conf = get_def_conf()
+    conf.update(load_cfg(settings, debug=debug))
     cliConf = {}
     if debug:
         cliConf['DEBUG'] = True
@@ -57,8 +58,8 @@ def libreant(settings, debug, port, address, fsdb_path, es_indexname, es_hosts, 
         if conf.get('DEBUG', False):
             raise
         else:
-            click.secho(str(e), fg='yellow', err=True)
-            exit(1)
+            die(str(e))
+
 
 if __name__ == '__main__':
     libreant()

@@ -1,6 +1,7 @@
 import time
 
 from elasticsearch import NotFoundError, RequestError
+from elasticsearch.helpers import scan, bulk
 from elasticsearch.helpers import scan
 
 import logging
@@ -268,6 +269,20 @@ class DB(object):
         self.es.delete(index=self.index_name,
                        id=id,
                        doc_type='book')
+
+    def delete_all(self):
+        '''Delete all books from the index'''
+        def delete_action_gen():
+            scanner = scan(self.es,
+                           index=self.index_name,
+                           query={'query':{'match_all':{}},'fields': []})
+            for v in scanner:
+                yield { '_op_type': 'delete',
+                        '_index': self.index_name,
+                        '_type': v['_type'],
+                        '_id': v['_id'],
+                      }
+        bulk(self.es, delete_action_gen())
 
     def update_book(self, id, body, doc_type='book'):
         ''' Update a book

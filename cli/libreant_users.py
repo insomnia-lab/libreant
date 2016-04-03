@@ -37,7 +37,7 @@ def libreant_users(debug, settings, users_db, pretty):
         cliConf['USERS_DATABASE'] = users_db
     conf.update(cliConf)
     if conf['USERS_DATABASE'] is None:
-        die('Error: --users-db not set')
+        die('--users-db parameter not set')
     if pretty:
         global json_dumps
         json_dumps = pretty_json_dumps
@@ -53,7 +53,7 @@ def libreant_users(debug, settings, users_db, pretty):
         if conf['DEBUG']:
             raise
         else:
-            die('Error: ' + str(e))
+            die(str(e))
 
 
 class ExistingUserType(click.ParamType):

@@ -1,8 +1,8 @@
-from webant.test import WebantTestCase
+from webant.test import WebantUsersTestCase
 from flask.json import loads, dumps
 
 
-class WebantTestApiCase(WebantTestCase):
+class WebantTestApiCase(WebantUsersTestCase):
 
     API_PREFIX = '/api/v1'
 

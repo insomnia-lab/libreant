@@ -16,7 +16,7 @@ from util import requestedFormat, send_attachment_file
 from archivant import Archivant
 from archivant.exceptions import NotFoundException, FileOpNotSupported
 from agherant import agherant
-from api.blueprint_api import api
+from api.blueprint_api import get_blueprint_api
 from webserver_utils import gevent_run
 import users
 import util
@@ -76,6 +76,7 @@ class LibreantViewApp(LibreantCoreApp):
         super(LibreantViewApp, self).__init__(import_name, defaults)
         if self.config['AGHERANT_DESCRIPTIONS']:
             self.register_blueprint(agherant, url_prefix='/agherant')
+        api = get_blueprint_api(users_routes=self.users_enabled)
         self.register_blueprint(api, url_prefix=self.config['API_URL'])
         Bootstrap(self)
         self.babel = Babel(self)

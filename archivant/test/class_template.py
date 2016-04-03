@@ -27,8 +27,8 @@ class TestArchivant():
         self.arc = Archivant(conf)
 
     def tearDown(self):
-        self.arc._db.es.delete_by_query(index=self.TEST_ES_INDEX,
-                                        body={'query': {'match_all': {}}})
+        self.arc._db.delete_all()
+        self.refresh_index()
         rmtree(self.tmpDir)
         self.tmpDir = None
         self.arc = None

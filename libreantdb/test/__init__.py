@@ -17,8 +17,7 @@ def tearDownPackage():
 
 def cleanall():
     if db.es.indices.exists(db.index_name):
-        db.es.delete_by_query(index=db.index_name,
-                              body={'query': {'match_all': {}}})
+        db.delete_all()
     else:
         db.setup_db()
     db.es.indices.refresh(index=db.index_name)

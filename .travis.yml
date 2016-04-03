@@ -12,9 +12,6 @@ env:
 matrix:
     fast_finish: true
 
-    allow_failures:
-        - env: VERSION_ES=2.x
-
     include:
         - python: "2.7"
           sudo: true

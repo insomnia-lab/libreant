@@ -1,8 +1,8 @@
 import time
 
 from elasticsearch import NotFoundError, RequestError
+from elasticsearch import __version__ as es_version
 from elasticsearch.helpers import scan, bulk
-from elasticsearch.helpers import scan
 
 import logging
 log = logging.getLogger(__name__)
@@ -86,6 +86,9 @@ class DB(object):
         "_insertion_date" : {
             "type": "long",
             "null_value": 0},
+        "_language": {
+            "type": "string",
+            "index": "no"},
         "_text_en": {
             "type": "string",
             "analyzer": "english"},
@@ -191,15 +194,18 @@ class DB(object):
 
         Its exact implementation can vary.
         '''
-        query = {'more_like_this': {
-            # FIXME: text_* does not seem to work, so we're relying on listing
-            # them manually
-            'fields': ['book._text_it', 'book._text_en'],
-            'ids': [_id],
-            'min_term_freq': 1,
-            'min_doc_freq': 1,
-        }}
-        return self._search(dict(query=query))
+        query = {
+            'query': {'more_like_this': {
+                      'like': {'_id': _id},
+                      'min_term_freq': 1,
+                      'min_doc_freq': 1,
+             }}
+        }
+        if es_version[0] <= 1:
+            mlt = query['query']['more_like_this']
+            mlt['ids'] = [_id]
+            del mlt['like']
+        return self._search(query)
 
     def get_all_books(self, size=30):
         return self._search({}, size=size)

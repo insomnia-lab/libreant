@@ -202,10 +202,7 @@ def add_capability():
     actions = capData.get('actions', None)
     if not actions:
         raise ApiError("Bad Request", 400, details="missing 'actions' parameter")
-    try:
-        cap = users.api.add_capability(domain=domain, action=Action.from_list(actions))
-    except users.api.ConflictException, e:
-        raise ApiError("Conflict", 409, details=str(e))
+    cap = users.api.add_capability(domain=domain, action=Action.from_list(actions))
     link_self = url_for('.get_capability', capID=cap.id, _external=True)
     response = jsonify({'data': {'id': cap.id, 'link_self': link_self}})
     response.status_code = 201

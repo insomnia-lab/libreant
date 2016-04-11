@@ -6,7 +6,7 @@ import mimetypes
 
 from . import load_cfg, die, bye
 from archivant import Archivant
-from archivant.exceptions import NotFoundException
+from archivant.exceptions import NotFoundException, ConflictException
 from conf.defaults import get_def_conf, get_help
 from utils.loggers import initLoggers
 from custom_types import StringList
@@ -62,6 +62,39 @@ def export_volume(volumeid, pretty):
     indent = 3 if pretty else None
     ouput = json.dumps(volume, indent=indent)
     click.echo(ouput)
+
+
+@libreant_db.command(name="import")
+@click.argument('source', type=click.File('r'), required=True)
+@click.option('--ignore-conflicts', is_flag=True, help='Skip volumes with an already existent id')
+@click.option('-y', '--yes', is_flag=True, help='Assume Yes to all queries and do not prompt')
+def import_volumes(source, ignore_conflicts, yes):
+    '''Import volumes
+
+    SOURCE must be a json file and must follow the same structure used in `libreant-db export`.
+    Pass - to read from standard input.
+    '''
+    volumes = json.load(source)
+    tot = len(volumes)
+    if not yes:
+        click.confirm("Are you sure you want to import {} volumes into index '{}'".format(tot, arc._config['ES_INDEXNAME']))
+    conflicts=0
+    with click.progressbar(volumes, label='adding volumes') as bar:
+        for v in bar:
+            try:
+                arc.import_volume(v)
+            except ConflictException as ce:
+                if not ignore_conflicts:
+                    die(str(ce))
+                conflicts += 1
+            except Exception as e:
+                if conf.get('DEBUG', False):
+                    raise
+                else:
+                    die(str(e))
+
+    if conflicts > 0:
+        click.echo("{} volumes has been skipped beacause of a conflict".format(conflicts))
 
 
 @libreant_db.command(name="remove", help="remove a volume")

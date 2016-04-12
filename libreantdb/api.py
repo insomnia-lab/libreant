@@ -1,8 +1,9 @@
 import time
+import re
 
-from elasticsearch import NotFoundError, RequestError
+from elasticsearch import NotFoundError, RequestError, TransportError
 from elasticsearch import __version__ as es_version
-from elasticsearch.helpers import scan, bulk
+from elasticsearch.helpers import scan, bulk, reindex
 
 import logging
 log = logging.getLogger(__name__)
@@ -152,10 +153,8 @@ class DB(object):
                 log.warn('An old or wrong properties mappings has been found for index: "{0}",\
                           this could led to some errors. It is recomanded to perform a reindexing'.format(self.index_name))
         else:
-            log.debug("Creating missing index: '{0}'".format(self.index_name))
-            self.es.indices.create(index=self.index_name,
-                                   body={'settings': self.settings,
-                                         'mappings': {'book': {'properties': self.properties}}})
+            log.debug("Index is missing: '{0}'".format(self.index_name))
+            self.create_index()
 
         if wait_for_ready:
             log.debug('waiting for index "{}" to be ready'.format(self.index_name))
@@ -171,6 +170,100 @@ class DB(object):
             if type(cause) is dict:
                 cause = cause['root_cause'][0]['reason']
             raise Exception("Cannot update index properties mappings: [{0}]".format(cause.replace('\n',' ')))
+
+    def create_index(self, indexname=None, index_conf=None):
+        ''' Create the index
+
+            Create the index with given configuration.
+            If `indexname` is provided it will be used as the new index name
+            instead of the class one (:py:attr:`DB.index_name`)
+
+            :param index_conf: configuration to be used in index creation. If this
+                              is not specified the default index configuration will be used.
+            :raises Exception: if the index already exists.
+        '''
+        if indexname is None:
+            indexname = self.index_name
+        log.debug("Creating new index: '{0}'".format(indexname))
+        if index_conf is None:
+            index_conf = {'settings': self.settings,
+                          'mappings': {'book': {'properties': self.properties}}}
+        try:
+            self.es.indices.create(index=indexname, body=index_conf)
+        except TransportError as te:
+            if te.error.startswith("IndexAlreadyExistsException"):
+                raise Exception("Cannot create index '{}', already exists".format(indexname))
+            else:
+                raise
+
+    def clone_index(self, new_indexname, index_conf=None):
+        '''Clone current index
+
+           All entries of the current index will be copied into the newly
+           created one named `new_indexname`
+
+           :param index_conf: Configuration to be used in the new index creation.
+                              This param will be passed directly to :py:func:`DB.create_index`
+        '''
+        log.debug("Cloning index '{}' into '{}'".format(self.index_name, new_indexname))
+        self.create_index(indexname=new_indexname, index_conf=index_conf)
+        reindex(self.es, self.index_name, new_indexname)
+
+    def reindex(self, new_index=None, index_conf=None):
+        '''Rebuilt the current index
+
+           This function could be useful in the case you want to change some index settings/mappings
+           and you don't want to loose all the entries belonging to that index.
+
+           This function is built in such a way that you can continue to use the old index name,
+           this is achieved using index aliases.
+
+           The old index will be cloned into a new one with the given `index_conf`.
+           If we are working on an alias, it is redirected to the new index.
+           Otherwise a brand new alias with the old index name is created in such a way that
+           points to the newly create index.
+
+           Keep in mind that even if you can continue to use the same index name,
+           the old index will be deleted.
+
+           :param index_conf: Configuration to be used in the new index creation.
+                              This param will be passed directly to :py:func:`DB.create_index`
+        '''
+
+        alias = self.index_name if self.es.indices.exists_alias(name=self.index_name) else None
+        if alias:
+            original_index=self.es.indices.get_alias(self.index_name).popitem()[0]
+        else:
+            original_index=self.index_name
+
+        if new_index is None:
+            mtc = re.match(r"^.*_v(\d)*$", original_index)
+            if mtc:
+                new_index = original_index[:mtc.start(1)] + str(int(mtc.group(1)) + 1)
+            else:
+                new_index = original_index + '_v1'
+
+        log.debug("Reindexing {{ alias: '{}', original_index: '{}', new_index: '{}'}}".format(alias, original_index, new_index))
+        self.clone_index(new_index, index_conf=index_conf)
+
+        if alias:
+            log.debug("Moving alias from ['{0}' -> '{1}'] to ['{0}' -> '{2}']".format(alias, original_index, new_index))
+            self.es.indices.update_aliases(body={
+                "actions" : [
+                    { "remove" : { "alias": alias, "index" : original_index} },
+                    { "add" : { "alias": alias, "index" : new_index } }
+                ]})
+
+        log.debug("Deleting old index: '{}'".format(original_index))
+        self.es.indices.delete(original_index)
+
+        if not alias:
+            log.debug("Crating new alias: ['{0}' -> '{1}']".format(original_index, new_index))
+            self.es.indices.update_aliases(body={
+                "actions" : [
+                    { "add" : { "alias": original_index, "index" : new_index } }
+                ]})
+
     # End setup }}
 
     # Queries {{{2

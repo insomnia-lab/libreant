@@ -1,8 +1,8 @@
 from webant.util import routes_collector
 from util import ApiError, make_success_response, on_json_load_error
-from flask import request, url_for, jsonify#, current_app, jsonify
+from flask import request, url_for, jsonify
 import users.api
-from users import Action, Capability
+from users import Action
 
 routes = []
 route = routes_collector(routes)
@@ -24,6 +24,12 @@ def delete_user(userID):
     except users.api.NotFoundException, e:
         raise ApiError("Not found", 404, details=str(e))
     return make_success_response("user has been successfully deleted")
+
+
+@route('/users/', methods=['GET'])
+def get_users():
+    usrs = [{'id': u.id, 'name': u.name} for u in users.api.get_users()]
+    return jsonify({'data': usrs})
 
 
 @route('/users/', methods=['POST'])
@@ -80,6 +86,12 @@ def delete_group(groupID):
     except users.api.NotFoundException, e:
         raise ApiError("Not found", 404, details=str(e))
     return make_success_response("group has been successfully deleted")
+
+
+@route('/groups/', methods=['GET'])
+def get_groups():
+    groups = [ {'id': g.id, 'name': g.name } for g in users.api.get_groups() ]
+    return jsonify({'data': groups})
 
 
 @route('/groups/', methods=['POST'])
@@ -153,16 +165,19 @@ def get_groups_of_user(userID):
     return jsonify({'data': groups})
 
 
+@route('/capabilities/', methods=['GET'])
+def get_capabilities():
+    capabilities = [ c.to_dict() for c in users.api.get_capabilities()]
+    return jsonify({'data': capabilities})
+
+
 @route('/capabilities/<int:capID>', methods=['GET'])
 def get_capability(capID):
     try:
         cap = users.api.get_capability(capID)
     except users.api.NotFoundException, e:
         raise ApiError("Not found", 404, details=str(e))
-    return jsonify({'data':
-                      {'id': cap.id,
-                       'domain': Capability.regToSim(cap.domain),
-                       'actions': cap.action.to_list()}})
+    return jsonify({'data': cap.to_dict()})
 
 
 @route('/capabilities/<int:capID>', methods=['DELETE'])
@@ -187,10 +202,7 @@ def add_capability():
     actions = capData.get('actions', None)
     if not actions:
         raise ApiError("Bad Request", 400, details="missing 'actions' parameter")
-    try:
-        cap = users.api.add_capability(domain=domain, action=Action.from_list(actions))
-    except users.api.ConflictException, e:
-        raise ApiError("Conflict", 409, details=str(e))
+    cap = users.api.add_capability(domain=domain, action=Action.from_list(actions))
     link_self = url_for('.get_capability', capID=cap.id, _external=True)
     response = jsonify({'data': {'id': cap.id, 'link_self': link_self}})
     response.status_code = 201
@@ -235,7 +247,7 @@ def delete_capability_from_group(groupID, capID):
 @route('/groups/<int:groupID>/capabilities/', methods=['GET'])
 def get_capabilities_of_group(groupID):
     try:
-        caps = [{'id': cap.id} for cap in users.api.get_capabilities_of_group(groupID)]
+        caps = [ cap.to_dict() for cap in users.api.get_capabilities_of_group(groupID)]
     except users.api.NotFoundException, e:
         raise ApiError("Not found", 404, details=str(e))
     return jsonify({'data': caps})

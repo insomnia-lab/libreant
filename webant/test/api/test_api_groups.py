@@ -39,6 +39,11 @@ class TestApiGroups(WebantTestApiCase):
         rg = self.wtc.get(self.GRP_URI + str(gid))
         eq_(rg.status_code, 200)
 
+    def test_get_grups(self):
+        rg = self.wtc.get(self.GRP_URI)
+        eq_(rg.status_code, 200)
+        eq_(len((loads(rg.data))['data']), 2) # the 2 default groups
+
     def test_delete_group(self):
         gid = self.add_group({'name':'groupName'})
         r = self.wtc.delete(self.GRP_URI + str(gid))

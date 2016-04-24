@@ -57,9 +57,6 @@ class Capability(BaseModel):
     class Meta:
         indexes = ((('domain', 'action'), False),)
 
-    def to_dict(self):
-        return dict(id=self.id, domain=self.regToSim(self.domain), action=self.action.to_list())
-
     @classmethod
     def simToReg(self, sim):
         """Convert simplified domain expression to regular expression"""
@@ -87,6 +84,11 @@ class Capability(BaseModel):
         by this capability
         """
         return self.match_domain(dom) and self.match_action(act)
+
+    def to_dict(self):
+        return {'id': self.id,
+                'domain': self.regToSim(self.domain),
+                'actions': self.action.to_list()}
 
 
 class Action(int):

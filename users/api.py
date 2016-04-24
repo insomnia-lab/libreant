@@ -24,6 +24,10 @@ def update_user(id, updates):
         u.save()
 
 
+def get_users():
+    return User.select()
+
+
 def get_user(id=None, name=None):
     try:
         if id:
@@ -54,6 +58,10 @@ def update_group(id, updates):
         if 'name' in updates:
             g.name = updates['name']
         g.save()
+
+
+def get_groups():
+    return Group.select()
 
 
 def get_group(id=None, name=None):
@@ -92,6 +100,10 @@ def get_groups_of_user(userID):
 def get_users_in_group(groupID):
     for u in get_group(id=groupID).users:
         yield u
+
+
+def get_capabilities():
+    return Capability.select()
 
 
 def get_capability(capID):

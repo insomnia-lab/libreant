@@ -10,12 +10,15 @@ def from_file(fname):
     try:
         with open(fname) as buf:
             conf = json.load(buf)
-            return conf
     except ValueError as ve:
-        log.error('Bad json format on conf file: "{0}"; {1}'.format(fname, str(ve)))
-        raise ve
+        raise Exception('Bad json format on configuration file: "{0}" [{1}]'.format(fname, str(ve)))
     except EnvironmentError as ee:
         raise Exception('Cannot read configuration file: {0} [{1}]'.format(fname, ee.strerror))
+
+    if not isinstance(conf, dict):
+        raise Exception('Bad format on configuration file: "{0}" [ dictionary object was expected, instead "{1}" was found]'.format(fname, type(conf).__name__))
+
+    return conf
 
 
 def from_envvar_file(envvar, environ=None):

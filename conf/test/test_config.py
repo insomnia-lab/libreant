@@ -8,7 +8,7 @@ from tempfile import mkstemp
 import json
 import os
 
-from nose.tools import eq_, raises
+from nose.tools import eq_, raises, assert_raises_regexp
 
 from conf.config_utils import from_envvars, from_envvar_file
 
@@ -99,7 +99,6 @@ def test_file_notexist():
                      environ={'MYRC': '/tmp/notexist.webant.test'})
 
 
-@raises(ValueError)
 def test_file_wrong_format():
     '''if config file has bad json fomat an exception should be raised'''
     tempFd, tempPath = mkstemp(suffix='.json', prefix='webant_test',
@@ -108,8 +107,9 @@ def test_file_wrong_format():
         with os.fdopen(tempFd, 'w') as f:
             f.write('not in json format $%^&*(, ')
 
-        from_envvar_file('MYRC',
-                         environ={'MYRC': tempPath})
+        with assert_raises_regexp(Exception, r".*(B|b)ad json format.*"):
+            from_envvar_file('MYRC',
+                             environ={'MYRC': tempPath})
     finally:
         os.unlink(tempPath)
 

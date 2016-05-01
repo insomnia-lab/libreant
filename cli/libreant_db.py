@@ -90,7 +90,7 @@ def search(query, pretty):
 @click.option('-p', '--pretty', is_flag=True, help='format the output on multiple lines')
 def export_all(pretty):
     indent = 3 if pretty else None
-    volumes = [vol for vol in arc.get_all_volumes()]
+    volumes = [vol for vol in arc.iter_all_volumes()]
     click.echo(json.dumps(volumes, indent=indent))
 
 

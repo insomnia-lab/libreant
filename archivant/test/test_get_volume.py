@@ -14,14 +14,14 @@ class TestArchivantGetVolume(TestArchivant):
         id = self.arc.insert_volume(volume_metadata)
         self.arc.get_volume(id)
 
-    def test_get_all_volumes(self):
+    def test_iter_all_volumes(self):
         n = 3
         ids = list()
         for _ in range(n):
             id = self.arc.insert_volume(self.generate_volume_metadata())
             ids.append(id)
         self.refresh_index()
-        volumes = [vol for vol in self.arc.get_all_volumes()]
+        volumes = [vol for vol in self.arc.iter_all_volumes()]
         for vol in volumes:
             ok_(vol['id'] in ids)
         eq_(len(volumes), len(ids))

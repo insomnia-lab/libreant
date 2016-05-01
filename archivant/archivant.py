@@ -172,7 +172,9 @@ class Archivant():
     def get_all_volumes(self):
         '''iterate over all stored volumes'''
         for raw_volume in self._db.iterate_all():
-            yield self.normalize_volume(raw_volume)
+            v = self.normalize_volume(raw_volume)
+            del v['score']
+            yield v
 
     def get_volume(self, volumeID):
         log.debug("Requested volume with id:'{}'".format(volumeID))

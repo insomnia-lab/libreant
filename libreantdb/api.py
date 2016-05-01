@@ -1,6 +1,6 @@
 import time
 
-from elasticsearch import NotFoundError
+from elasticsearch import NotFoundError, RequestError
 from elasticsearch.helpers import scan
 
 import logging
@@ -80,6 +80,52 @@ class DB(object):
                      }
         }
     '''
+
+    properties = {
+        "_insertion_date" : {
+            "type": "long",
+            "null_value": 0},
+        "_text_en": {
+            "type": "string",
+            "analyzer": "english"},
+        "_text_it": {
+            "type": "string",
+            "analyzer": "it_analyzer"},
+        }
+
+    # Just like the default one
+    # http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/analysis-lang-analyzer.html#italian-analyzer
+    # but the stemmer changed from light_italian to italian
+    settings = {"analysis": {
+        "filter": {
+            "italian_elision": {
+                "type": "elision",
+                "articles": [
+                    "c", "l", "all", "dall", "dell",
+                    "nell", "sull", "coll", "pell",
+                    "gl", "agl", "dagl", "degl", "negl",
+                    "sugl", "un", "m", "t", "s", "v", "d"
+                ]
+            },
+            "italian_stop": {
+                "type": "stop", "stopwords": "_italian_"},
+            "italian_stemmer": {
+                "type": "stemmer", "language": "italian"}
+        },
+        "analyzer": {
+            "it_analyzer": {
+                "type": "custom",
+                "tokenizer": "standard",
+                "filter": [
+                    "italian_elision",
+                    "lowercase",
+                    "italian_stop",
+                    "italian_stemmer"
+                ]
+            }
+        }
+    }}
+
     # Setup {{{2
     def __init__(self, es, index_name):
         self.es = es
@@ -93,64 +139,34 @@ class DB(object):
             If `wait_for_ready` is True, this function will block until
             status for `self.index_name` will be `yellow`
         '''
-        maps = {
-            'book': {  # this need to be the document type!
-                "properties": {
-                    "_insertion_date" : {
-                        "type": "long",
-                        "null_value": 0},
-                    "_text_en": {
-                        "type": "string",
-                        "analyzer": "english"},
-                    "_text_it": {
-                        "type": "string",
-                        "analyzer": "it_analyzer"}
-                }
-            }
-        }
 
-        # Just like the default one
-        # http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/analysis-lang-analyzer.html#italian-analyzer
-        # but the stemmer changed from light_italian to italian
-        settings = {"analysis": {
-            "filter": {
-                "italian_elision": {
-                    "type": "elision",
-                    "articles": [
-                        "c", "l", "all", "dall", "dell",
-                        "nell", "sull", "coll", "pell",
-                        "gl", "agl", "dagl", "degl", "negl",
-                        "sugl", "un", "m", "t", "s", "v", "d"
-                    ]
-                },
-                "italian_stop": {
-                    "type": "stop", "stopwords": "_italian_"},
-                "italian_stemmer": {
-                    "type": "stemmer", "language": "italian"}
-            },
-            "analyzer": {
-                "it_analyzer": {
-                    "type": "custom",
-                    "tokenizer": "standard",
-                    "filter": [
-                        "italian_elision",
-                        "lowercase",
-                        "italian_stop",
-                        "italian_stemmer"
-                    ]
-                }
-            }
-        }}
-
-        if not self.es.indices.exists(self.index_name):
+        if self.es.indices.exists(self.index_name):
+            try:
+                self.update_mappings()
+            except Exception as ex:
+                log.error(ex)
+                log.warn('An old or wrong properties mappings has been found for index: "{0}",\
+                          this could led to some errors. It is recomanded to perform a reindexing'.format(self.index_name))
+        else:
+            log.debug("Creating missing index: '{0}'".format(self.index_name))
             self.es.indices.create(index=self.index_name,
-                                   body={'settings': settings,
-                                         'mappings': maps})
+                                   body={'settings': self.settings,
+                                         'mappings': {'book': {'properties': self.properties}}})
 
         if wait_for_ready:
             log.debug('waiting for index "{}" to be ready'.format(self.index_name))
             self.es.cluster.health(index=self.index_name, level='index', wait_for_status='yellow')
             log.debug('index "{}" is now ready'.format(self.index_name))
+
+    def update_mappings(self):
+        log.debug('updating index properties mappings')
+        try:
+            self.es.indices.put_mapping(index=self.index_name, doc_type='book', body={'properties': self.properties})
+        except RequestError as re:
+            cause = re.info['error']
+            if type(cause) is dict:
+                cause = cause['root_cause'][0]['reason']
+            raise Exception("Cannot update index properties mappings: [{0}]".format(cause.replace('\n',' ')))
     # End setup }}
 
     # Queries {{{2

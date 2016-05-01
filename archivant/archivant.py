@@ -169,7 +169,7 @@ class Archivant():
         except NotFoundError:
             raise NotFoundException("could not found volume with id: '{}'".format(volumeID))
 
-    def get_all_volumes(self):
+    def iter_all_volumes(self):
         '''iterate over all stored volumes'''
         for raw_volume in self._db.iterate_all():
             v = self.normalize_volume(raw_volume)

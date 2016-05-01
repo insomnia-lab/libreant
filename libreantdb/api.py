@@ -5,6 +5,8 @@ from elasticsearch import NotFoundError, RequestError, TransportError
 from elasticsearch import __version__ as es_version
 from elasticsearch.helpers import scan, bulk, reindex
 
+from exceptions import MappingsException
+
 import logging
 log = logging.getLogger(__name__)
 
@@ -148,9 +150,9 @@ class DB(object):
         if self.es.indices.exists(self.index_name):
             try:
                 self.update_mappings()
-            except Exception as ex:
+            except MappingsException as ex:
                 log.error(ex)
-                log.warn('An old or wrong properties mappings has been found for index: "{0}",\
+                log.warn('An old or wrong properties mapping has been found for index: "{0}",\
                           this could led to some errors. It is recomanded to perform a reindexing'.format(self.index_name))
         else:
             log.debug("Index is missing: '{0}'".format(self.index_name))
@@ -163,13 +165,18 @@ class DB(object):
 
     def update_mappings(self):
         log.debug('updating index properties mappings')
-        try:
-            self.es.indices.put_mapping(index=self.index_name, doc_type='book', body={'properties': self.properties})
-        except RequestError as re:
-            cause = re.info['error']
-            if type(cause) is dict:
-                cause = cause['root_cause'][0]['reason']
-            raise Exception("Cannot update index properties mappings: [{0}]".format(cause.replace('\n',' ')))
+        errors = {}
+        for prop_k, prop_m in self.properties.iteritems():
+            try:
+                self.es.indices.put_mapping(index=self.index_name, doc_type='book', body={'properties': { prop_k: prop_m}})
+            except RequestError as re:
+                cause = re.info['error']
+                if type(cause) is dict:
+                    cause = cause['root_cause'][0]['reason']
+                errors[prop_k] = cause.replace('\n', ' ')
+
+        if len(errors) > 0:
+            raise MappingsException("Couldn't update index properties mapping: {0}".format(errors))
 
     def create_index(self, indexname=None, index_conf=None):
         ''' Create the index

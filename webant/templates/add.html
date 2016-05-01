@@ -137,6 +137,7 @@ Libreant | {%trans%}Add new{%endtrans%} {{ preset.id if preset else "item"}}
 {% endblock %}
 {% block scripts %}
 {{ super() }}
+<script type="text/javascript" src="{{ url_for('static', filename='js/add-volume.js') }}"></script>
 <script type="text/javascript" src="{{ url_for('static', filename='js/bootstrap-filestyle.min.js') }}"></script>
 <script>
    

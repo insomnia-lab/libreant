@@ -153,7 +153,7 @@ class DB(object):
             except MappingsException as ex:
                 log.error(ex)
                 log.warn('An old or wrong properties mapping has been found for index: "{0}",\
-                          this could led to some errors. It is recomanded to perform a reindexing'.format(self.index_name))
+                          this could led to some errors. It is recomanded to run "libreant-db upgrade"'.format(self.index_name))
         else:
             log.debug("Index is missing: '{0}'".format(self.index_name))
             self.create_index()

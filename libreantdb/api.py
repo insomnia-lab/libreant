@@ -153,7 +153,10 @@ class DB(object):
         return self.es.count(index=self.index_name)['count']
 
     def _search(self, body, **kargs):
-        return self.es.search(index=self.index_name, body=body, **kargs)
+        return self.es.search(index=self.index_name,
+                              body=body,
+                              doc_type='book',
+                              **kargs)
 
     def _get_search_field(self, field, value):
         return {'query':

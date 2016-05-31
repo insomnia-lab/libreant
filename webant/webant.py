@@ -19,7 +19,8 @@ from agherant import agherant
 from api.blueprint_api import get_blueprint_api
 from webserver_utils import gevent_run
 import users
-import util
+from . import util
+from . import auth
 from authbone.authorization import CapabilityMissingException
 
 
@@ -82,11 +83,11 @@ class LibreantViewApp(LibreantCoreApp):
         self.babel = Babel(self)
         self.available_translations = [l.language for l in self.babel.list_translations()]
         if self.users_enabled:
-            self.autht = util.AuthtFromSession()
-            self.authz = util.AuthzFromSession(authenticator=self.autht)
+            self.autht = auth.AuthtFromSessionAnon()
+            self.authz = auth.AuthzFromSession(authenticator=self.autht)
         else:
-            self.autht = util.TransparentAutht()
-            self.authz = util.TransparentAuthz()
+            self.autht = auth.TransparentAutht()
+            self.authz = auth.TransparentAuthz()
 
 
 def create_app(conf={}):

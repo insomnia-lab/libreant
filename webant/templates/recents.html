@@ -62,8 +62,8 @@ header h1{
             <div class="item-sub col-xs-12 col-sm-3 vcenter">
                 <ul class="meta-list list-unstyled">
                     <li><span class="glyphicon glyphicon-time"></span>
-                        <date data-timestamp="{{ b['fields']['_timestamp'] }}">
-                            {{ b['fields']['_timestamp'] | timepassedformat }}
+                        <date data-timestamp="{{ b['_source']['_insertion_date'] }}">
+                            {{ b['_source']['_insertion_date'] | timepassedformat }}
                         </date>
                     </li>
                     <li><span class="glyphicon glyphicon-flag"></span> {{ b['_source']['_language'] }}</li>

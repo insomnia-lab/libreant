@@ -91,3 +91,28 @@ def test_mlt_en_topic_2():
     res = db.mlt(book_id1)['hits']
     eq_(res['total'], 1)
     eq_(res['hits'][0]['_id'], book_id2)
+
+
+@with_setup(cleanall, cleanall)
+def test_mlt_multilan_topic_2():
+    '''MLT: Two additional books with different languages, one about same topic, one totally different'''
+    b = dict(title='On the origins of Africa',
+             actors=['marco', 'giulio'],
+             _language='en')
+    book_id1 = db.add_book(doc_type='book', body=b)['_id']
+    b = dict(title='Africa: a tour on the origins',
+             actors=['frank', 'johnny'],
+             _language='en')
+    book_id2 = db.add_book(doc_type='book', body=b)['_id']
+    b = dict(title='Computer Networks',
+             actors=['switch', 'router'],
+             _language='en')
+    db.add_book(doc_type='book', body=b)['_id']
+    b = dict(title='Reti di calcolatori',
+             actors=['switch', 'router'],
+             _language='it')
+    db.add_book(doc_type='book', body=b)['_id']
+    db.es.indices.refresh(index=db.index_name)
+    res = db.mlt(book_id1)['hits']
+    eq_(res['total'], 1)
+    eq_(res['hits'][0]['_id'], book_id2)

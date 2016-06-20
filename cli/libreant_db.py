@@ -50,6 +50,62 @@ def libreant_db(debug, settings, fsdb_path, es_indexname, es_hosts):
             die(str(e))
 
 
+@libreant_db.command(name="upgrade")
+@click.option('-c', '--check-only', is_flag=True,
+              help='Does not perform any action on database, it will exit with code 123 if an upgraded is needed, and 0 if it\'s not. '+
+                   'Any other exit code means that an error occurred.')
+@click.option('-y', '--yes', is_flag=True, help='Assume Yes to all queries and do not prompt')
+def upgrade(check_only, yes):
+    '''
+    Upgrade libreant database.
+
+    This command can be used after an update of libreant
+    in order to upgrade the database and make it aligned with the new version.
+    '''
+    from elasticsearch import Elasticsearch
+    from libreantdb import DB, migration
+    from libreantdb.exceptions import MappingsException
+
+    try:
+        db = DB(Elasticsearch(hosts=conf['ES_HOSTS']),
+                              index_name=conf['ES_INDEXNAME'])
+        if not db.es.indices.exists(db.index_name):
+            die("The specified index does not exists: {}".format(db.index_name))
+
+        # Migrate old special `_timestamp` field into the new `_insertion_date`
+        num_to_update = migration.elements_without_insertion_date(db.es, db.index_name)
+        if num_to_update > 0:
+            if check_only:
+                exit(123)
+
+            if yes or click.confirm("{} entries miss the '_insertion_date' field. Do you want to proceed and update those entries?".format(num_to_update),
+                             prompt_suffix='',
+                             default=False):
+                migration.migrate_timestamp(db.es, db.index_name)
+            else:
+                exit(0)
+
+        # Upgrade the index mappings and reindex if necessary
+        try:
+            db.update_mappings()
+        except MappingsException:
+            if check_only:
+                exit(123)
+            count = db.es.count(index=db.index_name)['count']
+            if yes or click.confirm("Some old or wrong mappings has been found for the index '"+ db.index_name +"'.\n"\
+                                    "In order to upgrade them it is necessary to reindex '"+ str(count) +"' entries.\n"\
+                                    "Are you sure you want to proceed?",
+                                     prompt_suffix='',
+                                     default=False):
+                    db.reindex()
+
+    except Exception as e:
+        if conf.get('DEBUG', False):
+            raise
+        else:
+            die(str(e))
+
+
 @libreant_db.command(name="export-volume", help="export a volume")
 @click.argument('volumeid')
 @click.option('-p', '--pretty', is_flag=True, help='format the output on multiple lines')

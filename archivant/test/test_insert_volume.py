@@ -22,7 +22,6 @@ class TestArchivantInsertVolume(TestArchivant):
         added_volume = self.arc.get_volume(id)
         ok_('id' in added_volume)
         eq_(added_volume['type'], 'volume')
-        eq_(len(volume_metadata), len(added_volume['metadata']))
         for k, v in volume_metadata.items():
             eq_(added_volume['metadata'][k], v)
 

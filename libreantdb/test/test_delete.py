@@ -26,3 +26,15 @@ def test_delete_one_of_two():
     db.delete_book(id2)
     db.es.indices.refresh(index=db.index_name)
     eq_(len(db), 1)
+
+
+@with_setup(cleanall, cleanall)
+def test_delete_all():
+    db.add_book(body=dict(title='Un libro 1', _language='it'))['_id']
+    db.add_book(body=dict(title='Un libro 2', _language='it'))['_id']
+    db.add_book(body=dict(title='Un libro 3', _language='it'))['_id']
+    db.es.indices.refresh(index=db.index_name)
+    eq_(len(db), 3)
+    db.delete_all()
+    db.es.indices.refresh(index=db.index_name)
+    eq_(len(db), 0)

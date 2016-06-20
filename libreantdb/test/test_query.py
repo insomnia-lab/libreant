@@ -12,7 +12,7 @@ from . import db, cleanall
 @with_setup(cleanall)
 def test_start_hasindex():
     '''If the test is setup properly, we got our own index'''
-    assert db.index_name in db.es.indices.status()['indices']
+    assert db.es.indices.exists(db.index_name)
 
 
 @with_setup(cleanall)

@@ -37,3 +37,13 @@ class WebantUsersTestCase(WebantTestCase):
              'PWD_ROUNDS': 1,
              'USERS_DATABASE': 'sqlite:///:memory:'
         })
+
+    def login(self, username, password):
+        return self.wtc.post('/login',
+                             data=dict(
+                                username=username,
+                                password=password),
+                             follow_redirects=True)
+
+    def logout(self):
+        return self.wtc.get('/logout', follow_redirects=True)

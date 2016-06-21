@@ -35,6 +35,13 @@ class WebantTestApiCase(WebantUsersTestCase):
         return loads(res.data)['data']['id']
 
 
+class WebantTestApiAdminCase(WebantTestApiCase):
+
+    def setUp(self):
+        super(WebantTestApiCase, self).setUp()
+        self.login('admin', 'admin')
+
+
 class ApiClientError(Exception):
 
     def __init__(self, res):

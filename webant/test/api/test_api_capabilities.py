@@ -1,9 +1,9 @@
-from webant.test.api import WebantTestApiCase, ApiClientError
+from webant.test.api import WebantTestApiAdminCase, ApiClientError
 from nose.tools import eq_
 from flask.json import loads, dumps
 
 
-class TestApiCapabilities(WebantTestApiCase):
+class TestApiCapabilities(WebantTestApiAdminCase):
 
     def test_get_capability_not_exist(self):
         r = self.wtc.get(self.CAP_URI + 'a1s2d')

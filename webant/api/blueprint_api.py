@@ -3,6 +3,7 @@ from webant.util import add_routes
 from util import ApiError
 from archivant_api import routes as archivantRoutes
 from users_api import routes as usersRoutes
+from authbone.authorization import CapabilityMissingException
 
 
 def get_blueprint_api(archivant_routes=True,
@@ -28,6 +29,10 @@ def get_blueprint_api(archivant_routes=True,
     @api.route("/<path:invalid_path>", methods=['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTIONS'])
     def apiNotFound(invalid_path):
         raise ApiError("invalid URI", 404)
+
+    @api.errorhandler(CapabilityMissingException)
+    def not_authorized_handler(error):
+        return apiErrorHandler(ApiError('Unauthorized Request', 403))
 
     @api.errorhandler(Exception)
     def exceptionHandler(e):

@@ -109,7 +109,7 @@ conf = dict(
           'flask-bootstrap',
           'Flask-Babel',
           'flask-script',
-          'Flask-Authbone >=0.2',
+          'Flask-Authbone >=0.2.2',
           'Flask <= 0.11.1',
           'opensearch',
           'Fsdb >= 0.3.3, <= 1.2.1',

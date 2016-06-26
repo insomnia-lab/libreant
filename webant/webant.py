@@ -5,7 +5,7 @@ from flask import Flask, render_template, request, Response, redirect, url_for
 from werkzeug import secure_filename
 from flask_bootstrap import Bootstrap
 from elasticsearch import exceptions as es_exceptions
-from flask.ext.babel import Babel, gettext
+from flask_babel import Babel, gettext
 from babel.dates import format_timedelta
 from datetime import datetime
 from logging import getLogger

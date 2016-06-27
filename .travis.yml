@@ -20,6 +20,12 @@ matrix:
         - python: "2.7"
           env: TEST_SUITE=flake
 
+        # Debian Jessie
+        - python: "2.7"
+          env:
+              - EXTRA_INSTALLS="gevent==1.0.1 flask==0.10.1"
+              - VERSION_ES=1.x
+
         - python: "2.7"
           env: TEST_SUITE=build_sphinx
 
@@ -29,6 +35,7 @@ install:
     - 'if [[ $TEST_SUITE == flake ]]; then pip install flake8; return $?; fi'
     - 'if [[ $TEST_SUITE != flake ]]; then pip install .; return $?; fi'
     - 'if [[ $TEST_SUITE == build_sphinx ]]; then pip install sphinx; return $?; fi'
+    - 'if [[ -n "$EXTRA_INSTALLS" ]]; then pip install $EXTRA_INSTALLS; return $?; fi'
 
 before_script:
     - bash -x ./travis/install_dependencies.sh

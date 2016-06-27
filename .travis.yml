@@ -25,6 +25,7 @@ matrix:
 
 
 install:
+    - 'pip install -U pip wheel'
     - 'if [[ $TEST_SUITE == flake ]]; then pip install flake8; return $?; fi'
     - 'if [[ $TEST_SUITE != flake ]]; then python setup.py install; return $?; fi'
     - 'if [[ $TEST_SUITE == build_sphinx ]]; then pip install sphinx; return $?; fi'
@@ -37,3 +38,4 @@ script:
     - 'if [[ $TEST_SUITE == flake ]]; then flake8; return $?; fi'
     - 'if [[ $TEST_SUITE == build_sphinx ]]; then python setup.py build_sphinx; return $?; fi'
 
+cache: pip

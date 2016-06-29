@@ -1,6 +1,6 @@
 from flask import Flask, request
 from flask_bootstrap import Bootstrap
-from flask.ext.babel import Babel
+from flask_babel import Babel
 
 import agherant
 from webserver_utils import gevent_run

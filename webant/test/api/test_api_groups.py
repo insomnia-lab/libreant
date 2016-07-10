@@ -26,13 +26,13 @@ class TestApiGroups(WebantTestApiCase):
     def test_add_group_no_name(self):
         with self.assertRaises(ApiClientError) as ace:
             self.add_group({'altro':'altroValue'})
-            eq_(ace.res.status_code, 400)
+        eq_(ace.exception.res.status_code, 400)
 
     def test_add_group_same_name(self):
         self.add_group({'name':'groupName'})
         with self.assertRaises(ApiClientError) as ace:
             self.add_group({'name':'groupName'})
-            eq_(ace.res.status_code, 409)
+        eq_(ace.exception.res.status_code, 409)
 
     def test_get_group(self):
         gid = self.add_group({'name':'groupName'})

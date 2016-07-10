@@ -35,19 +35,19 @@ class TestApiUsers(WebantTestApiCase):
     def test_add_user_no_name(self):
         with self.assertRaises(ApiClientError) as ace:
             self.add_user({'password':'testPassword'})
-            eq_(ace.res.status_code, 400)
+        eq_(ace.exception.res.status_code, 400)
 
     def test_add_user_no_pass(self):
         with self.assertRaises(ApiClientError) as ace:
             self.add_user({'name':'testName'})
-            eq_(ace.res.status_code, 400)
+        eq_(ace.exception.res.status_code, 400)
 
     def test_add_user_same_name(self):
         user_data = {'name':'testName', 'password': 'testPassword'}
         self.add_user(user_data)
         with self.assertRaises(ApiClientError) as ace:
             self.add_user(user_data)
-            eq_(ace.res.status_code, 409)
+        eq_(ace.exception.res.status_code, 409)
 
     def test_delete_user(self):
         userData = {'name':'testName', 'password': 'testPassword'}

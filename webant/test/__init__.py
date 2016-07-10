@@ -21,11 +21,11 @@ class WebantTestCase(unittest.TestCase):
         es = Elasticsearch()
         es.indices.delete(cls.conf['ES_INDEXNAME'], ignore=[404])
 
-    @property
-    def wtc(self):
-        if not getattr(self, '_wtc', None):
-            self._wtc = create_app(self.conf).test_client()
-        return self._wtc
+    def setUp(self):
+        self.wtc = create_app(self.conf).test_client()
+
+    def tearDown(self):
+        del self.wtc
 
 
 class WebantUsersTestCase(WebantTestCase):
@@ -37,3 +37,13 @@ class WebantUsersTestCase(WebantTestCase):
              'PWD_ROUNDS': 1,
              'USERS_DATABASE': 'sqlite:///:memory:'
         })
+
+    def login(self, username, password):
+        return self.wtc.post('/login',
+                             data=dict(
+                                username=username,
+                                password=password),
+                             follow_redirects=True)
+
+    def logout(self):
+        return self.wtc.get('/logout', follow_redirects=True)

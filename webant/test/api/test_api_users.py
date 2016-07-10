@@ -1,9 +1,9 @@
-from webant.test.api import WebantTestApiCase, ApiClientError
+from webant.test.api import WebantTestApiAdminCase, ApiClientError
 from nose.tools import eq_
 from flask.json import dumps, loads
 
 
-class TestApiUsers(WebantTestApiCase):
+class TestApiUsers(WebantTestApiAdminCase):
 
     def test_add_user(self):
         self.add_user({'name':'testName', 'password': 'testPassword'})

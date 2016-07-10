@@ -1,9 +1,9 @@
-from webant.test.api import WebantTestApiCase, ApiClientError
+from webant.test.api import WebantTestApiAdminCase, ApiClientError
 from nose.tools import eq_
 from flask.json import loads, dumps
 
 
-class TestApiGroups(WebantTestApiCase):
+class TestApiGroups(WebantTestApiAdminCase):
 
     def test_get_group_not_exist(self):
         r = self.wtc.get(self.GRP_URI + 'a1s2d')

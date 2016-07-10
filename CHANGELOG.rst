@@ -2,18 +2,67 @@
 Libreant changelog
 ===================
 
-Next release
-++++++++++++
-- Changed default capability for anonynous (non logged) user: now she can read all volumes
+0.5
++++
+- Added supoort to Elasticsearch 2.x versions. (PR #281)
+
+- Changed default capability for anonymous (non logged) user: now she can read all volumes
   in the collection.
 
-  Tip: if you have an existing and alredy initialized user database, it won't be changed, i.e.
+  Tip: if you have an existing and already initialized user database, it won't be changed, i.e.
   if you upgrade from a previous version of libreant and you have existing users, the anonymous
   user won't get the read capability.
   In the case you want to add this capability to the already existing anonymous user you can use the
   following command::
 
     libreant-users --users-db <users-db-url> group cap-add anonymous "volumes/*" R
+
+CLI:
+----
+- Added new command `libreant-db import` to import volumes all at once. (PR #291)
+
+Web Interface:
+--------------
+- While adding a new book if it is available the language will be autocompleted
+  using the one suggested by the client's browser. ( based on `Accept-Language` http field).
+  Thanks @leonaard (PR #288)
+
+API:
+----
+- Added endpoints to retrieve collections
+    - `/api/v1/groups/`
+    - `/api/v1/users/`
+    - `/api/v1/capabilities/`
+
+Dependencies:
+-------------
+- Fsdb: added support till version `1.2.1` (PR #277)
+- Gevent: added support for the new version `1.1.1` (PR #298)
+- Flask: added support till version `0.11.1` (PR #299)
+
+Bugfixes:
+---------
+- #255 Libreant starts also if it fails to read the conf file:
+    fixed by PR #260.
+    If some error is encountered while reading the configuration file the stack trace
+    will be printed if the debug mode is active otherwise a colored one-line message
+    with the cause of the error will be printed.
+    Moreover the path of the configuration file will be printed if available.
+
+- #283 Read configuration file error:
+    If the configuration is a valid JSON formatted file but it's not a
+    dictionary an exception is raised.
+    (PR #286)
+
+- Tests for Webant were leaving leftover files around ( commit 1c050a8 )
+
+- In single-user-mode all the users related REST api enpoints are disabled (PR #278)
+
+- CLI: don't print 'Error' string twice (PR #279)
+
+- #287 missing authentication/authorization layer for REST api.
+    For the moment the only supported authentication method is the cookie based one ( login through the web UI )
+
 
 0.4
 +++

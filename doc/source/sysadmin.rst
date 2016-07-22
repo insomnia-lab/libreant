@@ -1,14 +1,13 @@
 Sysadmin
 =========
 
+.. _sys-Installation:
+
 Installation
 -------------
 
 System dependencies
 ^^^^^^^^^^^^^^^^^^^^
-.. note::
-        In this moment we do *not* support elasticsearch v2.
-        There are plans to do it shortly!
 
 Debian wheezy / Debian jessie / Ubuntu
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -21,7 +20,7 @@ Download and install the Public Signing Key for elasticsearch repo::
 
 Add elasticsearch repos in /etc/apt/sources.list.d/elasticsearch.list::
 
-    echo "deb http://packages.elasticsearch.org/elasticsearch/1.7/debian stable main" | sudo tee /etc/apt/sources.list.d/elasticsearch.list
+    echo "deb http://packages.elasticsearch.org/elasticsearch/2.x/debian stable main" | sudo tee /etc/apt/sources.list.d/elasticsearch.list
 
 Install requirements::
     
@@ -38,15 +37,7 @@ Arch
 
 Install all necessary packages::
 
-    sudo pacman -Sy python2 python2-virtualenv 
-
-And take care to install elasticsearch<2.x::
-
-    wget https://archive.archlinux.org/packages/e/elasticsearch/elasticsearch-1.7.3-1-x86_64.pkg.tar.xz
-    wget https://archive.archlinux.org/packages/e/elasticsearch/elasticsearch-1.7.3-1-x86_64.pkg.tar.xz.sig
-    sudo pacman-key --verify elasticsearch-1.7.3-1-x86_64.pkg.tar.xz elasticsearch-1.7.3-1-x86_64.pkg.tar.xz.sig
-    sudo pacman -U elasticsearch-1.7.3.1-x86_64.pkg.tar.xz
-    echo "IgnorePkg elasticsearch" | sudo tee -a /etc/pacman.conf
+    sudo pacman -Sy python2 python2-virtualenv elasticsearch
 
 Python dependencies
 ^^^^^^^^^^^^^^^^^^^^
@@ -58,6 +49,52 @@ Create a virtual env::
 Install libreant and all python dependencies::
     
     ./ve/bin/pip install libreant
+
+Upgrading
+----------
+
+Generally speaking, to upgrade libreant you just need to::
+
+    ./ve/bin/pip install -U libreant
+
+And restart your instance (see the :ref:`sys-execution` section).
+
+Some versions, however, could need additional actions. We will list them all in
+this section.
+
+From 0.4 to 0.5
+^^^^^^^^^^^^^^^
+
+libreant now supports elasticsearch2. If you were already using libreant0.4, you were using libreant 1.x.
+You *can* continue using it if you want. The standard upgrade procedure is enough to have everything working.
+However, we suggest you to upgrade to elasticsearch2 sooner or later.
+
+
+Step 1: stop libreant
+~~~~~~~~~~~~~~~~~~~~~~
+
+For more info, see :ref:`sys-execution`; something like ``pkill libreant`` should do
+
+Step 2: upgrade elasticsearch
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Just apply the steps in :ref:`sys-installation` section as if it was a brand new installation.
+
+If you are using archlinux, you must remove the ``IgnorePkg elasticsearch`` line in ``/etc/pacman.conf`` *before* trying to upgrade.
+
+Step 3: upgrade DB contents
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Libreant ships a tool that will take care of the upgrade. You can run it with
+``./ve/bin/libreant-db upgrade``.
+
+This tool will give you information on the current DB status and ask you for
+confirmation before proceding to real changes. Which means that you can run it
+without worries, you're still in time for answering "no" if you change your mind.
+
+The upgrade tool will ask you about converting entries to the new format, and upgrading the index mapping (in elasticsearch jargon, this is somewhat similar to what a ``TABLE SCHEMA`` is in SQL)
+
+.. _sys-execution:
 
 Execution
 ----------

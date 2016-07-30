@@ -62,10 +62,10 @@ And restart your instance (see the :ref:`sys-execution` section).
 Some versions, however, could need additional actions. We will list them all in
 this section.
 
-From 0.4 to 0.5
-^^^^^^^^^^^^^^^
+Upgrade to version 0.5
+^^^^^^^^^^^^^^^^^^^^^^
 
-libreant now supports elasticsearch2. If you were already using libreant0.4, you were using libreant 1.x.
+libreant now supports elasticsearch 2. If you were already using libreant 0.4, you were using elasticsearch 1.x.
 You *can* continue using it if you want. The standard upgrade procedure is enough to have everything working.
 However, we suggest you to upgrade to elasticsearch2 sooner or later.
 

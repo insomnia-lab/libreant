@@ -80,7 +80,11 @@ Step 2: upgrade elasticsearch
 
 Just apply the steps in :ref:`sys-installation` section as if it was a brand new installation.
 
-If you are using archlinux, you must remove the ``IgnorePkg elasticsearch`` line in ``/etc/pacman.conf`` *before* trying to upgrade.
+.. note::
+
+    If you are using archlinux, you've probably made pacman ignore elasticsearch package updates.
+    In order to install the new elasticsearch version you must remove the ``IgnorePkg elasticsearch`` line in ``/etc/pacman.conf``
+    *before* trying to upgrade.
 
 Step 3: upgrade DB contents
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

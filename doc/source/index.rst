@@ -18,6 +18,7 @@ Contents:
    documentation
    developer
    api/modules
+   changelog
 
 
 

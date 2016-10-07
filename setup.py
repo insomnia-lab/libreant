@@ -108,7 +108,6 @@ conf = dict(
           'elasticsearch >=1, <2',
           'flask-bootstrap',
           'Flask-Babel',
-          'flask-script',
           'Flask-Authbone >=0.2.2',
           'Flask <= 0.11.1',
           'opensearch',

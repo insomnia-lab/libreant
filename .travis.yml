@@ -23,7 +23,6 @@ matrix:
                       - elasticsearch
 
         - python: "2.7"
-          sudo: true
           env: VERSION_ES=2.x
           addons:
               apt:

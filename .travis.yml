@@ -14,8 +14,23 @@ matrix:
 
     include:
         - python: "2.7"
+          env: VERSION_ES=1.6
+          addons:
+              apt:
+                  sources:
+                      - elasticsearch-1.6
+                  packages:
+                      - elasticsearch
+
+        - python: "2.7"
           sudo: true
           env: VERSION_ES=2.x
+          addons:
+              apt:
+                  sources:
+                      - elasticsearch-2.x
+                  packages:
+                      - elasticsearch
 
         - python: "2.7"
           env: TEST_SUITE=flake

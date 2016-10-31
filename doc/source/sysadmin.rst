@@ -16,7 +16,7 @@ Debian wheezy / Debian jessie / Ubuntu
 
 Download and install the Public Signing Key for elasticsearch repo::
 
-    wget -qO - http://packages.elasticsearch.org/GPG-KEY-elasticsearch | sudo apt-key add -
+    wget -qO - https://packages.elasticsearch.org/GPG-KEY-elasticsearch | sudo apt-key add -
 
 Add elasticsearch repos in /etc/apt/sources.list.d/elasticsearch.list::
 

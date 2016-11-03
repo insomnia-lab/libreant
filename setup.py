@@ -127,7 +127,7 @@ conf = dict(
           # ES_VERSION env var is read in order to decide which version of the python library must be installed,
           # if ES_VERSION is no provided we assume that elasticsearch 2.x will be used.
           'elasticsearch {}'.format(get_es_requirements(os.environ.get('ES_VERSION', '2'))),
-          'flask-bootstrap',
+          'flask-bootstrap <=4',
           'Flask-Babel',
           'Flask-Authbone >=0.2.2',
           'Flask <= 0.11.1',

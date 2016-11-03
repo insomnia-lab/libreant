@@ -2,6 +2,14 @@
 Libreant changelog
 ===================
 
+next
+++++
+
+Dependencies:
+-------------
+- Gevent: added support for gevent version till `1.2.2`
+
+
 0.5
 +++
 - Added supoort to Elasticsearch 2.x versions. (PR #281)

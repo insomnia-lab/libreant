@@ -123,7 +123,7 @@ conf = dict(
                   'cli',
                   'conf'],
         install_requires=[
-          'gevent >=1.0.1, <=1.1.1', # gevent version 1.0.0 do not support pyhton 2.7.8 https://github.com/gevent/gevent/issues/513
+          'gevent >=1.0.1, <=1.2.2', # gevent version 1.0.0 do not support pyhton 2.7.8 https://github.com/gevent/gevent/issues/513
           # ES_VERSION env var is read in order to decide which version of the python library must be installed,
           # if ES_VERSION is no provided we assume that elasticsearch 2.x will be used.
           'elasticsearch {}'.format(get_es_requirements(os.environ.get('ES_VERSION', '2'))),

@@ -14,15 +14,6 @@ matrix:
 
     include:
         - python: "2.7"
-          env: ES_VERSION=1.6
-          addons:
-              apt:
-                  sources:
-                      - elasticsearch-1.6
-                  packages:
-                      - elasticsearch
-
-        - python: "2.7"
           env: ES_VERSION=2.x
           addons:
               apt:
@@ -31,14 +22,20 @@ matrix:
                   packages:
                       - elasticsearch
 
-        - python: "2.7"
-          env: TEST_SUITE=flake
-
-        # Debian Jessie
+        # Debian Jessie (backports)
         - python: "2.7"
           env:
               - EXTRA_INSTALLS="gevent==1.0.1 flask==0.10.1"
-              - ES_VERSION=1.x
+              - ES_VERSION=1.6
+          addons:
+              apt:
+                  sources:
+                      - elasticsearch-1.6
+                  packages:
+                      - elasticsearch
+
+        - python: "2.7"
+          env: TEST_SUITE=flake
 
         - python: "2.7"
           env: TEST_SUITE=build_sphinx

@@ -85,6 +85,25 @@ def read(fname):
         return buf.read()
 
 
+def get_es_requirements(es_version):
+    '''Get the requirements string for elasticsearch-py library
+
+    Returns a suitable requirements string for the elsaticsearch-py library
+    according to the elasticsearch version to be supported (es_version)'''
+
+    # accepts version range in the form `2.x`
+    es_version = es_version.replace('x', '0')
+    es_version = map(int, es_version.split('.'))
+    if es_version >= [5]:
+        return ">=5.0.0, <6.0.0"
+    elif es_version >= [2]:
+        return ">=2.0.0, <3.0.0"
+    elif es_version >= [1]:
+        return ">=1.0.0, <2.0.0"
+    else:
+        return "<1.0.0"
+
+
 conf = dict(
         name='libreant',
         version='0.5',
@@ -105,7 +124,9 @@ conf = dict(
                   'conf'],
         install_requires=[
           'gevent >=1.0.1, <=1.1.1', # gevent version 1.0.0 do not support pyhton 2.7.8 https://github.com/gevent/gevent/issues/513
-          'elasticsearch >=1, <2',
+          # ES_VERSION env var is read in order to decide which version of the python library must be installed,
+          # if ES_VERSION is no provided we assume that elasticsearch 2.x will be used.
+          'elasticsearch {}'.format(get_es_requirements(os.environ.get('ES_VERSION', '2'))),
           'flask-bootstrap',
           'Flask-Babel',
           'Flask-Authbone >=0.2.2',

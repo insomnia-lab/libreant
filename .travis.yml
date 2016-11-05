@@ -7,14 +7,26 @@ services:
   - elasticsearch
 
 env:
-    - VERSION_ES=1.x
+    - ES_VERSION=1.x
 
 matrix:
     fast_finish: true
 
     include:
         - python: "2.7"
-          env: VERSION_ES=1.6
+          env: ES_VERSION=2.x
+          addons:
+              apt:
+                  sources:
+                      - elasticsearch-2.x
+                  packages:
+                      - elasticsearch
+
+        # Debian Jessie (backports)
+        - python: "2.7"
+          env:
+              - EXTRA_INSTALLS="gevent==1.0.1 flask==0.10.1"
+              - ES_VERSION=1.6
           addons:
               apt:
                   sources:
@@ -23,22 +35,7 @@ matrix:
                       - elasticsearch
 
         - python: "2.7"
-          env: VERSION_ES=2.x
-          addons:
-              apt:
-                  sources:
-                      - elasticsearch-2.x
-                  packages:
-                      - elasticsearch
-
-        - python: "2.7"
           env: TEST_SUITE=flake
-
-        # Debian Jessie
-        - python: "2.7"
-          env:
-              - EXTRA_INSTALLS="gevent==1.0.1 flask==0.10.1"
-              - VERSION_ES=1.x
 
         - python: "2.7"
           env: TEST_SUITE=build_sphinx
@@ -50,9 +47,6 @@ install:
     - 'if [[ $TEST_SUITE != flake ]]; then pip install .; return $?; fi'
     - 'if [[ $TEST_SUITE == build_sphinx ]]; then pip install sphinx; return $?; fi'
     - 'if [[ -n "$EXTRA_INSTALLS" ]]; then pip install $EXTRA_INSTALLS; return $?; fi'
-
-before_script:
-    - bash -x ./travis/install_dependencies.sh
 
 script:
     - 'if [[ -z $TEST_SUITE ]]; then sleep 10; python setup.py test; return $?; fi'

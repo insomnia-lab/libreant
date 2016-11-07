@@ -343,8 +343,8 @@ def create_app(conf={}):
 
     @app.errorhandler(es_exceptions.ConnectionError)
     def handle_elasticsearch_down(error):
-        app.logger.exception("Error connecting to DB; check your configuration")
-        return renderErrorPage(message='DB connection error', httpCode=503)
+        app.logger.exception("Error connecting to elasticsearch DB; check your configuration")
+        return renderErrorPage(message='Database connection error', httpCode=503)
 
     @app.errorhandler(404)
     def not_found(error):

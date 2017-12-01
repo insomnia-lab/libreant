@@ -57,6 +57,7 @@ def aggregate(descriptions, query):
     results.sort(key=lambda r: r.score, reverse=True)
     return results
 
+
 if __name__ == '__main__':
     description_list = ['http://127.0.0.1:5000/description.xml']
     results = aggregate(description_list, 'russia')

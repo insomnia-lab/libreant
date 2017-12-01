@@ -39,5 +39,6 @@ def agherant(settings, debug, port, address, agherant_descriptions):
             click.secho(str(e), fg='yellow', err=True)
             exit(1)
 
+
 if __name__ == '__main__':
     agherant()

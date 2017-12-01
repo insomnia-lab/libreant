@@ -134,6 +134,7 @@ class Action(int):
         '''return the bitmask associated withe the given action name'''
         return 2**cls.ACTIONS.index(action.upper())
 
+
 for i, act in enumerate(Action.ACTIONS):
     setattr(Action, act.upper(), 2**i)
 

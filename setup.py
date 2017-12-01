@@ -134,7 +134,7 @@ conf = dict(
           'opensearch',
           'Fsdb >= 0.3.3, <= 1.2.1',
           'click',
-          'peewee != 2.8.2, <= 2.8.5', # version 2.8.2
+          'peewee != 2.8.2, <= 2.10.2',
           'passlib >=1.6, <1.7' # version 1.7 will drop python2 suport
         ],
         package_data = {

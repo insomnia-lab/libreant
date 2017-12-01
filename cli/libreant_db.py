@@ -185,13 +185,13 @@ def export_all(pretty):
 
 @libreant_db.command(name='attach', help='adds an attachment to an existing volume')
 @click.argument('volumeid')
-@click.option('-f', 'filepath', type=click.Path(exists=True,resolve_path=True), multiple=True, help='the path of the attachment')
+@click.option('-f', 'filepath', type=click.Path(exists=True, resolve_path=True), multiple=True, help='the path of the attachment')
 @click.option('-t', '--notes', type=click.STRING, metavar='<string>', multiple=True, help='notes about the attachment')
 def append_file(volumeid, filepath, notes):
     attachments = attach_list(filepath, notes)
     try:
-        arc.insert_attachments(volumeid,attachments)
-    except:
+        arc.insert_attachments(volumeid, attachments)
+    except Exception:
         die('An upload error occurred in updating an attachment!', exit_code=4)
 
 
@@ -199,7 +199,7 @@ def append_file(volumeid, filepath, notes):
 @click.option('-l', '--language', type=click.STRING, required=True,
               help='specify the language of the volume')
 @click.option('-f', '--filepath',
-              type=click.Path(exists=True,resolve_path=True),
+              type=click.Path(exists=True, resolve_path=True),
               multiple=True, help='path to the attachment to be uploaded')
 @click.option('-t', '--notes', type=click.STRING, multiple=True,
               help='notes about the attachment '
@@ -232,13 +232,13 @@ def insert_volume(language, filepath, notes, metadata):
           libreant-db insert-volume -l en -f /path/book.epub --notes 'poor quality' -f /path/someother.epub --notes 'preprint'
 
     '''
-    meta = {"_language":language}
+    meta = {"_language": language}
     if metadata:
         meta.update(json.load(metadata))
     attachments = attach_list(filepath, notes)
     try:
-        out = arc.insert_volume(meta,attachments)
-    except:
+        out = arc.insert_volume(meta, attachments)
+    except Exception:
         die('An upload error have occurred!', exit_code=4)
     click.echo(out)
 

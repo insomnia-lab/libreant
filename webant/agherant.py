@@ -50,7 +50,7 @@ def aggregate(descriptions, query):
         log.debug("Fetching description {}".format(url))
         try:
             clients.append(Client(url))
-        except:
+        except Exception:
             log.exception("Error retrieving description for '%s'" % url)
     results = map(lambda c: c.search(query), clients)
     results = list(chain(*results))

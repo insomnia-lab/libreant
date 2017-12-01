@@ -232,7 +232,7 @@ class Archivant():
                 rawAttachment = self._assemble_attachment(a['file'], a)
                 rawVolume['_source']['_attachments'].append(rawAttachment)
                 attsID.append(rawAttachment['id'])
-            except:
+            except Exception:
                 log.exception("Error while elaborating attachments array at index: {}".format(index))
                 raise
         self._db.modify_book(volumeID, rawVolume['_source'], version=rawVolume['_version'])
@@ -281,7 +281,7 @@ class Archivant():
             try:
                 attData = self._assemble_attachment(a['file'], a)
                 attsData.append(attData)
-            except:
+            except Exception:
                 log.exception("Error while elaborating attachments array at index: {}".format(index))
                 raise
         volume['_attachments'] = attsData

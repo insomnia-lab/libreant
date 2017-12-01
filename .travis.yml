@@ -20,19 +20,19 @@ matrix:
                   sources:
                       - elasticsearch-2.x
                   packages:
-                      - elasticsearch
+                      - elasticsearch=2.4.6
 
         # Debian Jessie (backports)
         - python: "2.7"
           env:
               - EXTRA_INSTALLS="gevent==1.0.1 flask==0.10.1"
-              - ES_VERSION=1.6
+              - ES_VERSION=1.7
           addons:
               apt:
                   sources:
-                      - elasticsearch-1.6
+                      - elasticsearch-1.7
                   packages:
-                      - elasticsearch
+                      - elasticsearch=1.7.5
 
         - python: "2.7"
           env: TEST_SUITE=flake

@@ -372,7 +372,7 @@ class Archivant():
         for attachment in rawVolume['_source']['_attachments']:
             if attachment['id'] == attachmentID:
                 attachment.update(metadata)
-                self._db.modify_book(volumeID, rawVolume['_source'], rawVolume['_version'])
+                self._db.modify_book(id=volumeID, body=rawVolume['_source'], version=rawVolume['_version'])
                 return
         raise NotFoundException('Could not found attachment with id {} in volume {}'.format(attachmentID, volumeID))
 

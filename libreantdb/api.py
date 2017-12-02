@@ -339,7 +339,7 @@ class DB(object):
         return self._search(self._get_search_field('actors', authorname))
 
     def get_book_by_id(self, id):
-        return self.es.get(index=self.index_name, id=id)
+        return self.es.get(index=self.index_name, id=id, doc_type='book')
 
     def get_books_querystring(self, query, **kargs):
         q = {'query': query, 'fields': ['_text_*']}

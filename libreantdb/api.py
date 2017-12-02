@@ -364,17 +364,15 @@ class DB(object):
     # End queries }}}
 
     # Operations {{{2
-    def add_book(self, **book):
+    def add_book(self, body, doc_type='book'):
         '''
         Call it like this:
             db.add_book(doc_type='book',
             body={'title': 'foobar', '_language': 'it'})
         '''
-        if 'doc_type' not in book:
-            book['doc_type'] = 'book'
-        book['body'] = validate_book(book['body'])
-        book['body']['_insertion_date'] = current_time_millisec()
-        return self.es.create(index=self.index_name, **book)
+        body = validate_book(body)
+        body['_insertion_date'] = current_time_millisec()
+        return self.es.index(index=self.index_name, doc_type=doc_type, body=body)
 
     def delete_book(self, id):
         self.es.delete(index=self.index_name,

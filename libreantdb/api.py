@@ -86,7 +86,7 @@ class DB(object):
     '''
 
     properties = {
-        "_insertion_date" : {
+        "_insertion_date": {
             "type": "long",
             "null_value": 0},
         "_language": {
@@ -98,7 +98,7 @@ class DB(object):
         "_text_it": {
             "type": "string",
             "analyzer": "it_analyzer"},
-        }
+    }
 
     # Just like the default one
     # http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/analysis-lang-analyzer.html#italian-analyzer

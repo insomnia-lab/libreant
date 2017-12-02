@@ -384,7 +384,7 @@ class DB(object):
         def delete_action_gen():
             scanner = scan(self.es,
                            index=self.index_name,
-                           query={'query':{'match_all':{}},'fields': []})
+                           query={'query': {'match_all':{}}})
             for v in scanner:
                 yield { '_op_type': 'delete',
                         '_index': self.index_name,

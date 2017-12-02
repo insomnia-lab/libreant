@@ -13,6 +13,8 @@ log = logging.getLogger(__name__)
 # https://www.elastic.co/guide/en/elasticsearch/reference/5.5/string.html
 TEXT = 'text' if es_version[0] >= 5 else 'string'
 
+FALSE = 'false' if es_version[0] >= 5 else 'no'
+
 
 def current_time_millisec():
     return int(round(time.time() * 10**3))
@@ -94,7 +96,7 @@ class DB(object):
             "null_value": 0},
         "_language": {
             "type": TEXT,
-            "index": "no"},
+            "index": FALSE},
         "_text_en": {
             "type": TEXT,
             "analyzer": "english"},

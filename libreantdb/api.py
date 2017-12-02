@@ -10,6 +10,9 @@ from exceptions import MappingsException
 import logging
 log = logging.getLogger(__name__)
 
+# https://www.elastic.co/guide/en/elasticsearch/reference/5.5/string.html
+TEXT = 'text' if es_version[0] >= 5 else 'string'
+
 
 def current_time_millisec():
     return int(round(time.time() * 10**3))
@@ -90,13 +93,13 @@ class DB(object):
             "type": "long",
             "null_value": 0},
         "_language": {
-            "type": "string",
+            "type": TEXT,
             "index": "no"},
         "_text_en": {
-            "type": "string",
+            "type": TEXT,
             "analyzer": "english"},
         "_text_it": {
-            "type": "string",
+            "type": TEXT,
             "analyzer": "it_analyzer"},
     }
 

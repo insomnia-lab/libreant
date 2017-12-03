@@ -31,10 +31,6 @@ def test_fts_it_plural_manual():
     title = "La donna nella russia di pietro"
     query = 'donne'
     db.add_book(doc_type='book', body=dict(title=title, _language='it'))
-    for phrase in title, query:
-        db.es.indices.analyze(index=db.index_name,
-                              body=phrase,
-                              analyzer='it_analyzer')['tokens']
     db.es.indices.refresh(index=db.index_name)
 
     res = db._search(db._get_search_field('_text_it', query))
@@ -48,10 +44,6 @@ def test_fts_it_plural():
     query = 'donne'
     wrong_query = 'donato'
     db.add_book(doc_type='book', body=dict(title=title, _language='it'))
-    for phrase in title, query:
-        db.es.indices.analyze(index=db.index_name,
-                              body=phrase,
-                              analyzer='it_analyzer')['tokens']
     db.es.indices.refresh(index=db.index_name)
 
     res = db.get_books_simplequery(query)
@@ -67,10 +59,6 @@ def test_fts_en_manual():
     query = 'live'
     wrong_query = 'love'
     db.add_book(doc_type='book', body=dict(title=title, _language='en'))
-    for phrase in title, query, wrong_query:
-        db.es.indices.analyze(index=db.index_name,
-                              body=phrase,
-                              analyzer='english')['tokens']
     db.es.indices.refresh(index=db.index_name)
     res = db._search(db._get_search_field('_text_en', 'living'))
     eq_(res['hits']['total'], 1)
@@ -87,10 +75,6 @@ def test_fts_en_verbs():
     query = 'live'
     wrong_query = 'love'
     db.add_book(doc_type='book', body=dict(title=title, _language='en'))
-    for phrase in title, query, wrong_query:
-        db.es.indices.analyze(index=db.index_name,
-                              body=phrase,
-                              analyzer='english')['tokens']
     db.es.indices.refresh(index=db.index_name)
     res = db.get_books_simplequery('living')
     eq_(res['hits']['total'], 1)
@@ -107,10 +91,6 @@ def test_fts_en_plural():
     query = 'bug'
     wrong_query = 'buggy'
     db.add_book(doc_type='book', body=dict(title=title, _language='en'))
-    for phrase in title, query, wrong_query:
-        db.es.indices.analyze(index=db.index_name,
-                              body=phrase,
-                              analyzer='english')['tokens']
     db.es.indices.refresh(index=db.index_name)
     res = db.get_books_simplequery('bugs')
     eq_(res['hits']['total'], 1)

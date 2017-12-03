@@ -325,9 +325,6 @@ class DB(object):
         return self._search(body=query, size=size)
 
     def get_books_simplequery(self, query):
-        return self._search(self._get_search_field('_all', query))
-
-    def get_books_multilanguage(self, query):
         return self._search({'query': {'multi_match':
                                        {'query': query, 'fields': '_text_*'}
                                        }})

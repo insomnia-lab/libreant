@@ -54,9 +54,9 @@ def test_fts_it_plural():
                               analyzer='it_analyzer')['tokens']
     db.es.indices.refresh(index=db.index_name)
 
-    res = db.get_books_multilanguage(query)
+    res = db.get_books_simplequery(query)
     eq_(res['hits']['total'], 1)
-    res = db.get_books_multilanguage(wrong_query)
+    res = db.get_books_simplequery(wrong_query)
     eq_(res['hits']['total'], 0)
 
 
@@ -92,11 +92,11 @@ def test_fts_en_verbs():
                               body=phrase,
                               analyzer='english')['tokens']
     db.es.indices.refresh(index=db.index_name)
-    res = db.get_books_multilanguage('living')
+    res = db.get_books_simplequery('living')
     eq_(res['hits']['total'], 1)
-    res = db.get_books_multilanguage(wrong_query)
+    res = db.get_books_simplequery(wrong_query)
     eq_(res['hits']['total'], 0)
-    res = db.get_books_multilanguage(query)
+    res = db.get_books_simplequery(query)
     eq_(res['hits']['total'], 1)
 
 
@@ -112,9 +112,9 @@ def test_fts_en_plural():
                               body=phrase,
                               analyzer='english')['tokens']
     db.es.indices.refresh(index=db.index_name)
-    res = db.get_books_multilanguage('bugs')
+    res = db.get_books_simplequery('bugs')
     eq_(res['hits']['total'], 1)
-    res = db.get_books_multilanguage(wrong_query)
+    res = db.get_books_simplequery(wrong_query)
     eq_(res['hits']['total'], 0)
-    res = db.get_books_multilanguage(query)
+    res = db.get_books_simplequery(query)
     eq_(res['hits']['total'], 1)

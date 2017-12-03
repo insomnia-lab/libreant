@@ -7,6 +7,7 @@ next
 
 Dependencies:
 -------------
+- Added support for Elasticsearch 5.x and 6.x (PR #321)
 - Gevent: added support for gevent version till `1.2.2`
 
 

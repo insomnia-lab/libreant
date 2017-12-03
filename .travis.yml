@@ -14,6 +14,15 @@ matrix:
 
     include:
         - python: "2.7"
+          env: ES_VERSION=5.x
+          addons:
+              apt:
+                  sources:
+                      - elasticsearch-5.x
+                  packages:
+                      - elasticsearch
+
+        - python: "2.7"
           env: ES_VERSION=2.x
           addons:
               apt:

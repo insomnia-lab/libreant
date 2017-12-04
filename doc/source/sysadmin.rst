@@ -6,42 +6,64 @@ Sysadmin
 Installation
 -------------
 
+Libreant is written in Python and uses Elasticsearch as the underlying search engine.
+In the follwoing sections there are the step-by-step guides to install Libreant on different linux-based operating system:
+
+* :ref:`Debian, Ubuntu and all the debian based distributions<sys-install-debian>`
+* :ref:`Arch Linux<sys-install-arch>`
+
+.. _sys-install-debian:
+
+Debian & Ubuntu
+^^^^^^^^^^^^^^^
+
 System dependencies
-^^^^^^^^^^^^^^^^^^^^
+"""""""""""""""""""
 
-Debian wheezy / Debian jessie / Ubuntu
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Install Elasticsearch
+~~~~~~~~~~~~~~~~~~~~~
 
-.. highlight:: bash
-
-Download and install the Public Signing Key for elasticsearch repo::
-
-    wget -qO - https://packages.elasticsearch.org/GPG-KEY-elasticsearch | sudo apt-key add -
-
-Add elasticsearch repos in /etc/apt/sources.list.d/elasticsearch.list::
-
-    echo "deb http://packages.elasticsearch.org/elasticsearch/2.x/debian stable main" | sudo tee /etc/apt/sources.list.d/elasticsearch.list
-
-Install requirements::
-
-    sudo apt-get update && sudo apt-get install python2.7 gcc python2.7-dev python-virtualenv openjdk-7-jre-headless elasticsearch
+The recommended way of installing Elasticsearch on debian-based distro is through the official APT repository.
 
 .. note::
 
-    if you have problem installing elasticsearch try to follow the `official installation guide`_
+    If you have any problem installing elasticsearch try to follow the `official deb installation guide`_
 
-.. _official installation guide: http://www.elastic.co/guide/en/elasticsearch/reference/current/setup-repositories.html
+.. _official deb installation guide: https://www.elastic.co/guide/en/elasticsearch/reference/6.0/deb.html
 
-Arch
-~~~~~
+.. highlight:: bash
 
-Install all necessary packages::
+In order to follow the Elasticsearch installation steps we needs to install some common packages::
 
-    sudo pacman -Sy python2 python2-virtualenv elasticsearch
+    sudo apt-get update && sudo apt-get install apt-transport-https wget gnupg ca-certificates
 
-Python dependencies
-^^^^^^^^^^^^^^^^^^^^
+Download and install the Public Signing Key for elasticsearch repo::
 
+    wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+
+
+Add elasticsearch repository::
+
+    echo "deb https://artifacts.elastic.co/packages/6.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-6.x.list
+
+And finally you can install the Elasticsearch package with::
+
+    sudo apt-get update && sudo apt-get install openjdk-8-jre-headless procps elasticsearch
+
+.. note::
+    
+    The procps provides the ``ps`` command that is required by the elasticsearch startup script 
+
+Install Python
+~~~~~~~~~~~~~~
+
+Libreant is going to be installed into a python virtual environment, thus we need to install it::
+
+    sudo apt-get update && sudo apt-get install python2.7 virtualenv python-wheel
+
+
+Install libreant
+""""""""""""""""
 Create a virtual env::
 
     virtualenv -p /usr/bin/python2 ve
@@ -50,8 +72,51 @@ Install libreant and all python dependencies::
 
     ./ve/bin/pip install libreant
 
+.. _sys-install-arch:
+
+Arch
+^^^^
+
+Install all necessary packages::
+
+    sudo pacman -Sy python2 python2-setuptools python2-virtualenv grep procps elasticsearch
+
+.. note::
+    
+    The procps and grep packages are required by the elasticsearch startup script 
+
+Create a virtual env::
+
+    virtualenv2 -p /usr/bin/python2 ve
+
+Install libreant and all python dependencies::
+
+    ./ve/bin/pip install libreant
+
+
+.. _sys-execution:
+
+Execution
+---------
+
+Start elasticsearch service::
+
+    sudo service elasticsearch start
+
+.. note::
+
+    If you want to automatically start elasticsearch during bootup::
+
+        sudo systemctl enable elasticsearch
+
+
+To execute libreant::
+
+    ./ve/bin/libreant
+
+
 Upgrading
-----------
+---------
 
 Generally speaking, to upgrade libreant you just need to::
 
@@ -71,12 +136,12 @@ However, we suggest you to upgrade to elasticsearch2 sooner or later.
 
 
 Step 1: stop libreant
-~~~~~~~~~~~~~~~~~~~~~~
+"""""""""""""""""""""
 
 For more info, see :ref:`sys-execution`; something like ``pkill libreant`` should do
 
 Step 2: upgrade elasticsearch
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""""""""""""""""""""""""""""
 
 Just apply the steps in :ref:`sys-installation` section as if it was a brand new installation.
 
@@ -87,7 +152,7 @@ Just apply the steps in :ref:`sys-installation` section as if it was a brand new
     *before* trying to upgrade.
 
 Step 3: upgrade DB contents
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+"""""""""""""""""""""""""""
 
 Libreant ships a tool that will take care of the upgrade. You can run it with
 ``./ve/bin/libreant-db upgrade``.
@@ -97,45 +162,3 @@ confirmation before proceding to real changes. Which means that you can run it
 without worries, you're still in time for answering "no" if you change your mind.
 
 The upgrade tool will ask you about converting entries to the new format, and upgrading the index mapping (in elasticsearch jargon, this is somewhat similar to what a ``TABLE SCHEMA`` is in SQL)
-
-.. _sys-execution:
-
-Execution
-----------
-
-Start elsticsearch
-^^^^^^^^^^^^^^^^^^^
-
-Debian wheezy / Ubuntu
-~~~~~~~~~~~~~~~~~~~~~~
-
-Start elasticsearch service::
-
-    sudo service elasticsearch start
-
-.. note::
-
-    If you want to automatically start elasticsearch during bootup::
-
-        sudo update-rc.d elasticsearch defaults 95 10
-
-Arch / Debian jessie
-~~~~~~~~~~~~~~~~~~~~
-
-Start elasticsearch service::
-
-    sudo systemctl start elasticsearch
-
-.. note::
-
-    If you want to automatically start elasticsearch during bootup::
-
-        sudo systemctl enable elasticsearch
-
-
-Start libreant
-^^^^^^^^^^^^^^
-To execute libreant::
-
-    ./ve/bin/libreant
-

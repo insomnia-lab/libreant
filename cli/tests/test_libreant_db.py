@@ -7,7 +7,7 @@ import json
 from nose.tools import eq_, raises
 import click
 import click.testing
-from elasticsearch import Elasticsearch
+from utils.es import Elasticsearch
 
 from cli.libreant_db import attach_list, libreant_db
 

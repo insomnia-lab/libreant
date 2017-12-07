@@ -1,5 +1,5 @@
 import unittest
-from elasticsearch import Elasticsearch
+from utils.es import Elasticsearch
 
 from webant import create_app
 from conf.defaults import get_def_conf

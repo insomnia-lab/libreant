@@ -1,6 +1,6 @@
 import os
 from numbers import Integral
-from elasticsearch import Elasticsearch
+from utils.es import Elasticsearch
 from elasticsearch import NotFoundError, ConflictError
 from uuid import uuid4
 from fsdb import Fsdb

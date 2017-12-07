@@ -1,5 +1,5 @@
 from archivant import Archivant
-from elasticsearch import Elasticsearch
+from utils.es import Elasticsearch
 from tempfile import mkdtemp, mkstemp
 from shutil import rmtree
 import random

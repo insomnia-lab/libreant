@@ -1,5 +1,5 @@
 from libreantdb import DB
-from elasticsearch import Elasticsearch
+from utils.es import Elasticsearch
 
 
 es = Elasticsearch()

@@ -62,7 +62,7 @@ def upgrade(check_only, yes):
     This command can be used after an update of libreant
     in order to upgrade the database and make it aligned with the new version.
     '''
-    from elasticsearch import Elasticsearch
+    from utils.es import Elasticsearch
     from libreantdb import DB, migration
     from libreantdb.exceptions import MappingsException
 

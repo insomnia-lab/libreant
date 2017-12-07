@@ -2,7 +2,8 @@ from archivant import Archivant
 from archivant.exceptions import FileOpNotSupported
 from tempfile import mkdtemp
 from shutil import rmtree
-from elasticsearch import Elasticsearch, ElasticsearchException
+from utils.es import Elasticsearch
+from elasticsearch import ElasticsearchException
 from nose.tools import raises
 
 

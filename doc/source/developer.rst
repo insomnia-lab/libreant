@@ -178,6 +178,9 @@ You can see a full testing example in the `preset package`_.
 .. note::
     if you are testing a new package remember to add the new package name in ``cover-package`` directive under ``[nosetests]`` section in `/setup.cfg`_ file.
 
+.. note::
+    Some of the tests need to connect and use an elasticsearch instance. Be sure to have at least one up and running before to start the tests. You can use the ``LIBREANT_ES_HOSTS`` environment variable to pass custom elasticsearch connection enpoints in the form ``http://user:secret@hostname:port``.
+
 Contributing
 ------------
 

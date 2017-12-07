@@ -1,8 +1,9 @@
+import os
 from libreantdb import DB
 from utils.es import Elasticsearch
 
 
-es = Elasticsearch()
+es = Elasticsearch(hosts=os.environ.get('LIBREANT_ES_HOSTS', None))
 db = DB(es, index_name='test-book')
 
 

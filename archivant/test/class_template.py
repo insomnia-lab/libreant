@@ -14,7 +14,8 @@ class TestArchivant():
 
     @classmethod
     def setUpClass(self):
-        self.es = Elasticsearch()
+        self.ES_HOSTS = os.environ.get('LIBREANT_ES_HOSTS', None)
+        self.es = Elasticsearch(hosts=self.ES_HOSTS)
 
     @classmethod
     def tearDownClass(self):
@@ -22,7 +23,8 @@ class TestArchivant():
 
     def setUp(self):
         self.tmpDir = mkdtemp(prefix=self.FSDB_PATH_PREFIX)
-        conf = {'ES_INDEXNAME': self.TEST_ES_INDEX,
+        conf = {'ES_HOSTS': self.ES_HOSTS,
+                'ES_INDEXNAME': self.TEST_ES_INDEX,
                 'FSDB_PATH': self.tmpDir}
         self.arc = Archivant(conf)
 

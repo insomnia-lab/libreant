@@ -51,13 +51,16 @@ class TestDedicatedEs(TestCase):
     def setUp(self):
         self.fsdbPath = mkdtemp(prefix=self.__class__.__name__ +
                             '_fsdb_')
+        self.esHosts = os.environ.get('LIBREANT_ES_HOSTS', None)
+
         self.cli = click.testing.CliRunner(env={
             'LIBREANT_FSDB_PATH': self.fsdbPath,
-            'LIBREANT_ES_INDEXNAME': 'test-book'
+            'LIBREANT_ES_INDEXNAME': 'test-book',
+            'LIBREANT_ES_HOSTS': self.esHosts
         })
 
     def tearDown(self):
-        es = Elasticsearch()
+        es = Elasticsearch(hosts=self.esHosts)
         if es.indices.exists('test-book'):
             es.indices.delete('test-book')
         rmtree(self.fsdbPath)

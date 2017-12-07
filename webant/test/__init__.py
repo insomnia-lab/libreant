@@ -1,6 +1,7 @@
 import unittest
-from utils.es import Elasticsearch
+import os
 
+from utils.es import Elasticsearch
 from webant import create_app
 from conf.defaults import get_def_conf
 
@@ -13,12 +14,13 @@ class WebantTestCase(unittest.TestCase):
         conf.update({
             'TESTING': True,
             'ES_INDEXNAME': 'webant_test',
+            'ES_HOSTS': os.environ.get('LIBREANT_ES_HOSTS', None)
         })
         cls.conf = conf
 
     @classmethod
     def tearDownClass(cls):
-        es = Elasticsearch()
+        es = Elasticsearch(cls.conf['ES_HOSTS'])
         es.indices.delete(cls.conf['ES_INDEXNAME'], ignore=[404])
 
     def setUp(self):

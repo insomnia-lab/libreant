@@ -1,3 +1,4 @@
+import os
 from archivant import Archivant
 from archivant.exceptions import FileOpNotSupported
 from tempfile import mkdtemp
@@ -13,7 +14,7 @@ FSDB_PATH_PREFIX = "archivant_test_"
 
 def cleanup(esIndex=None, tmpDir=None):
     if esIndex is not None:
-        es = Elasticsearch()
+        es = Elasticsearch(os.environ.get("LIBREANT_ES_HOSTS", None))
         if es.indices.exists(esIndex):
             es.indices.delete(esIndex)
 

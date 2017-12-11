@@ -125,20 +125,20 @@ conf = dict(
                   'cli',
                   'conf'],
         install_requires=[
-          'gevent >=1.0.1, <=1.2.2', # gevent version 1.0.0 do not support pyhton 2.7.8 https://github.com/gevent/gevent/issues/513
+          'gevent >=1.0.1, <1.3', # gevent version 1.0.0 do not support pyhton 2.7.8 https://github.com/gevent/gevent/issues/513
           # ES_VERSION env var is read in order to decide which version of the python library must be installed,
           # if ES_VERSION is no provided we assume that elasticsearch 2.x will be used.
           'elasticsearch {}'.format(get_es_requirements(os.environ.get('ES_VERSION', '2'))),
-          'flask-bootstrap <=4',
+          'flask-bootstrap <4',
           'Flask-Babel',
           'Flask-Authbone >=0.2.2',
-          'Flask <= 0.12',
+          'Flask <0.13',
           'opensearch',
-          'Fsdb >= 0.3.3, <= 1.2',
+          'Fsdb >= 0.3.3, <1.3',
           'click',
-          'peewee != 2.8.2, <= 2.10.2',
+          'peewee != 2.8.2, <2.11',
           # passlib version >= 1.7: Support for Python versions 2.5 and 3.0 through 3.2 have been dropped
-          'passlib >=1.6, <=1.7'
+          'passlib >=1.6, <1.8'
         ],
         package_data = {
           # If any package contains *.mo include them

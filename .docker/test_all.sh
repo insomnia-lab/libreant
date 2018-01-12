@@ -14,8 +14,7 @@ DIR=$(dirname "$(readlink -f "$0")")
 
 LIBREANT_SRC=$(readlink -f ${DIR}/..)
 
-CURL_RETRY_DELAY=3 # seconds
-CURL_RETRIES=20 # seconds
+CURL_RETRIES=12 # 78 seconds
 
 DEBIAN="debian-stable"
 UBUNTU="ubuntu-lts"
@@ -32,16 +31,19 @@ function cleanup {
 }
 
 function test_libreant_search {
-    curl -f -sS "localhost:5000/search?q=*:*" > /dev/null
+    curl -fsS "localhost:5000/search?q=*:*"  #> /dev/null
 }
 
+
+# this implements a linear backoff
+# it will wait 1, then 2, then... $CURL_RETRIES seconds
 function with_backoff {
   local max_attempts=${CURL_RETRIES}
-  local timeout=${CURL_RETRY_DELAY}
-  local attempt=0
+  local attempt=1
   local exitCode=0
 
-  while (( $attempt < $max_attempts ))
+  # while condition is inside the loop!
+  while true
   do
     set +e
     "$@"
@@ -52,14 +54,16 @@ function with_backoff {
       break
     fi
 
+    # check before sleeping
+    (( attempt <= max_attempts )) || break
    	printf ". "
-    sleep $timeout
+    sleep $attempt
     attempt=$(( attempt + 1 ))
   done
 
   if [[ $exitCode != 0 ]]
   then
-    echo "Failed too many times" 1>&2
+    echo "Failed too many times -- $*" 1>&2
   else
 	  printf "\n"
   fi
@@ -71,10 +75,24 @@ function with_backoff {
 trap cleanup EXIT
 set -e
 
-for os in ${OSES[@]} ; do
-    printf "Testing libreant installation on ${os}\n"
+i=1
+for os in "${OSES[@]}" ; do
+    echo "Testing libreant installation on ${os}"
     docker build --file="${LIBREANT_SRC}/.docker/dockerfile-${os}" --tag="${PREFIX}${os}" "${LIBREANT_SRC}"
-    docker run --rm -p 5000:5000 -d --name ${PREFIX}${os} ${PREFIX}${os}
-    with_backoff test_libreant_search
-    docker kill ${PREFIX}${os}
+    docker run --rm -p 5000:5000 -d --name "${PREFIX}${os}" "${PREFIX}${os}"
+    if ! with_backoff curl -fsS 'http://localhost:5000'; then
+        echo "Failed docker test $i/${#OSES[@]}: $os" >&2
+        echo "at step 1 (home page)" >&2
+        exit 1
+    fi
+    if ! with_backoff test_libreant_search; then
+        echo "Failed docker test $i/${#OSES[@]}: ${os}" >&2
+        echo "at step 2 (search)" >&2
+        docker kill "${PREFIX}${os}"
+        exit 1
+    fi
+    echo "Docker test $i/${#OSES[@]} (${os})    [OK]"
+    docker kill "${PREFIX}${os}"
+    i=$((i+1))
 done
+echo "All test passed"

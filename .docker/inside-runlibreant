@@ -1,0 +1,9 @@
+#!/bin/bash
+set -eux
+service elasticsearch start
+for i in {1..4}; do  # wait until elasticsearch is ready
+    curl 'http://localhost:9200/' -s && break
+    sleep $i
+done
+curl '-s' "http://localhost:9200/_cluster/health/index_name?wait_for_status=green&timeout=20s"
+./ve/bin/libreant

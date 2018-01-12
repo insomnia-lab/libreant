@@ -1,6 +1,6 @@
 FROM archlinux/base
 
-RUN pacman -Sy --noconfirm \
+RUN pacman -Sqy --noconfirm \
 	python2-setuptools \
 	# setuptools unspecified dependencies: https://bugs.archlinux.org/task/56493?project=0&order=id&sort=desc&string=python2-virtualenv
 	python2-virtualenv \
@@ -18,12 +18,7 @@ ADD . ${LIBREANT_INST_DIR}/
 # Install libreant
 WORKDIR $LIBREANT_INST_DIR
 RUN virtualenv2 -p /usr/bin/python2 ve
-RUN ./ve/bin/pip install .
-
-### AFTER LIBREANT 0.6 ###
-#  
-# RUN virtualenv -p /usr/bin/python2 ve
-# RUN ./ve/bin/pip install libreant
+RUN ./ve/bin/pip -q install .
 
 EXPOSE 5000
 

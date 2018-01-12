@@ -1,6 +1,8 @@
 FROM ubuntu:latest
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# we cannot use the slimmified version of debian stable because of this bug https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=863199
+
+RUN apt-get -q update && apt-get install -qy --no-install-recommends \
 		apt-transport-https \
 		curl \
 		gnupg \
@@ -17,8 +19,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 		# the ps command is required by elasticsearch startup script
 		elasticsearch
 
+
 # Install the base system requirements: python, pip
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get -q update && apt-get install -qy --no-install-recommends \
 		python2.7 \
 		python-wheel \
 		virtualenv \
@@ -34,9 +37,14 @@ ADD . ${LIBREANT_INST_DIR}/
 # Install libreant
 WORKDIR $LIBREANT_INST_DIR
 RUN virtualenv -p /usr/bin/python2.7 ve
-RUN ./ve/bin/pip install .
+RUN ./ve/bin/pip -q install .
+
+### AFTER LIBREANT 0.6 ###
+#  
+# RUN virtualenv -p /usr/bin/python2.7 ve
+# RUN ./ve/bin/pip install libreant
 
 EXPOSE 5000
 
 # we bypass systemd to run elasticsearch
-CMD service elasticsearch start && ./ve/bin/libreant
+CMD bash /libreant/.docker/inside-runlibreant

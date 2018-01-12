@@ -1,4 +1,5 @@
-.docker/
+.docker/dockerfile*
+.docker/test*
 .git/
 *.swp
 *.pyc

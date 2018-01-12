@@ -1,0 +1,7 @@
+#!/bin/bash
+set -eu
+service elasticsearch start
+curl "http://localhost:9200/_cluster/health/index_name?wait_for_status=green&timeout=20s"
+cd "${LIBREANT_INST_DIR}"
+./ve/bin/python setup.py test
+

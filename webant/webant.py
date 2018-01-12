@@ -135,7 +135,7 @@ def create_app(conf={}):
             books.append(src)
         format = requestedFormat(request,
                                  ['text/html',
-                                  'text/xml', 'application/rss+xml', 'opensearch'])
+                                  'text/xml', 'application/rss+xml'])
         if (not format) or (format is 'text/html'):
             return render_template('search.html',
                                    books=books,

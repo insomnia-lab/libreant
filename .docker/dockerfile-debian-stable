@@ -12,7 +12,7 @@ RUN curl --silent --show-error "https://artifacts.elastic.co/GPG-KEY-elasticsear
 
 RUN echo "deb https://artifacts.elastic.co/packages/6.x/apt stable main" > /etc/apt/sources.list.d/elastic-6.x.list
 
-RUN apt-get -q update && apt-get -q install -y --no-install-recommends \
+RUN apt-get -q update && apt-get install -qy --no-install-recommends \
 		openjdk-8-jre-headless \
 		procps \
 		# the ps command is required by elasticsearch startup script
@@ -25,8 +25,6 @@ RUN apt-get -q update && apt-get install -qy --no-install-recommends \
 		virtualenv \
 && rm -rf /var/lib/apt/lists/*
 
-### BEFORE LIBREANT 0.6 ###
-
 ENV LIBREANT_INST_DIR /libreant
   
 # Import libreant source from current local folder
@@ -35,7 +33,7 @@ ADD . ${LIBREANT_INST_DIR}/
 # Install libreant
 WORKDIR $LIBREANT_INST_DIR
 RUN virtualenv -p /usr/bin/python2.7 ve
-RUN ./ve/bin/pip install .
+RUN ./ve/bin/pip -q install .
 
 EXPOSE 5000
 

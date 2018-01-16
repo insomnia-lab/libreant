@@ -83,6 +83,7 @@ for os in "${OSES[@]}" ; do
     if ! with_backoff curl -fsS 'http://localhost:5000'; then
         echo "Failed docker test $i/${#OSES[@]}: $os" >&2
         echo "at step 1 (home page)" >&2
+        docker kill "${PREFIX}${os}"
         exit 1
     fi
     if ! with_backoff test_libreant_search; then
@@ -91,8 +92,14 @@ for os in "${OSES[@]}" ; do
         docker kill "${PREFIX}${os}"
         exit 1
     fi
-    echo "Docker test $i/${#OSES[@]} (${os})    [OK]"
     docker kill "${PREFIX}${os}"
+
+    if docker run --rm --name "${PREFIX}${os}" "${PREFIX}${os}" /libreant/.docker/inside-runtests | \
+        tee >(cat) | tail -n1 |grep -x FAIL; then
+        echo "Failed docker unit test for $i/${OSES[@]} ($os})" >&2
+        exit 1
+    fi
+    echo "Docker test $i/${#OSES[@]} (${os})    [OK]"
     i=$((i+1))
 done
 echo "All test passed"

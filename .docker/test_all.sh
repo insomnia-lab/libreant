@@ -25,15 +25,18 @@ PREFIX="libreant-inst-test__"
 
 
 function cleanup {
-    for os in ${OSES[@]}; do
-        docker kill ${OSES[@]/#/"$PREFIX"} > /dev/null 2>&1
+	for os in ${OSES[@]}; do
+        docker rm -f ${OSES[@]/#/"$PREFIX"} > /dev/null 2>&1 || true
     done
 }
 
-function test_libreant_search {
-    curl -fsS "localhost:5000/search?q=*:*"  #> /dev/null
+function test_libreant_homepage {
+    curl -fs "localhost:5000"  > /dev/null
 }
 
+function test_libreant_search {
+    curl -fs "localhost:5000/search?q=*:*"  > /dev/null
+}
 
 # this implements a linear backoff
 # it will wait 1, then 2, then... $CURL_RETRIES seconds
@@ -80,7 +83,7 @@ for os in "${OSES[@]}" ; do
     echo "Testing libreant installation on ${os}"
     docker build --file="${LIBREANT_SRC}/.docker/dockerfile-${os}" --tag="${PREFIX}${os}" "${LIBREANT_SRC}"
     docker run --rm -p 5000:5000 -d --name "${PREFIX}${os}" "${PREFIX}${os}"
-    if ! with_backoff curl -fsS 'http://localhost:5000'; then
+    if ! with_backoff test_libreant_homepage; then
         echo "Failed docker test $i/${#OSES[@]}: $os" >&2
         echo "at step 1 (home page)" >&2
         docker kill "${PREFIX}${os}"
@@ -92,10 +95,9 @@ for os in "${OSES[@]}" ; do
         docker kill "${PREFIX}${os}"
         exit 1
     fi
-    docker kill "${PREFIX}${os}"
+    docker rm -f "${PREFIX}${os}"
 
-    if docker run --rm --name "${PREFIX}${os}" "${PREFIX}${os}" /libreant/.docker/inside-runtests | \
-        tee >(cat) | tail -n1 |grep -x FAIL; then
+    if ! docker run --rm --name "${PREFIX}${os}" "${PREFIX}${os}" /libreant/.docker/inside-runtests; then
         echo "Failed docker unit test for $i/${OSES[@]} ($os})" >&2
         exit 1
     fi

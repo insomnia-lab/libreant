@@ -1,10 +1,11 @@
 #!/bin/bash
 set -eu
 service elasticsearch start
+printf "Waiting for elasticsearch to be up and running..."
 for i in {1..4}; do  # wait until elasticsearch is ready
-    curl 'http://localhost:9200/' -s && break
+    curl 'http://localhost:9200/' -s > /dev/null && break
     sleep $i
 done
-curl "http://localhost:9200/_cluster/health/index_name?wait_for_status=green&timeout=20s"
+curl "http://localhost:9200/_cluster/health/index_name?wait_for_status=green&timeout=20s" -s > /dev/null
 cd "${LIBREANT_INST_DIR}"
-./ve/bin/python setup.py test || echo "FAIL"
+./ve/bin/python setup.py test 

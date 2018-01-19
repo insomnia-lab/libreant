@@ -2,13 +2,60 @@
 Libreant changelog
 ===================
 
-next
-++++
+0.6
++++
 
 Dependencies:
 -------------
-- Added support for Elasticsearch 5.x and 6.x (PR #321)
-- Gevent: added support for gevent version till `1.2.2`
+- Added support for Elasticsearch 5.x and 6.x
+  A lot of changes to libreantdb component have been introduced
+  in order to support the latests version fo ES.
+  (commits: e0bc3094 34c9329b 225d5571 49e8a098 34e0e941 72dd559d 3b0784e7)
+- Only major versions of the dependencies are now enforced, in such a way
+  that minor versions updates will be supported automatically. (826f9b0c)
+
+- Added support for new versions of several dependencies:
+  - Gevent `1.2.x`
+  - Flask `0.12.x`
+  - passlib `1.7.x`
+  - Fsdb `1.2.x`
+  - peewee `2.10.x`
+
+- Removed unneeded dependency to flask-script
+- Better handling of the elasticsearch-py library version.
+  The version of this library to be installed depends upon which version
+  of elasticsearch are you going to use.
+  
+  The installation procedure (setup.py) now reads ES_VERSION environment
+  variable in order to choose the correct version of the elasticseach-py library.
+  e.g. if you are going to use Elasticsearch v5.4 just set ES_VERSION=5.4 before
+  to proceed with the Libreant installation.
+  If you don't set the ES_VERSION env variable, version 6.x of elastcisearch-py will be installed.
+  
+  Moreover in the case the version of the elasticsearch-py library doesn't match
+  the one of the Elasticsearch cluster, an error at runtime is thrown to notify the sysadmin. (2a3299ad)
+
+Documentation:
+--------------
+- Documentation relative to the installation procedure has been refractored.
+  Now each operating system has its own installation section. Interleaved instructions was too confusing. (1d90e2a2)
+- Installation instruction has been updated and tested for all the supported operating systems.
+- Changelog has been included into the official documentation:
+  http://libreant.readthedocs.io/en/latest/changelog.html (f5855fa6)
+
+Continuos Integration:
+----------------------
+- Test Libreant with Elasticsearch v1.6 and v5.x (fa9b7ad9)
+- Test procedure have been simplified through the usage of the new ES_VERSION
+  environment variable. (f98cf51f)
+
+Docker:
+-------
+- Docker has been introduced in our testing procedure. (fb3ce767)
+  In particular it is used to test that the installation steps provided
+  by the documentation are actually working. The installation scenarios
+  are reproduced by means of docker containers.
+  These tests can be performed whith help of the `.docker/test_all.sh` script.
 
 
 0.5

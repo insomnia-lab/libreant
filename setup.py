@@ -108,7 +108,7 @@ def get_es_requirements(es_version):
 
 conf = dict(
         name='libreant',
-        version='0.5',
+        version='0.6',
         description='{e,}book archive focused on small grass root archives, distributed search, low assumptions',
         long_description=read('README.rst'),
         author='insomnialab',

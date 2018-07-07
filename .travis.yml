@@ -7,7 +7,7 @@ services:
   - elasticsearch
 
 env:
-    - ES_VERSION=1.x
+  - LIBREANT_ES_HOSTS="http://elastic:changeme@localhost:9200"
 
 matrix:
     fast_finish: true
